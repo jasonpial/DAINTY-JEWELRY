@@ -5,12 +5,14 @@
   --color-bg-secondary: #faf8f5;
   --color-bg-tertiary: #f3ece6;
   
-  --color-gold-primary: #c28b53;
-  --color-gold-dark: #996535;
-  --color-gold-light: #e6cbac;
-  --color-gold-accent: rgba(194, 139, 83, 0.15);
+  --color-gold-primary: #b38728; /* Rich metallic gold base color */
+  --color-gold-dark: #8a640f; /* Deep metallic gold shadow tone */
+  --color-gold-light: #f5e6a5; /* High shiny gold highlight tone */
+  --color-gold-accent: rgba(179, 135, 40, 0.15);
   --color-tan: #dfc9b2;
-  --color-caramel: #b57a42;
+  --color-caramel: #b38728; /* Aligned with metallic gold primary */
+  
+  --gradient-gold-metallic: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
   
   --color-brown-primary: #3e2723;
   --color-brown-light: #5d4037;
@@ -3408,4 +3410,33 @@ div[style*="background: rgba"] span,
   .mobile-menu-toggle-btn {
     display: none !important; /* Hide hamburger menu toggle since all links are visible */
   }
+}
+
+/* METALLIC GOLD GRADIENT OVERRIDES FOR EVERY GOLD BACKGROUND */
+.header-nav-row-gold,
+.mobile-nav-drawer-gold,
+.btn-gold,
+.search-btn,
+.hero-btn-discover,
+.promo-shop-now-btn,
+.btn-checkout,
+.btn-auth,
+.admin-btn-save,
+.btn-confirm-order,
+.card-btn-bag-visible:hover,
+.btn-primary:hover,
+.preset-chip.active,
+.shape-box.active {
+  background: var(--gradient-gold-metallic) !important;
+  border: 1px solid var(--color-gold-light) !important;
+  color: #1c1917 !important; /* High-contrast dark text on shiny gold */
+}
+
+/* Ensure text inside gold buttons/badges is dark for contrast safety */
+.btn-gold *, 
+.btn-checkout *, 
+.btn-auth *, 
+.search-btn *,
+.hero-btn-discover * {
+  color: #1c1917 !important;
 }
