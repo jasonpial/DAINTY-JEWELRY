@@ -80,17 +80,7 @@ export default function ProductCard({ product, onAddToBag }) {
   else if (limited_edition) badgeText = 'Limited';
   else if (clearance) badgeText = 'Clearance';
 
-  const handleDetailsClick = (e) => {
-    // Detect touchscreen devices to trigger tap-to-reveal on first tap instead of clicking through
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice && !isRevealed) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      setIsRevealed(true);
-      return;
-    }
+  const handleDetailsClick = () => {
     navigateTo('product', { id });
   };
 
@@ -130,7 +120,7 @@ export default function ProductCard({ product, onAddToBag }) {
         ))}
       </div>
 
-      <div className="product-info">
+      <div className="product-info" onClick={handleDetailsClick}>
         <span className="product-info-cat">{category_id}</span>
         <h3 className="product-info-name" title={name}>{name}</h3>
         
@@ -154,7 +144,7 @@ export default function ProductCard({ product, onAddToBag }) {
         <div className="product-card-buttons">
           <button 
             className="card-btn-action-visible card-btn-details-visible"
-            onClick={(e) => { e.stopPropagation(); handleDetailsClick(); }}
+            onClick={(e) => { e.stopPropagation(); navigateTo('product', { id }); }}
           >
             Details
           </button>
