@@ -2265,21 +2265,22 @@ footer {
 .site-footer span,
 .site-footer li,
 .site-footer a {
-  color: #1c1917 !important; /* Dark stone gray for readability on metallic gold background */
+  color: #000000 !important; /* Enforced solid black for footer body/links */
 }
 
 .site-footer h3,
 .site-footer h4 {
-  color: #0c0a09 !important; /* Bold stone black headers */
+  color: #000000 !important; /* Enforced solid black for footer headers */
   font-weight: 800 !important;
 }
 
 .site-footer a:hover {
-  color: #78350f !important; /* Warm dark amber on hover */
+  color: #000000 !important; /* Remain black on hover */
+  text-decoration: underline !important;
 }
 
 .site-footer svg {
-  color: #1c1917 !important; /* Dark icons for map/phone/mail */
+  color: #000000 !important; /* Enforced solid black for footer icons */
 }
 
 
@@ -3426,17 +3427,79 @@ div[style*="background: rgba"] span,
 .card-btn-bag-visible:hover,
 .btn-primary:hover,
 .preset-chip.active,
-.shape-box.active {
+.shape-box.active,
+.site-footer {
   background: var(--gradient-gold-metallic) !important;
   border: 1px solid var(--color-gold-light) !important;
-  color: #1c1917 !important; /* High-contrast dark text on shiny gold */
+  color: #000000 !important; /* Enforced solid black text color */
 }
 
-/* Ensure text inside gold buttons/badges is dark for contrast safety */
+/* Ensure text inside gold buttons/badges/headers is black for contrast safety */
 .btn-gold *, 
 .btn-checkout *, 
 .btn-auth *, 
 .search-btn *,
-.hero-btn-discover * {
-  color: #1c1917 !important;
+.hero-btn-discover *,
+.header-nav-row-gold *,
+.site-footer *,
+.site-footer a,
+.site-footer p,
+.site-footer span,
+.site-footer h3,
+.site-footer h4,
+.site-footer li {
+  color: #000000 !important;
+}
+.site-footer svg,
+.header-nav-row-gold svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Exclude bottom black copyright bar text from black override to preserve visibility */
+.site-footer > div:last-child,
+.site-footer > div:last-child * {
+  color: #e7e5e4 !important;
+}
+.site-footer > div:last-child a:hover {
+  color: var(--color-gold-light) !important;
+}
+.site-footer > div:last-child svg {
+  stroke: #d6d3d1 !important;
+  color: #d6d3d1 !important;
+}
+
+/* MOBILE PRODUCT CARD OVERRIDES TO PREVENT WORD CUTOFFS AND ENSURE VISIBILITY */
+@media (max-width: 768px) {
+  .product-info {
+    max-height: 80% !important; /* Allow details overlay to use more height to fit text and buttons */
+    min-height: 48% !important;
+    padding: 0.35rem 0.4rem !important;
+  }
+  .product-info-name {
+    font-size: 0.76rem !important;
+    line-height: 1.15 !important;
+    margin-bottom: 0.15rem !important;
+    white-space: normal !important; /* Allow normal wrapping */
+  }
+  .product-info-price {
+    margin-bottom: 0.25rem !important;
+  }
+  .price-sale, 
+  .price-regular {
+    font-size: 0.72rem !important;
+  }
+  .price-original, 
+  .price-usd {
+    font-size: 0.62rem !important;
+  }
+  .product-card-buttons {
+    margin-top: 0.2rem !important;
+    gap: 0.2rem !important;
+  }
+  .card-btn-action-visible {
+    font-size: 0.62rem !important;
+    padding: 0.3rem 0.15rem !important;
+    border-radius: 3px !important;
+  }
 }
