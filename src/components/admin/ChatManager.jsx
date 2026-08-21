@@ -137,9 +137,9 @@ export default function ChatManager() {
                   <div 
                     className="chat-bubble"
                     style={{
-                      background: msg.sender === 'admin' ? 'var(--color-brown-primary)' : 'white',
-                      color: msg.sender === 'admin' ? 'var(--color-gold-light)' : 'var(--color-text-primary)',
-                      border: msg.sender === 'admin' ? 'none' : '1px solid var(--color-border-light)',
+                      background: msg.sender === 'admin' ? 'var(--gradient-gold-metallic)' : 'white',
+                      color: msg.sender === 'admin' ? '#000000' : 'var(--color-text-primary)',
+                      border: msg.sender === 'admin' ? '1px solid var(--color-gold-light)' : '1px solid var(--color-border-light)',
                       borderBottomRightRadius: msg.sender === 'admin' ? '1px' : 'var(--border-radius-md)',
                       borderBottomLeftRadius: msg.sender === 'admin' ? 'var(--border-radius-md)' : '1px',
                       boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
@@ -148,7 +148,7 @@ export default function ChatManager() {
                     {msg.content}
                     <span 
                       className="chat-msg-time"
-                      style={{ color: msg.sender === 'admin' ? 'rgba(255,255,255,0.6)' : 'var(--color-text-muted)' }}
+                      style={{ color: msg.sender === 'admin' ? 'rgba(0,0,0,0.6)' : 'var(--color-text-muted)' }}
                     >
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
