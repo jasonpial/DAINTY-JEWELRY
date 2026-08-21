@@ -118,18 +118,18 @@ a {
 }
 
 .glass-panel-dark {
-  background: rgba(62, 39, 35, 0.9);
+  background: var(--gradient-gold-metallic) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-gold-primary);
-  color: var(--color-bg-secondary);
+  border: 1px solid var(--color-gold-light) !important;
+  color: #000000 !important;
 }
 
 /* Premium Buttons */
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-brown-primary), var(--color-brown-light));
-  color: var(--color-bg-primary) !important;
-  border: 1px solid var(--color-gold-primary);
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
   padding: 0.8rem 1.8rem;
   font-size: 0.9rem;
   letter-spacing: 0.08em;
@@ -142,6 +142,11 @@ a {
   gap: 0.5rem;
   transition: var(--transition-smooth);
   box-shadow: var(--shadow-premium);
+}
+
+.btn-primary svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
 }
 
 .btn-primary:hover {
@@ -306,8 +311,9 @@ a {
 }
 
 .nav-item.active {
-  background: var(--color-brown-primary);
-  color: var(--color-gold-light) !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
 }
 
 .nav-item:hover {
@@ -370,9 +376,9 @@ a {
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: var(--color-brown-primary);
-  color: var(--color-gold-light);
-  border: 1px solid var(--color-gold-primary);
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
   font-size: 0.65rem;
   width: 18px;
   height: 18px;
@@ -655,9 +661,9 @@ a {
   position: absolute;
   top: 0.8rem;
   left: 0.8rem;
-  background: #1c1917 !important;
-  color: #ffffff !important;
-  border: none !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
   padding: 0.25rem 0.6rem;
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -818,20 +824,21 @@ a {
 }
 
 .card-btn-details-visible:hover {
-  background: #1c1917 !important;
-  color: #ffffff !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-color: var(--color-gold-light) !important;
 }
 
 .card-btn-bag-visible {
-  background: #1c1917 !important;
-  color: #ffffff !important;
-  border: 1px solid #1c1917 !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
 }
 
 .card-btn-bag-visible:hover {
-  background: var(--color-gold-dark) !important;
-  border-color: var(--color-gold-dark) !important;
-  color: #ffffff !important;
+  background: var(--gradient-gold-metallic) !important;
+  border-color: var(--color-gold-light) !important;
+  color: #000000 !important;
 }
 
 /* Filters and Shop Sidebar Layout */
@@ -925,7 +932,7 @@ a {
   margin: 3rem auto;
   padding: 0 2rem;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 0.85fr 1.15fr;
   gap: 4rem;
 }
 
@@ -1107,9 +1114,9 @@ a {
 }
 
 .chat-bubble-btn {
-  background: linear-gradient(135deg, var(--color-brown-primary), var(--color-brown-light));
-  color: var(--color-gold-light);
-  border: 1px solid var(--color-gold-primary);
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -1117,15 +1124,20 @@ a {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(62, 39, 35, 0.25);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   transition: var(--transition-smooth);
 }
 
 .chat-bubble-btn:hover {
   transform: scale(1.08) rotate(5deg);
-  background: var(--color-gold-primary);
-  color: var(--color-brown-primary);
-  border-color: var(--color-brown-primary);
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-color: var(--color-gold-light) !important;
+}
+
+.chat-bubble-btn svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
 }
 
 .chat-window {
@@ -1143,13 +1155,13 @@ a {
 }
 
 .chat-header {
-  background: #1c1917 !important;
-  border-bottom: 1px solid #2e2826 !important;
+  background: var(--gradient-gold-metallic) !important;
+  border-bottom: 1px solid var(--color-gold-light) !important;
   padding: 1rem 1.2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #ffffff;
+  color: #000000 !important;
 }
 
 .chat-title {
@@ -1159,14 +1171,14 @@ a {
 }
 
 .chat-title-info h4 {
-  color: #ffffff;
+  color: #000000 !important;
   font-size: 0.9rem;
   font-family: var(--font-sans);
 }
 
 .chat-title-info span {
   font-size: 0.7rem;
-  color: var(--color-gold-light) !important;
+  color: rgba(0, 0, 0, 0.6) !important;
 }
 
 .chat-body {
@@ -1201,8 +1213,9 @@ a {
 }
 
 .chat-msg-row.customer .chat-bubble {
-  background: var(--color-gold-primary) !important;
-  color: #ffffff !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border: 1px solid var(--color-gold-light) !important;
   border-bottom-right-radius: 1px;
 }
 
@@ -1370,19 +1383,19 @@ a {
 }
 
 .qty-btn:hover {
-  background: var(--color-gold-primary) !important;
-  color: var(--color-brown-primary) !important;
-  border-color: var(--color-gold-primary) !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-color: var(--color-gold-light) !important;
 }
 
 .cart-checkout-panel {
   padding: 2rem;
   border-radius: var(--border-radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  background: rgba(18, 16, 15, 0.55) !important;
+  border: 1px solid var(--color-gold-light) !important;
+  background: var(--gradient-gold-metallic) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  color: #ffffff !important;
+  color: #000000 !important;
 }
 
 .checkout-summary-row {
@@ -1439,26 +1452,26 @@ a {
 
 .admin-sidebar {
   width: 250px;
-  background: #1c1917 !important; /* Charcoal-stone background */
-  color: white;
-  border-right: 1px solid #2e2826 !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
   padding: 2rem 0;
 }
 
 .admin-sidebar-header {
   padding: 0 2rem 2rem 2rem;
-  border-bottom: 1px solid #2e2826 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15) !important;
   margin-bottom: 1.5rem;
 }
 
 .admin-sidebar-header h2 {
-  color: #ffffff;
+  color: #000000 !important;
   font-size: 1.2rem;
 }
 
 .admin-sidebar-header span {
   font-size: 0.7rem;
-  color: var(--color-gold-light);
+  color: rgba(0, 0, 0, 0.6) !important;
   text-transform: uppercase;
 }
 
@@ -1468,14 +1481,19 @@ a {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.75) !important;
   cursor: pointer;
   transition: var(--transition-quick);
 }
 
 .admin-nav-item:hover, .admin-nav-item.active {
-  color: var(--color-gold-light);
-  background: rgba(255, 255, 255, 0.08) !important;
+  color: #000000 !important;
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+.admin-sidebar svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
 }
 
 .admin-main {
@@ -2026,9 +2044,9 @@ a {
 }
 
 .preset-chip.active {
-  background: #1c1917 !important;
-  color: #ffffff !important;
-  border-color: #1c1917 !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-color: var(--color-gold-light) !important;
 }
 
 /* Circular Gender selectors */
@@ -2053,9 +2071,9 @@ a {
 }
 
 .gender-circle-btn.active {
-  background: #1c1917 !important;
-  color: #ffffff !important;
-  border-color: #1c1917 !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-color: var(--color-gold-light) !important;
 }
 
 /* Action button stylings */
@@ -2074,14 +2092,15 @@ a {
 }
 
 .filter-btn-reset:hover {
-  background: #1c1917 !important;
-  color: #ffffff !important;
+  background: var(--gradient-gold-metallic) !important;
+  color: #000000 !important;
+  border-color: var(--color-gold-light) !important;
 }
 
 .filter-btn-apply {
-  background: var(--color-gold-primary) !important;
-  border: 1px solid var(--color-gold-primary) !important;
-  color: #ffffff !important;
+  background: var(--gradient-gold-metallic) !important;
+  border: 1px solid var(--color-gold-light) !important;
+  color: #000000 !important;
   font-weight: 700;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -2093,8 +2112,9 @@ a {
 }
 
 .filter-btn-apply:hover {
-  background: var(--color-gold-dark) !important;
-  border-color: var(--color-gold-dark) !important;
+  background: var(--gradient-gold-metallic) !important;
+  border-color: var(--color-gold-light) !important;
+  color: #000000 !important;
 }
 
 /* Layout spacer rules */
@@ -2140,10 +2160,10 @@ a {
 
 /* TRANSLUCENT FOOTER WITH FROSTED GLASS BACKGROUND */
 footer {
-  background: rgba(181, 122, 66, 0.48) !important; /* Translucent caramel brown */
+  background: var(--gradient-gold-metallic) !important; /* Metallic gold gradient background */
   backdrop-filter: blur(25px) !important;
   -webkit-backdrop-filter: blur(25px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-top: 1px solid var(--color-gold-light) !important;
 }
 
 /* MOBILE TOGGLE & SLIDE DRAWER STYLE SHEETS */
@@ -2315,7 +2335,6 @@ footer {
 .main-content .hero-slider p,
 .main-content .hero-slider span,
 .horizontal-filter-panel *,
-.cart-checkout-panel *,
 .site-footer *,
 /* Category Card Overlays */
 div[style*="linear-gradient(to top, rgba(18, 16, 15, 0.9)"] *,
@@ -2353,15 +2372,16 @@ div[style*="background: rgba"] span,
 }
 
 .cart-checkout-panel .form-label {
-  color: #ffffff !important;
+  color: #000000 !important;
 }
 
 .cart-checkout-panel .checkout-summary-row {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(0, 0, 0, 0.8) !important;
 }
 
 .cart-checkout-panel .checkout-summary-row.total {
-  color: #ffffff !important;
+  color: #000000 !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.15) !important;
 }
 
 .qty-btn {
@@ -2369,9 +2389,9 @@ div[style*="background: rgba"] span,
 }
 
 .qty-btn:hover {
-  color: var(--color-brown-primary) !important;
-  background: var(--color-gold-primary) !important;
-  border-color: var(--color-gold-primary) !important;
+  color: #000000 !important;
+  background: var(--gradient-gold-metallic) !important;
+  border-color: var(--color-gold-light) !important;
 }
 
 /* Link hover overrides on white background */
@@ -2392,7 +2412,7 @@ div[style*="background: rgba"] span,
 }
 
 .main-content .btn-gold {
-  color: var(--color-brown-primary) !important;
+  color: #000000 !important;
 }
 
 .main-content .price-sale {
@@ -2412,7 +2432,7 @@ div[style*="background: rgba"] span,
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
-  padding: 3rem 2rem;
+  padding: 1.5rem 2rem;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
@@ -2446,7 +2466,7 @@ div[style*="background: rgba"] span,
   .home-features-bar {
     grid-template-columns: repeat(4, 1fr) !important; /* Compact 1x4 horizontal row layout */
     gap: 0.25rem !important; /* Extremely tight gap */
-    padding: 1rem 0.3rem !important; /* Tighter padding */
+    padding: 0.7rem 0.3rem !important; /* Tighter padding */
   }
 
   .home-features-bar .feature-icon {
@@ -3392,6 +3412,8 @@ div[style*="background: rgba"] span,
   .nav-row-inner {
     width: 100% !important;
     justify-content: center !important;
+    height: auto !important;
+    padding: 0.3rem 0 !important;
   }
   .nav-links-left {
     display: flex !important;
@@ -3402,8 +3424,13 @@ div[style*="background: rgba"] span,
   }
   .gold-nav-item {
     font-size: 0.72rem !important;
-    padding: 0.2rem 0.3rem !important;
+    padding: 0.25rem 0.4rem !important;
     letter-spacing: 0.02em !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+  .gold-nav-dropdown {
+    height: auto !important;
   }
   .nav-links-right-gold {
     display: none !important; /* Hide desktop right items */
@@ -3442,16 +3469,45 @@ div[style*="background: rgba"] span,
 .hero-btn-discover *,
 .header-nav-row-gold *,
 .site-footer *,
-.site-footer a,
-.site-footer p,
-.site-footer span,
-.site-footer h3,
-.site-footer h4,
-.site-footer li {
+.btn-primary *,
+.card-btn-bag-visible *,
+.chat-bubble-btn *,
+.chat-header *,
+.cart-msg-row.customer .chat-bubble *,
+.admin-sidebar *,
+.glass-panel-dark *,
+.product-badge *,
+.qty-btn:hover *,
+.preset-chip.active *,
+.gender-circle-btn.active *,
+.filter-btn-reset:hover *,
+.filter-btn-apply *,
+.cart-checkout-panel *,
+.nav-item.active * {
   color: #000000 !important;
 }
 .site-footer svg,
-.header-nav-row-gold svg {
+.header-nav-row-gold svg,
+.btn-gold svg,
+.btn-checkout svg,
+.btn-auth svg,
+.search-btn svg,
+.hero-btn-discover svg,
+.btn-primary svg,
+.card-btn-bag-visible svg,
+.chat-bubble-btn svg,
+.chat-header svg,
+.cart-msg-row.customer .chat-bubble svg,
+.admin-sidebar svg,
+.glass-panel-dark svg,
+.product-badge svg,
+.qty-btn:hover svg,
+.preset-chip.active svg,
+.gender-circle-btn.active svg,
+.filter-btn-reset:hover svg,
+.filter-btn-apply svg,
+.cart-checkout-panel svg,
+.nav-item.active svg {
   stroke: #000000 !important;
   color: #000000 !important;
 }
@@ -3503,3 +3559,15 @@ div[style*="background: rgba"] span,
     border-radius: 3px !important;
   }
 }
+
+@media (max-width: 480px) {
+  .gold-nav-item {
+    font-size: 0.66rem !important;
+    padding: 0.2rem 0.25rem !important;
+    letter-spacing: 0.01em !important;
+  }
+  .nav-links-left {
+    gap: 0.2rem 0.35rem !important;
+  }
+}
+
