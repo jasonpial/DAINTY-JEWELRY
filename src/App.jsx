@@ -66,9 +66,9 @@ function App() {
       position: fixed;
       bottom: 2rem;
       left: 2rem;
-      background: var(--color-brown-primary);
-      color: var(--color-gold-light);
-      border: 1px solid var(--color-gold-primary);
+      background: var(--gradient-gold-metallic);
+      color: #000000;
+      border: 1px solid var(--color-gold-light);
       padding: 1rem 1.5rem;
       border-radius: 8px;
       font-size: 0.85rem;
