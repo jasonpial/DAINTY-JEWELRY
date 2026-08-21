@@ -63,9 +63,9 @@ export default function AdminPortal() {
           <div 
             className="admin-nav-item"
             onClick={handleReset}
-            style={{ color: '#f87171', borderTop: '1px solid var(--color-brown-light)', marginTop: '2rem' }}
+            style={{ color: '#b91c1c', borderTop: '1px solid rgba(0, 0, 0, 0.15)', marginTop: '2rem' }}
           >
-            <RefreshCw size={18} />
+            <RefreshCw size={18} style={{ color: '#b91c1c' }} />
             Reset Sample Data
           </div>
 
@@ -73,9 +73,9 @@ export default function AdminPortal() {
           <div 
             className="admin-nav-item"
             onClick={() => navigateTo('home')}
-            style={{ borderTop: '1px solid var(--color-brown-light)', marginTop: '0.5rem', color: 'var(--color-gold-light)' }}
+            style={{ borderTop: '1px solid rgba(0, 0, 0, 0.15)', marginTop: '0.5rem', color: '#000000' }}
           >
-            <Store size={18} />
+            <Store size={18} style={{ color: '#000000' }} />
             Return to Store
           </div>
         </nav>
