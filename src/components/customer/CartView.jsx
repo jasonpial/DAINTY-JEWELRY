@@ -179,11 +179,19 @@ Please confirm receipt and guide me on payment details!`;
       </div>
     );
   }
-
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <div style={{ background: 'transparent', padding: '2.5rem 0' }}>
+      <style>{`
+        .product-review-badge,
+        span.product-review-badge {
+          color: #ffffff !important;
+          background-color: #1c1917 !important;
+          border-color: #1c1917 !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+      `}</style>
       <div className="checkout-layout-grid animate-fade-in">
         
         {/* Left Column: Product Review & Summary */}
@@ -196,7 +204,7 @@ Please confirm receipt and guide me on payment details!`;
           <div className="product-review-card">
             <div className="product-review-header">
               <h3>Product Review</h3>
-              <span className="product-review-badge">{cartCount} {cartCount === 1 ? 'Item' : 'Items'}</span>
+              <span className="product-review-badge" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#1c1917', color: '#ffffff', border: '1px solid #1c1917', borderRadius: '20px', padding: '0.2rem 0.5rem' }}>{cartCount} {cartCount === 1 ? 'Item' : 'Items'}</span>
             </div>
 
             {/* Cart Product List */}
@@ -235,6 +243,7 @@ Please confirm receipt and guide me on payment details!`;
                 <button 
                   type="button" 
                   className="coupon-btn"
+                  style={{ backgroundColor: '#1c1917', color: '#ffffff', border: '1px solid #1c1917' }}
                   onClick={() => {
                     const cleanCode = couponCode.trim().toUpperCase();
                     if (cleanCode === 'DAINTY5') handleApplyCoupon('DAINTY5', 5);
@@ -251,6 +260,7 @@ Please confirm receipt and guide me on payment details!`;
                 <button 
                   type="button" 
                   className={`coupon-chip ${couponCode === 'DAINTY5' ? 'active' : ''}`}
+                  style={couponCode === 'DAINTY5' ? { backgroundColor: '#1c1917', color: '#ffffff', borderColor: '#1c1917' } : {}}
                   onClick={() => handleApplyCoupon('DAINTY5', 5)}
                 >
                   5% OFF
@@ -258,6 +268,7 @@ Please confirm receipt and guide me on payment details!`;
                 <button 
                   type="button" 
                   className={`coupon-chip ${couponCode === 'DAINTY10' ? 'active' : ''}`}
+                  style={couponCode === 'DAINTY10' ? { backgroundColor: '#1c1917', color: '#ffffff', borderColor: '#1c1917' } : {}}
                   onClick={() => handleApplyCoupon('DAINTY10', 10)}
                 >
                   10% OFF
@@ -265,6 +276,7 @@ Please confirm receipt and guide me on payment details!`;
                 <button 
                   type="button" 
                   className={`coupon-chip ${couponCode === 'DAINTY15' ? 'active' : ''}`}
+                  style={couponCode === 'DAINTY15' ? { backgroundColor: '#1c1917', color: '#ffffff', borderColor: '#1c1917' } : {}}
                   onClick={() => handleApplyCoupon('DAINTY15', 15)}
                 >
                   15% OFF
@@ -330,7 +342,7 @@ Please confirm receipt and guide me on payment details!`;
             </div>
             <div className="step-divider"></div>
             <div className="checkout-step active">
-              <span className="step-number">2</span>
+              <span className="step-number" style={{ backgroundColor: '#1c1917', color: '#ffffff', border: '1px solid #1c1917' }}>2</span>
               <span>Payment</span>
             </div>
             <div className="step-divider"></div>
@@ -499,11 +511,12 @@ Please confirm receipt and guide me on payment details!`;
             </div>
 
             {/* Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1.8rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1.8rem', alignItems: 'center' }}>
               <button 
                 type="submit" 
-                className="btn-primary checkout-pay-btn" 
+                className="checkout-pay-btn" 
                 disabled={loading}
+                style={{ width: '210px', maxWidth: '100%', justifyContent: 'center', backgroundColor: '#1c1917', color: '#ffffff', border: '1px solid #1c1917' }}
               >
                 {loading ? 'Processing Order...' : 'Pay now'}
               </button>
@@ -512,7 +525,7 @@ Please confirm receipt and guide me on payment details!`;
                 type="button" 
                 className="btn-whatsapp" 
                 onClick={handleWhatsAppCheckout}
-                style={{ width: '100%', justifyContent: 'center' }}
+                style={{ width: '210px', maxWidth: '100%', padding: '0.65rem 1rem', fontSize: '0.82rem', justifyContent: 'center', borderRadius: '30px' }}
               >
                 <MessageSquareText size={18} /> Checkout via WhatsApp
               </button>
