@@ -2,7 +2,7 @@ import HeroSlideshow from './HeroSlideshow';
 import ProductCard from './ProductCard';
 import { getProducts } from '../../db';
 import { navigateTo } from '../../Router';
-import { Sparkles, Heart, Award, ShieldCheck, Truck } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function HomeView({ onAddToBag }) {
   const allProducts = getProducts();
@@ -24,29 +24,7 @@ export default function HomeView({ onAddToBag }) {
       {/* Hero Slideshow */}
       <HeroSlideshow />
 
-      {/* Selling Points Bar */}
-      <section className="home-features-bar">
-        <div className="feature-item">
-          <ShieldCheck className="feature-icon" size={28} />
-          <h4>Tarnish Resistant</h4>
-          <p>Crafted with 18K plating & surgical steel</p>
-        </div>
-        <div className="feature-item">
-          <Heart className="feature-icon" size={28} />
-          <h4>Hypoallergenic</h4>
-          <p>100% nickel-free & gentle on sensitive skin</p>
-        </div>
-        <div className="feature-item">
-          <Truck className="feature-icon" size={28} />
-          <h4>UG Delivery</h4>
-          <p>Fast delivery across Kampala & countrywide</p>
-        </div>
-        <div className="feature-item">
-          <Award className="feature-icon" size={28} />
-          <h4>Premium Quality</h4>
-          <p>Handpicked designs, checked for absolute excellence</p>
-        </div>
-      </section>
+
 
 
 
