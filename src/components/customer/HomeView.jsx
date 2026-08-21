@@ -53,7 +53,7 @@ export default function HomeView({ onAddToBag }) {
 
       {/* Best Sellers Section */}
       {bestSellers.length > 0 && (
-        <section style={{ maxWidth: '1200px', margin: '2.2rem auto', padding: '0 2rem' }}>
+        <section style={{ maxWidth: '1200px', margin: '0.8rem auto 2.2rem auto', padding: '0 2rem' }}>
           <div className="luxury-header-text">
             <h2 style={{ fontSize: '2.2rem', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
               <Sparkles size={24} style={{ color: 'var(--color-gold-light)' }} /> Best Sellers
