@@ -2335,7 +2335,6 @@ footer {
 .main-content .hero-slider p,
 .main-content .hero-slider span,
 .horizontal-filter-panel *,
-.site-footer *,
 /* Category Card Overlays */
 div[style*="linear-gradient(to top, rgba(18, 16, 15, 0.9)"] *,
 div[style*="linear-gradient(to top, rgba(18, 16, 15, 0.9)"] h3,
@@ -2404,10 +2403,7 @@ div[style*="background: rgba"] span,
 }
 
 /* Special styles for buttons and badges to keep their light text */
-.main-content .product-badge,
-.main-content .product-sale-badge,
-.main-content .card-btn-action-visible,
-.main-content .btn-primary {
+.main-content .product-sale-badge {
   color: #ffffff !important;
 }
 
@@ -2892,7 +2888,7 @@ div[style*="background: rgba"] span,
 }
 
 .gold-nav-item {
-  color: #ffffff !important;
+  color: #000000 !important;
   text-decoration: none;
   font-weight: 700;
   font-size: 0.8rem;
@@ -3016,17 +3012,17 @@ div[style*="background: rgba"] span,
 }
 
 .mobile-nav-item-gold {
-  color: white !important;
+  color: #000000 !important;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   padding: 0.6rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 
 .mobile-nav-section-title-gold {
-  color: var(--color-gold-light);
+  color: rgba(0, 0, 0, 0.6) !important;
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -3036,7 +3032,7 @@ div[style*="background: rgba"] span,
 }
 
 .mobile-nav-itemSub-gold {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
   text-decoration: none;
   font-size: 0.82rem;
   padding: 0.3rem 0 0.3rem 0.8rem;
