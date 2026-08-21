@@ -108,7 +108,7 @@ export default function ChatWidget() {
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: 'black', cursor: 'pointer' }}
             >
               <X size={18} />
             </button>
