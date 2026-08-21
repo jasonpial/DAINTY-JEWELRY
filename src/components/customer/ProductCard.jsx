@@ -73,13 +73,6 @@ export default function ProductCard({ product, onAddToBag }) {
   const isSale = sale_price && sale_price < price;
   const isOutOfStock = stock_quantity <= 0;
 
-  // Determine badge text
-  let badgeText = '';
-  if (new_arrival) badgeText = 'New';
-  else if (best_seller) badgeText = 'Best Seller';
-  else if (limited_edition) badgeText = 'Limited';
-  else if (clearance) badgeText = 'Clearance';
-
   const handleDetailsClick = () => {
     navigateTo('product', { id });
   };
@@ -99,10 +92,6 @@ export default function ProductCard({ product, onAddToBag }) {
       style={{ cursor: 'pointer' }}
     >
       <div className="product-img-wrapper">
-        {/* Badges */}
-        {badgeText && <span className="product-badge">{badgeText}</span>}
-        {isSale && <span className="product-sale-badge">Sale</span>}
-        
         {/* Auto-slideshow Images */}
         {validImages.map((imgUrl, index) => (
           <img 
