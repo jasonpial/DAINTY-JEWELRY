@@ -3663,15 +3663,15 @@ div[style*="background: rgba"] span,
 }
 
 .product-review-badge {
-  background: var(--gradient-gold-metallic) !important;
-  color: #000000 !important;
+  background: #1c1917 !important;
+  color: #ffffff !important;
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
   padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 20px !important;
   letter-spacing: 0.05em;
-  border: 1px solid var(--color-gold-light) !important;
+  border: 1px solid #1c1917 !important;
 }
 
 .checkout-product-item {
@@ -3736,7 +3736,7 @@ div[style*="background: rgba"] span,
   flex: 1;
   padding: 0.6rem 0.8rem;
   border: 1px solid var(--color-border-gold);
-  border-radius: var(--border-radius-sm);
+  border-radius: 30px !important;
   font-size: 0.85rem;
   background: #ffffff;
   color: #1c1917;
@@ -3744,12 +3744,12 @@ div[style*="background: rgba"] span,
 
 .coupon-btn {
   padding: 0.6rem 1.2rem;
-  background: var(--gradient-gold-metallic) !important;
-  color: #000000 !important;
-  border: 1px solid var(--color-gold-light) !important;
+  background: #1c1917 !important;
+  color: #ffffff !important;
+  border: 1px solid #1c1917 !important;
   font-weight: 700;
   font-size: 0.85rem;
-  border-radius: var(--border-radius-sm);
+  border-radius: 30px !important;
   cursor: pointer;
   transition: var(--transition-quick);
 }
@@ -3778,9 +3778,9 @@ div[style*="background: rgba"] span,
 }
 
 .coupon-chip.active {
-  background: var(--gradient-gold-metallic) !important;
-  color: #000000 !important;
-  border-color: var(--color-gold-light) !important;
+  background: #1c1917 !important;
+  color: #ffffff !important;
+  border-color: #1c1917 !important;
 }
 
 .coupon-chip:hover {
@@ -3885,9 +3885,9 @@ div[style*="background: rgba"] span,
 }
 
 .checkout-step.active .step-number {
-  background: var(--gradient-gold-metallic) !important;
-  color: #000000 !important;
-  border: 1px solid var(--color-gold-light) !important;
+  background: #1c1917 !important;
+  color: #ffffff !important;
+  border: 1px solid #1c1917 !important;
 }
 
 .step-icon-checked {
@@ -3933,7 +3933,7 @@ div[style*="background: rgba"] span,
   gap: 0.4rem;
   padding: 0.8rem 1rem;
   border: 1px solid #eae6e1;
-  border-radius: var(--border-radius-sm);
+  border-radius: 16px !important;
   background: #ffffff;
   cursor: pointer;
   transition: var(--transition-quick);
@@ -3945,8 +3945,8 @@ div[style*="background: rgba"] span,
 }
 
 .payment-tab-btn.active {
-  border: 2px solid var(--color-gold-primary) !important;
-  box-shadow: 0 0 0 1px var(--color-gold-primary);
+  border: 2px solid #1c1917 !important;
+  box-shadow: 0 0 0 1px #1c1917;
 }
 
 .payment-tab-icon {
@@ -3956,7 +3956,7 @@ div[style*="background: rgba"] span,
 }
 
 .payment-tab-btn.active .payment-tab-icon {
-  color: var(--color-gold-dark);
+  color: #1c1917;
 }
 
 .payment-tab-title {
@@ -3991,13 +3991,16 @@ div[style*="background: rgba"] span,
 
 .checkout-pay-btn {
   width: 100%;
-  padding: 1rem !important;
-  font-size: 1rem !important;
+  padding: 0.65rem 1rem !important;
+  font-size: 0.85rem !important;
   font-weight: 800 !important;
-  border-radius: var(--border-radius-sm) !important;
+  border-radius: 30px !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
   margin-top: 1.5rem !important;
+  background: #1c1917 !important;
+  color: #ffffff !important;
+  border: 1px solid #1c1917 !important;
 }
 
 .checkout-save-info-note {
@@ -4005,5 +4008,19 @@ div[style*="background: rgba"] span,
   color: #78716c;
   line-height: 1.5;
   margin-top: 0.2rem;
+}
+
+/* Enforce white color for all text inside checkout black containers */
+.checkout-pay-btn,
+.checkout-pay-btn *,
+.product-review-badge,
+.product-review-badge *,
+.coupon-btn,
+.coupon-btn *,
+.coupon-chip.active,
+.coupon-chip.active *,
+.checkout-step.active .step-number,
+.checkout-step.active .step-number * {
+  color: #ffffff !important;
 }
 
