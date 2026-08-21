@@ -2544,7 +2544,7 @@ div[style*="background: rgba"] span,
   align-items: center;
   gap: 0.5rem;
   background: #231f20 !important; /* Elegant dark-toned solid background */
-  color: #ffffff !important;
+  color: #000000 !important;
   border: none !important;
   padding: 0.9rem 2.2rem !important;
   font-size: 0.85rem !important;
@@ -4022,5 +4022,68 @@ div[style*="background: rgba"] span,
 .checkout-step.active .step-number,
 .checkout-step.active .step-number * {
   color: #ffffff !important;
+}
+
+/* Mobile optimizations for the new checkout page layout */
+@media (max-width: 576px) {
+  .product-review-card {
+    padding: 1rem !important;
+  }
+  .payment-card {
+    padding: 1.2rem 1rem !important;
+  }
+  .checkout-layout-grid {
+    gap: 1.5rem !important;
+    margin-top: 1rem !important;
+  }
+  .checkout-product-item {
+    gap: 0.75rem !important;
+    padding: 0.75rem 0 !important;
+  }
+  .checkout-prod-img {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .checkout-prod-details {
+    flex: 1;
+  }
+  .checkout-prod-name {
+    font-size: 0.82rem !important;
+  }
+  .checkout-prod-meta {
+    font-size: 0.68rem !important;
+  }
+  .checkout-prod-price {
+    font-size: 0.82rem !important;
+  }
+  .payment-method-selector {
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
+  }
+  .payment-tab-btn {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    padding: 0.6rem 0.8rem !important;
+    width: 100% !important;
+  }
+  .payment-tab-title {
+    font-size: 0.78rem !important;
+  }
+  .payment-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .checkout-steps-tracker {
+    margin-bottom: 1.5rem !important;
+    padding-bottom: 0.8rem !important;
+  }
+  .checkout-step {
+    font-size: 0.7rem !important;
+    gap: 0.35rem !important;
+  }
+  .step-divider {
+    margin: 0 0.5rem !important;
+  }
 }
 
