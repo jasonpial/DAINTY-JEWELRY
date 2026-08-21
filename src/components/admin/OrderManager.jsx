@@ -115,13 +115,13 @@ export default function OrderManager() {
       {/* Selected Order Detail Sidebar Panel */}
       {selectedOrder && (
         <div className="admin-card animate-fade-in" style={{ height: 'fit-content', border: '1px solid var(--color-gold-primary)' }}>
-          <div className="admin-card-header" style={{ background: 'var(--color-brown-primary)', color: 'white' }}>
-            <h3 style={{ color: 'white', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ClipboardList size={16} /> Order #{selectedOrder.id}
+          <div className="admin-card-header" style={{ background: 'var(--gradient-gold-metallic)', color: 'black' }}>
+            <h3 style={{ color: 'black', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ClipboardList size={16} style={{ color: 'black' }} /> Order #{selectedOrder.id}
             </h3>
             <button 
               onClick={() => setSelectedOrder(null)}
-              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+              style={{ background: 'none', border: 'none', color: 'black', cursor: 'pointer', fontSize: '0.9rem' }}
             >
               ✕
             </button>
