@@ -1,0 +1,8 @@
+{
+  "name": "DAINTY STUDS & CHAINS",
+  "description": "Shop classic 18K gold plated chains, studs, promise bands, and couple watches. High-polished tarnish-resistant jewelry in Kampala, Uganda.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
