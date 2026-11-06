@@ -6191,6 +6191,80 @@ div[style*="background: rgba"] span,
   color: #000000 !important;
 }
 
+/* Universal Back Navigation Affordance */
+.universal-back-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1.5rem;
+  background: #faf8f5;
+  border-bottom: 1px solid rgba(223, 201, 178, 0.5);
+  font-size: 0.75rem;
+}
+
+.dainty-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  background: #ffffff;
+  color: #1c1917;
+  border: 1px solid #dfc9b2;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.dainty-back-btn:hover {
+  background: var(--gradient-gold-metallic);
+  color: #000000 !important;
+  border-color: #b38728;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 14px rgba(179, 135, 40, 0.25);
+}
+
+.dainty-back-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.dainty-back-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+.dainty-floating-back-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  background: #ffffff;
+  color: #1c1917;
+  border: 1.5px solid #dfc9b2;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dainty-floating-back-btn:hover {
+  background: var(--gradient-gold-metallic);
+  color: #000000 !important;
+  border-color: #b38728;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 12px 28px rgba(179, 135, 40, 0.35);
+}
+
 
 
 

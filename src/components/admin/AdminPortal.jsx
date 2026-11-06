@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Home,
-  ShoppingBag,
+  LayoutGrid,
   FolderKanban,
+  ClipboardList,
   MessageSquare,
+  Settings,
+  Key,
+  Shield,
+  Check,
   RotateCcw,
   Store,
   LogOut,
@@ -24,7 +29,6 @@ import {
   Sparkles,
   Diamond,
   ChevronDown,
-  ChevronRight,
   ChevronLeft
 } from 'lucide-react';
 import {
@@ -39,7 +43,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
-import { navigateTo } from '../../Router';
+import { navigateTo, goBack } from '../../Router';
 import {
   getProducts,
   saveProduct,
@@ -49,6 +53,8 @@ import {
   getChats,
   saveMessage,
   resetDatabase,
+  getAdminCredentials,
+  updateAdminCredentials,
   categories
 } from '../../db';
 
@@ -127,10 +133,9 @@ function CustomBarTooltip({ active, payload, label }) {
 
 export default function AdminPortal({ onLogout } = {}) {
   // Navigation State
-  // Valid activeTab nodes: 'dashboard' | 'catalog' | 'orders' | 'messages'
+  // Valid activeTab nodes: 'dashboard' | 'catalog' | 'orders' | 'messages' | 'settings'
   const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Data States connected to db.js
   const [products, setProducts] = useState([]);
@@ -149,6 +154,14 @@ export default function AdminPortal({ onLogout } = {}) {
   const [editingProduct, setEditingProduct] = useState(null);
   const [viewingOrder, setViewingOrder] = useState(null);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+
+  // Settings State for Admin Credentials
+  const [settingsUser, setSettingsUser] = useState(() => getAdminCredentials().username);
+  const [currentPass, setCurrentPass] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [settingsFeedback, setSettingsFeedback] = useState(null);
 
   // Chat conversation state
   const [activeChatId, setActiveChatId] = useState(null);
@@ -219,13 +232,41 @@ export default function AdminPortal({ onLogout } = {}) {
     });
   }, [orders, orderSearch, orderStatusFilter]);
 
-  // Delete product handler
-  const handleDeleteProduct = (productId, productName) => {
-    if (window.confirm(`Are you sure you want to delete "${productName}" from the store catalog? This will immediately remove it from the customer storefront.`)) {
-      deleteProduct(productId);
-      reloadData();
-      showToast(`Product "${productName}" was deleted from store catalog.`);
+  // Delete product handlers (In-app modal confirmation replaces window.confirm)
+  const handleDeleteProduct = (product) => {
+    setProductToDelete(product);
+  };
+
+  const confirmDeleteProduct = () => {
+    if (!productToDelete) return;
+    deleteProduct(productToDelete.id);
+    reloadData();
+    showToast(`Product "${productToDelete.name}" was permanently deleted from catalog.`);
+    setProductToDelete(null);
+  };
+
+  // Save Credentials in Settings
+  const handleSaveCredentials = (e) => {
+    e.preventDefault();
+    const creds = getAdminCredentials();
+    if (currentPass !== creds.password) {
+      setSettingsFeedback({ type: 'error', message: 'Current password does not match existing admin password.' });
+      return;
     }
+    if (!newPass || newPass.length < 4) {
+      setSettingsFeedback({ type: 'error', message: 'New password must contain at least 4 characters.' });
+      return;
+    }
+    if (newPass !== confirmPass) {
+      setSettingsFeedback({ type: 'error', message: 'New password and confirmation password do not match.' });
+      return;
+    }
+    updateAdminCredentials(settingsUser, newPass);
+    setCurrentPass('');
+    setNewPass('');
+    setConfirmPass('');
+    setSettingsFeedback({ type: 'success', message: 'Admin credentials successfully updated and persisted.' });
+    showToast('Admin credentials updated successfully!');
   };
 
   // Save / Update product handler
@@ -307,7 +348,18 @@ export default function AdminPortal({ onLogout } = {}) {
          ========================================================================= */}
       <nav className="h-16 bg-white border-b border-[#dfc9b2]/40 px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(62,39,35,0.03)]">
         {/* Left: Brand Logo & Hamburger */}
-        <div className="flex items-center gap-4 lg:gap-6">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
+          {/* Back Navigation Button in Admin Bar */}
+          <button
+            type="button"
+            onClick={() => goBack('home')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-black bg-[#faf8f5] hover:bg-amber-50 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+            title="Go Back to Previous Page"
+          >
+            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+
           {/* Real Website Logo in Top Navbar */}
           <div 
             className="flex items-center gap-3 cursor-pointer py-1"
@@ -414,85 +466,65 @@ export default function AdminPortal({ onLogout } = {}) {
         )}
 
         {/* =====================================================================
-            SIDEBAR (Exact match to eight_f023b57e.jpeg with metallic gold gradient)
+            SIDEBAR (Professional, spacious layout filling full vertical space)
+           ===================================================================== */}
+        {/* =====================================================================
+            SIDEBAR (Exact match to eight.jpeg Column 2 UI, fonts, spacing, and icons)
            ===================================================================== */}
         <aside
-          className={`fixed lg:static inset-y-0 left-0 z-40 lg:z-auto bg-white border-r border-[#dfc9b2]/40 flex flex-col shrink-0 transition-all duration-200 ease-in-out ${
-            sidebarCollapsed ? 'w-20' : 'w-72 lg:w-64'
-          } ${
-            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          className={`fixed lg:static inset-y-0 left-0 z-40 lg:z-auto bg-white border-r border-gray-100 flex flex-col justify-between shrink-0 transition-all duration-200 ease-in-out w-64 lg:w-68 min-h-[calc(100vh-64px)] p-5 ${
+            mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
           }`}
-          style={{ minHeight: 'calc(100vh - 64px)' }}
         >
-          {/* Top Logo / Brand Box in Sidebar */}
-          <div className="p-5 border-b border-[#f3ece6] flex items-center justify-between">
+          {/* Top & Navigation Section Wrapper */}
+          <div className="flex-1 flex flex-col">
+            {/* Top Logo (Real Website Logo preserved) */}
             <div 
-              className="flex items-center gap-3 cursor-pointer overflow-hidden" 
+              className="flex items-center gap-2.5 px-2 pb-5 border-b border-gray-100 cursor-pointer"
               onClick={() => navigateTo('home')}
+              title="Return to DAINTY Store"
             >
               <img
                 src="/images/logo-image.png"
-                alt="DAINTY STUDS & CHAINS"
-                className={`${sidebarCollapsed ? 'h-9 w-9 object-contain' : 'h-10 w-auto object-contain'} transition-all`}
+                alt="DAINTY"
+                className="h-8 w-auto object-contain hover:scale-105 transition-transform"
               />
-              {!sidebarCollapsed && (
-                <div className="leading-tight">
-                  <h3 className="font-serif italic font-bold text-sm text-[#3e2723]">
-                    DAINTY STUDS
-                  </h3>
-                  <p className="text-[10px] text-[#b38728] font-bold uppercase tracking-widest">
-                    Atelier Console
-                  </p>
+              <div className="flex items-baseline gap-1.5 font-sans">
+                <span className="font-extrabold text-[15px] tracking-tight text-gray-900">DAINTY</span>
+                <span className="text-[10px] font-bold text-[#b38728] uppercase tracking-wider">Atelier</span>
+              </div>
+            </div>
+
+            {/* Profile Row (Exact styling to eight.jpeg user profile: Jhon Doe / UI/UX/Director design) */}
+            <div className="flex items-center gap-3 px-2 py-4 my-1">
+              <div className="relative shrink-0">
+                <div 
+                  className="w-9 h-9 rounded-full flex items-center justify-center font-sans font-bold text-black text-xs shadow-xs ring-2 ring-[#b38728]/30"
+                  style={{ background: 'var(--gradient-gold-metallic)' }}
+                >
+                  DS
                 </div>
-              )}
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+              </div>
+              <div className="overflow-hidden font-sans">
+                <h4 className="font-semibold text-[13px] text-gray-900 leading-snug truncate">DAINTY Curator</h4>
+                <p className="text-[11px] text-gray-400 font-normal leading-snug truncate">Store Management HQ</p>
+              </div>
             </div>
 
-            {/* Collapse toggle button on desktop */}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            >
-              {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </button>
-          </div>
-
-          {/* User Profile Pill in Sidebar (Matching eight_f023b57e.jpeg) */}
-          <div className={`p-4 border-b border-[#f3ece6] flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="relative shrink-0">
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center font-serif font-bold text-black text-xs shadow-xs"
-                style={{ background: 'var(--gradient-gold-metallic)' }}
-              >
-                DS
-              </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
-            </div>
-            {!sidebarCollapsed && (
-              <div className="overflow-hidden">
-                <h4 className="font-bold text-xs text-[#1c1917] truncate">DAINTY Curator</h4>
-                <p className="text-[10px] text-gray-400 truncate">Store Management HQ</p>
-              </div>
-            )}
-          </div>
-
-          {/* Scrollable Navigation Body */}
-          <div className="py-4 px-3 flex-1 overflow-y-auto space-y-4">
             {/* ── SECTION 1: MENU ── */}
-            <div>
-              {!sidebarCollapsed && (
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
-                  Menu
-                </p>
-              )}
+            <div className="mt-3">
+              <p className="font-sans text-[11px] font-medium text-gray-400 px-3 mb-2">
+                Menu
+              </p>
               <div className="space-y-1">
-                {/* Node: Dashboard (Active Pill with Metallic Gold Gradient) */}
+                {/* Node: Dashboard (Matches 4-square grid active pill in eight.jpeg) */}
                 <button
                   onClick={() => handleNavClick('dashboard')}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start gap-3'} px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  className={`w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans ${
                     activeTab === 'dashboard'
-                      ? 'shadow-[0_4px_16px_rgba(179,135,40,0.25)] border border-[#f5e6a5]'
-                      : 'text-gray-600 hover:text-black hover:bg-amber-50/50'
+                      ? 'font-semibold shadow-xs'
+                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
                   }`}
                   style={
                     activeTab === 'dashboard'
@@ -501,17 +533,17 @@ export default function AdminPortal({ onLogout } = {}) {
                   }
                   title="Dashboard"
                 >
-                  <Home className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'stroke-[2.2] text-black' : 'text-gray-400'}`} />
-                  {!sidebarCollapsed && <span>Dashboard</span>}
+                  <LayoutGrid className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-black stroke-[2.2]' : 'text-gray-400'}`} />
+                  <span>Dashboard</span>
                 </button>
 
                 {/* Node: Manage Catalog */}
                 <button
                   onClick={() => handleNavClick('catalog')}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
                     activeTab === 'catalog'
-                      ? 'shadow-[0_4px_16px_rgba(179,135,40,0.25)] border border-[#f5e6a5] font-bold'
-                      : 'text-gray-600 hover:text-black hover:bg-amber-50/50'
+                      ? 'font-semibold shadow-xs'
+                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
                   }`}
                   style={
                     activeTab === 'catalog'
@@ -521,27 +553,25 @@ export default function AdminPortal({ onLogout } = {}) {
                   title="Manage Catalog"
                 >
                   <div className="flex items-center gap-3">
-                    <FolderKanban className={`w-4 h-4 shrink-0 ${activeTab === 'catalog' ? 'stroke-[2.2] text-black' : 'text-gray-400'}`} />
-                    {!sidebarCollapsed && <span>Manage Catalog</span>}
+                    <FolderKanban className={`w-4 h-4 shrink-0 ${activeTab === 'catalog' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                    <span>Manage Catalog</span>
                   </div>
-                  {!sidebarCollapsed && (
-                    <span
-                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                        activeTab === 'catalog' ? 'bg-black/15 text-black' : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
-                      {products.length}
-                    </span>
-                  )}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      activeTab === 'catalog' ? 'bg-black/15 text-black' : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+                    }`}
+                  >
+                    {products.length || 10}
+                  </span>
                 </button>
 
                 {/* Node: Customer Orders */}
                 <button
                   onClick={() => handleNavClick('orders')}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
                     activeTab === 'orders'
-                      ? 'shadow-[0_4px_16px_rgba(179,135,40,0.25)] border border-[#f5e6a5] font-bold'
-                      : 'text-gray-600 hover:text-black hover:bg-amber-50/50'
+                      ? 'font-semibold shadow-xs'
+                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
                   }`}
                   style={
                     activeTab === 'orders'
@@ -551,12 +581,12 @@ export default function AdminPortal({ onLogout } = {}) {
                   title="Customer Orders"
                 >
                   <div className="flex items-center gap-3">
-                    <ShoppingBag className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'stroke-[2.2] text-black' : 'text-gray-400'}`} />
-                    {!sidebarCollapsed && <span>Customer Orders</span>}
+                    <ClipboardList className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                    <span>Customer Orders</span>
                   </div>
-                  {!sidebarCollapsed && orders.length > 0 && (
+                  {orders.length > 0 && (
                     <span
-                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         activeTab === 'orders' ? 'bg-black/15 text-black' : 'bg-amber-100 text-amber-900'
                       }`}
                     >
@@ -568,10 +598,10 @@ export default function AdminPortal({ onLogout } = {}) {
                 {/* Node: Customer Messages */}
                 <button
                   onClick={() => handleNavClick('messages')}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
                     activeTab === 'messages'
-                      ? 'shadow-[0_4px_16px_rgba(179,135,40,0.25)] border border-[#f5e6a5] font-bold'
-                      : 'text-gray-600 hover:text-black hover:bg-amber-50/50'
+                      ? 'font-semibold shadow-xs'
+                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
                   }`}
                   style={
                     activeTab === 'messages'
@@ -581,103 +611,116 @@ export default function AdminPortal({ onLogout } = {}) {
                   title="Customer Messages"
                 >
                   <div className="flex items-center gap-3">
-                    <MessageSquare className={`w-4 h-4 shrink-0 ${activeTab === 'messages' ? 'stroke-[2.2] text-black' : 'text-gray-400'}`} />
-                    {!sidebarCollapsed && <span>Customer Messages</span>}
+                    <MessageSquare className={`w-4 h-4 shrink-0 ${activeTab === 'messages' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                    <span>Customer Messages</span>
                   </div>
-                  {!sidebarCollapsed && chats.length > 0 && (
-                    <span
-                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                        activeTab === 'messages' ? 'bg-black/15 text-black' : 'bg-emerald-100 text-emerald-800'
-                      }`}
-                    >
-                      {chats.length}
-                    </span>
-                  )}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      activeTab === 'messages' ? 'bg-black/15 text-black' : 'bg-emerald-100 text-emerald-800'
+                    }`}
+                  >
+                    {chats.length > 0 ? chats.length : 1}
+                  </span>
                 </button>
               </div>
             </div>
 
-            {/* ── SECTION 2: SETTINGS & UTILITIES (Matching eight_f023b57e.jpeg) ── */}
-            <div>
-              {!sidebarCollapsed && (
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
-                  Settings
-                </p>
-              )}
+            {/* ── SECTION 2: SETTINGS ── */}
+            <div className="mt-5">
+              <p className="font-sans text-[11px] font-medium text-gray-400 px-3 mb-2">
+                Settings
+              </p>
               <div className="space-y-1">
-                {/* Reset Sample Data */}
+                {/* Node: Settings */}
+                <button
+                  onClick={() => handleNavClick('settings')}
+                  className={`w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
+                    activeTab === 'settings'
+                      ? 'font-semibold shadow-xs'
+                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
+                  }`}
+                  style={
+                    activeTab === 'settings'
+                      ? { background: 'var(--gradient-gold-metallic)', color: '#000000' }
+                      : {}
+                  }
+                  title="Settings & Credentials"
+                >
+                  <Settings className={`w-4 h-4 shrink-0 ${activeTab === 'settings' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                  <span>Settings</span>
+                </button>
+
+                {/* Node: Reset Sample Data */}
                 <button
                   onClick={() => setIsResetConfirmOpen(true)}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start gap-3'} px-3.5 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors`}
+                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-rose-600 hover:bg-rose-50/50 transition-colors font-sans group"
                   title="Reset Sample Data"
                 >
-                  <RotateCcw className="w-4 h-4 shrink-0 text-rose-500" />
-                  {!sidebarCollapsed && <span>Reset Sample Data</span>}
+                  <RotateCcw className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-rose-600 transition-colors" />
+                  <span>Reset Sample Data</span>
                 </button>
 
-                {/* Return to Store */}
+                {/* Node: Return to Store */}
                 <button
                   onClick={() => navigateTo('home')}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start gap-3'} px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#b38728] hover:bg-amber-50/50 transition-colors`}
+                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-[#b38728] hover:bg-amber-50/50 transition-colors font-sans group"
                   title="Return to Store"
                 >
-                  <Store className="w-4 h-4 shrink-0 text-[#b38728]" />
-                  {!sidebarCollapsed && <span>Return to Store</span>}
+                  <Store className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-[#b38728] transition-colors" />
+                  <span>Return to Store</span>
                 </button>
 
-                {/* Logout */}
+                {/* Node: Logout */}
                 <button
                   onClick={handleLogoutAction}
-                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start gap-3'} px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-500 hover:text-rose-600 hover:bg-gray-50 transition-colors`}
+                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-rose-600 hover:bg-rose-50/50 transition-colors font-sans group"
                   title="Logout"
                 >
-                  <LogOut className="w-4 h-4 shrink-0" />
-                  {!sidebarCollapsed && <span>Logout</span>}
+                  <LogOut className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-rose-600 transition-colors" />
+                  <span>Logout</span>
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* ── SECTION 3: NOTIFICATIONS WIDGET (Matching bottom of eight_f023b57e.jpeg) ── */}
-            {!sidebarCollapsed && (
-              <div className="pt-2">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
-                  Notifications
-                </p>
-                <div className="space-y-2">
-                  {/* Notification Card 1 */}
-                  <div
-                    onClick={() => handleNavClick('messages')}
-                    className="p-2.5 rounded-xl bg-gray-50 hover:bg-amber-50/60 border border-gray-100 hover:border-[#b38728]/30 cursor-pointer transition-all flex items-start gap-2.5"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-amber-100 text-[#b38728] flex items-center justify-center font-bold text-[10px] shrink-0">
-                      GK
-                    </div>
-                    <div className="overflow-hidden">
-                      <p className="font-bold text-[11px] text-[#1c1917]">Grace Kembabazi</p>
-                      <p className="text-[10px] text-gray-500 truncate">
-                        Hi, This product is available for n...
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Notification Card 2 */}
-                  <div
-                    onClick={() => handleNavClick('messages')}
-                    className="p-2.5 rounded-xl bg-gray-50 hover:bg-amber-50/60 border border-gray-100 hover:border-[#b38728]/30 cursor-pointer transition-all flex items-start gap-2.5"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                      IS
-                    </div>
-                    <div className="overflow-hidden">
-                      <p className="font-bold text-[11px] text-[#1c1917]">Ibnul Shams</p>
-                      <p className="text-[10px] text-gray-500 truncate">
-                        Hi, Can I request custom engr...
-                      </p>
-                    </div>
-                  </div>
+          {/* ── SECTION 3: NOTIFICATIONS (Exact match to bottom cards in eight.jpeg) ── */}
+          <div className="pt-4 border-t border-gray-100">
+            <p className="font-sans text-[11px] font-medium text-gray-400 px-2 mb-2.5">
+              Notifications
+            </p>
+            <div className="space-y-2">
+              {/* Notification Card 1: Grace Kembabazi */}
+              <div
+                onClick={() => handleNavClick('messages')}
+                className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
+              >
+                <div className="w-8 h-8 rounded-full bg-amber-100 text-[#b38728] flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-[#b38728]/20">
+                  GK
+                </div>
+                <div className="overflow-hidden font-sans">
+                  <p className="font-semibold text-xs text-gray-900 leading-tight">Grace Kembabazi</p>
+                  <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
+                    Hi, This product is available for n...
+                  </p>
                 </div>
               </div>
-            )}
+
+              {/* Notification Card 2: Ibnul Shams */}
+              <div
+                onClick={() => handleNavClick('messages')}
+                className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-blue-300/30">
+                  IS
+                </div>
+                <div className="overflow-hidden font-sans">
+                  <p className="font-semibold text-xs text-gray-900 leading-tight">Ibnul Shams</p>
+                  <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
+                    Hi, Can I request custom eng...
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
 
@@ -1121,7 +1164,7 @@ export default function AdminPortal({ onLogout } = {}) {
                                     <Edit2 className="w-3.5 h-3.5" />
                                   </button>
                                   <button
-                                    onClick={() => handleDeleteProduct(p.id, p.name)}
+                                    onClick={() => handleDeleteProduct(p)}
                                     className="p-1.5 rounded-lg bg-gray-100 hover:bg-rose-100 text-gray-600 hover:text-rose-600 transition-colors"
                                     title="Delete Product"
                                   >
@@ -1403,12 +1446,223 @@ export default function AdminPortal({ onLogout } = {}) {
               </div>
             </div>
           )}
+
+          {/* ===================================================================
+              VIEW 5: SETTINGS & ADMIN CREDENTIALS MANAGEMENT
+             =================================================================== */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6 animate-fade-in max-w-4xl">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-black shadow-xs font-bold"
+                    style={{ background: 'var(--gradient-gold-metallic)' }}
+                  >
+                    <Settings className="w-5 h-5 stroke-[2.4]" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-serif font-bold text-[#3e2723] tracking-tight">Admin &amp; Store Settings</h2>
+                    <p className="text-xs text-gray-500">Manage administrator login credentials, security access, and boutique preferences</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#dfc9b2]/60 text-xs text-[#8a640f] font-semibold shadow-xs">
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Security &amp; Console</span>
+                </div>
+              </div>
+
+              {/* Card 1: Admin Login Credentials Form */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#dfc9b2]/40 shadow-xs space-y-6">
+                <div className="border-b border-[#f3ece6] pb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#b38728] flex items-center justify-center">
+                      <Key className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif font-bold text-base text-[#1c1917]">Admin Login Credentials</h3>
+                      <p className="text-xs text-gray-500">Change your administrative username and password stored in local system</p>
+                    </div>
+                  </div>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Active Session</span>
+                  </span>
+                </div>
+
+                {settingsFeedback && (
+                  <div className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all ${
+                    settingsFeedback.type === 'success' 
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}>
+                    {settingsFeedback.type === 'success' ? <Check className="w-4 h-4 shrink-0 text-emerald-600" /> : <Info className="w-4 h-4 shrink-0 text-rose-600" />}
+                    <span>{settingsFeedback.message}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveCredentials} className="space-y-4 max-w-xl">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      Admin Username
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={settingsUser}
+                      onChange={(e) => setSettingsUser(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728] bg-gray-50/40"
+                      placeholder="Username"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">This is the username used to log in at the admin portal gate.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      Current Password <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={currentPass}
+                      onChange={(e) => setCurrentPass(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728]"
+                      placeholder="Enter existing password to authorize update"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                        New Password <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={newPass}
+                        onChange={(e) => setNewPass(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728]"
+                        placeholder="••••••••"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                        Confirm New Password <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={confirmPass}
+                        onChange={(e) => setConfirmPass(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728]"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-3">
+                    <button
+                      type="submit"
+                      className="px-6 py-3 rounded-xl font-bold text-xs sm:text-sm text-black shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                      style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                    >
+                      <Key className="w-4 h-4" />
+                      <span>Save &amp; Persist Credentials</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Card 2: Atelier Boutique Status & Preferences */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#dfc9b2]/40 shadow-xs space-y-4">
+                <div className="flex items-center gap-3 border-b border-[#f3ece6] pb-3">
+                  <Store className="w-5 h-5 text-[#b38728]" />
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-[#1c1917]">DAINTY Atelier Boutique Status</h3>
+                    <p className="text-xs text-gray-500">Live configuration and operations for Uganda storefront</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-1">
+                    <p className="text-gray-400 font-medium">Boutique Currency</p>
+                    <p className="font-bold text-sm text-[#1c1917]">UGX (Ugandan Shillings)</p>
+                    <p className="text-[10px] text-[#b38728] font-semibold">USD live conversion enabled</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-1">
+                    <p className="text-gray-400 font-medium">Kampala Express Delivery</p>
+                    <p className="font-bold text-sm text-[#1c1917]">Free Over UGX 150,000</p>
+                    <p className="text-[10px] text-emerald-600 font-semibold">Cash on Delivery &amp; Mobile Money</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-1">
+                    <p className="text-gray-400 font-medium">Atelier Location</p>
+                    <p className="font-bold text-sm text-[#1c1917]">Kampala, Uganda</p>
+                    <p className="text-[10px] text-gray-500 font-medium">Online Showroom &amp; Dispatch</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
       {/* =========================================================================
-          ADD / EDIT PRODUCT MODAL (Supports Image File Upload, Presets & URL)
+          IN-APP PRODUCT DELETION CONFIRMATION MODAL (Reliable in sandboxed iframes)
          ========================================================================= */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#dfc9b2] space-y-4 animate-scale-up">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+                <Trash2 className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-lg text-gray-900">Delete Product from Catalog</h3>
+                <p className="text-xs text-gray-500">This action permanently deletes this product.</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3.5">
+              <img
+                src={productToDelete.image || productToDelete.images?.[0] || '/images/hero_rings.png'}
+                alt={productToDelete.name}
+                className="w-14 h-14 object-cover rounded-lg border border-gray-200 shrink-0"
+              />
+              <div className="text-xs overflow-hidden">
+                <p className="font-bold text-gray-900 truncate">{productToDelete.name}</p>
+                <p className="text-[#b38728] font-bold">{formatUGX(productToDelete.price)}</p>
+                <p className="text-gray-400 text-[10px] capitalize">Category: {productToDelete.category_id || 'Jewelry'}</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Are you sure you want to permanently delete this piece from the store catalog? It will be removed immediately from the customer storefront.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setProductToDelete(null)}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteProduct}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Confirm Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isProductModalOpen && (
         <ProductFormModal
           product={editingProduct}

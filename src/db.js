@@ -561,3 +561,26 @@ export function resetDatabase() {
   initDB();
   window.dispatchEvent(new Event('storage'));
 }
+
+// Admin Authentication & Credentials API
+const ADMIN_USER_KEY = 'dainty_admin_username';
+const ADMIN_PASS_KEY = 'dainty_admin_password';
+
+export function getAdminCredentials() {
+  const username = localStorage.getItem(ADMIN_USER_KEY) || 'admin';
+  const password = localStorage.getItem(ADMIN_PASS_KEY) || 'admin123';
+  return { username, password };
+}
+
+export function updateAdminCredentials(newUsername, newPassword) {
+  if (newUsername && newUsername.trim()) {
+    localStorage.setItem(ADMIN_USER_KEY, newUsername.trim());
+  }
+  if (newPassword && newPassword.trim()) {
+    localStorage.setItem(ADMIN_PASS_KEY, newPassword.trim());
+  }
+  return {
+    username: localStorage.getItem(ADMIN_USER_KEY) || 'admin',
+    password: localStorage.getItem(ADMIN_PASS_KEY) || 'admin123'
+  };
+}

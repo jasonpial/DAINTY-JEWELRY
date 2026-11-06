@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useHashRoute, navigateTo } from './Router';
-import { initDB } from './db';
+import { useHashRoute, navigateTo, goBack } from './Router';
+import { initDB, getAdminCredentials } from './db';
 import Header from './components/customer/Header';
 import ChatWidget from './components/customer/ChatWidget';
 import HomeView from './components/customer/HomeView';
@@ -9,7 +9,7 @@ import ProductDetailView from './components/customer/ProductDetailView';
 import CartView from './components/customer/CartView';
 import ContactView from './components/customer/ContactView';
 import AdminPortal from './components/admin/AdminPortal';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, ChevronLeft } from 'lucide-react';
 
 function App() {
   const route = useHashRoute();
@@ -118,8 +118,39 @@ function App() {
     <div className="app-container">
       {/* 1. Header (Hides in admin dashboard to preserve clean fullscreen panel feel) */}
       {!isAdminView && (
-        <Header cartCount={cartCount} currentRoute={route} />
+        <>
+          <Header cartCount={cartCount} currentRoute={route} />
+          {/* Universal Back Navigation Bar across every customer view */}
+          <div className="universal-back-nav-bar">
+            <button
+              type="button"
+              onClick={() => goBack('home')}
+              className="dainty-back-btn"
+              title="Go Back to Previous Page"
+              aria-label="Go Back to Previous Page"
+            >
+              <ChevronLeft size={15} strokeWidth={2.5} />
+              <span>Back</span>
+            </button>
+            <div className="flex items-center gap-2 text-gray-500 font-serif italic text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b38728]"></span>
+              <span>DAINTY Atelier Kampala · 18K Gold Plated Jewelry</span>
+            </div>
+          </div>
+        </>
       )}
+
+      {/* Floating Back Navigation Button for instant access when scrolling on any page */}
+      <button
+        type="button"
+        onClick={() => goBack('home')}
+        className="dainty-floating-back-btn"
+        title="Go Back to Previous Page"
+        aria-label="Go Back to Previous Page"
+      >
+        <ChevronLeft size={16} strokeWidth={2.5} />
+        <span>Back</span>
+      </button>
 
       {/* 2. Main Page Render */}
       <main className="main-content">
@@ -309,7 +340,8 @@ function AdminLoginOnboarding({ onLoginSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin123') {
+    const creds = getAdminCredentials();
+    if (username.trim() === creds.username && password === creds.password) {
       sessionStorage.setItem('dainty_admin_auth', 'true');
       onLoginSuccess();
     } else {
@@ -342,7 +374,7 @@ function AdminLoginOnboarding({ onLoginSuccess }) {
             onChange={(e) => setUsername(e.target.value)}
             required
             className="form-input" 
-            placeholder="admin"
+            placeholder="Username"
           />
         </div>
 
@@ -359,12 +391,17 @@ function AdminLoginOnboarding({ onLoginSuccess }) {
         </div>
 
         <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-          Log In
+          Log In to Console
         </button>
 
-        <div style={{ marginTop: '1.5rem', padding: '0.75rem', background: 'var(--color-bg-secondary)', borderRadius: '4px', fontSize: '0.72rem', color: 'var(--color-text-secondary)', textAlign: 'center', border: '1px solid var(--color-border-light)' }}>
-          <strong>Default Login Tip:</strong> <br />
-          User: <code style={{ background: '#e7e5e4', padding: '1px 3px', borderRadius: '2px' }}>admin</code> | Pass: <code style={{ background: '#e7e5e4', padding: '1px 3px', borderRadius: '2px' }}>admin123</code>
+        <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
+          <button
+            type="button"
+            onClick={() => goBack('home')}
+            style={{ background: 'none', border: 'none', color: '#8a640f', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+          >
+            ← Return to Store
+          </button>
         </div>
       </form>
     </div>

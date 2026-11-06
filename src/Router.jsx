@@ -45,6 +45,15 @@ export function navigateTo(page, params = {}) {
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 }
 
+// Navigates back through browser history, or falls back to home/previous page
+export function goBack(fallbackPage = 'home') {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    navigateTo(fallbackPage);
+  }
+}
+
 // React Hook to subscribe to hash changes
 export function useHashRoute() {
   const [route, setRoute] = useState(() => parseHash(window.location.hash));

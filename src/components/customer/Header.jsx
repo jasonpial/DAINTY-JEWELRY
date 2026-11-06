@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, ChevronDown, ChevronRight, Heart, Lock, X } from 'lucide-react';
-import { navigateTo } from '../../Router';
+import { ShoppingBag, ChevronDown, ChevronRight, ChevronLeft, Heart, Lock, X } from 'lucide-react';
+import { navigateTo, goBack } from '../../Router';
 import { categories } from '../../db';
 
 // The two primary material groups
@@ -149,6 +149,17 @@ export default function Header({ cartCount, currentRoute }) {
       <div className="header-nav-row-gold">
         <div className="nav-row-inner">
           <div className="nav-links-left">
+            {/* BACK BUTTON */}
+            <button
+              type="button"
+              className="gold-nav-item"
+              onClick={() => goBack('home')}
+              title="Back to Previous Page"
+              style={{ background: 'none', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, cursor: 'pointer' }}
+            >
+              <ChevronLeft size={13} strokeWidth={3} />
+              <span>BACK</span>
+            </button>
 
             {/* HOME */}
             <a
