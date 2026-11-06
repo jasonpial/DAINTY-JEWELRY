@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ShoppingBag, ChevronRight, MessageSquareCode, Truck, ShieldAlert, Award } from 'lucide-react';
+import { ShoppingBag, ChevronRight, MessageSquareCode, Truck, Award } from 'lucide-react';
 import { getProducts } from '../../db';
-import { formatUGX, formatUSD } from './ProductCard';
+import ProductCard, { formatUGX, formatUSD } from './ProductCard';
 import { navigateTo } from '../../Router';
 
 export default function ProductDetailView({ routeParams, onAddToBag }) {
@@ -329,6 +329,31 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
 
         </div>
       </div>
+
+      {/* Related Collection Pieces Matching Reference Photo */}
+      <section className="dainty-product-section" style={{ marginTop: '3.5rem' }}>
+        <div className="dainty-section-header-row">
+          <div>
+            <span className="dainty-section-kicker">You May Also Admire</span>
+            <h2 className="dainty-section-heading">COMPLETE THE SUITE</h2>
+          </div>
+          <button
+            className="dainty-btn-view-all"
+            onClick={() => navigateTo('shop', { category: category_id })}
+          >
+            <span>Explore {catName}</span>
+            <ChevronRight size={13} />
+          </button>
+        </div>
+        <div className="dainty-responsive-grid-4">
+          {getProducts()
+            .filter(p => p.id !== id && (p.category_id === category_id || p.material === material))
+            .slice(0, 4)
+            .map(p => (
+              <ProductCard key={p.id} product={p} onAddToBag={onAddToBag} />
+            ))}
+        </div>
+      </section>
     </div>
   );
 }

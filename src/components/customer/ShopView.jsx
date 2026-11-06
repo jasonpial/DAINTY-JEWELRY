@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import HeroSlideshow from './HeroSlideshow';
 import ProductCard from './ProductCard';
-import { getProducts, categories, subcategories } from '../../db';
+import { getProducts, categories } from '../../db';
 import { navigateTo } from '../../Router';
 import { priceRanges } from './FilterSidebar';
-import { Sparkles, Eye, ShoppingBag, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, RotateCcw } from 'lucide-react';
 
-// Advanced Local Search Engine supporting horizontal parameters
+// Advanced Local Search Engine supporting collection parameters
 function searchAndFilterProducts(products, query, routeParams, filters, activeSubcat) {
   let list = [...products];
 
@@ -50,15 +49,13 @@ function searchAndFilterProducts(products, query, routeParams, filters, activeSu
     list = list.filter(p => p.material.toLowerCase().includes(routeParams.material.toLowerCase()));
   }
 
-  // 5. Dashboard Filters (Multi-select)
+  // 5. Multi-select Filters
   if (filters.material && filters.material.length > 0) {
     list = list.filter(p => filters.material.includes(p.material));
   }
-
   if (filters.gender && filters.gender.length > 0) {
     list = list.filter(p => filters.gender.includes(p.gender));
   }
-
   if (filters.occasion && filters.occasion.length > 0) {
     list = list.filter(p => filters.occasion.includes(p.occasion));
   }
@@ -86,7 +83,7 @@ function searchAndFilterProducts(products, query, routeParams, filters, activeSu
   // 6. Search Bar Queries
   if (query) {
     const q = query.toLowerCase();
-    
+
     // Parse "under XXXXX"
     let maxPriceLimit = null;
     const underMatch = q.match(/under\s+(\d+[\d,]*)(k)?/i);
@@ -134,13 +131,9 @@ export default function ShopView({ routeParams, onAddToBag }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeSubcat, setActiveSubcat] = useState(null);
-  const [searchVal, setSearchVal] = useState(routeParams.q || '');
-  
-  // Custom Min/Max price states (temp values before apply)
-  const [priceMinInput, setPriceMinInput] = useState('');
-  const [priceMaxInput, setPriceMaxInput] = useState('');
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
 
-  // Local state filters
+  // Filter state
   const [filters, setFilters] = useState({
     material: [],
     priceRanges: [],
@@ -157,11 +150,6 @@ export default function ShopView({ routeParams, onAddToBag }) {
     setActiveSubcat(null);
   }, [routeParams.category, routeParams.collection, routeParams.gender, routeParams.occasion, routeParams.material]);
 
-  // Sync search input
-  useEffect(() => {
-    setSearchVal(routeParams.q || '');
-  }, [routeParams.q]);
-
   // Sync filtered list
   useEffect(() => {
     const list = searchAndFilterProducts(
@@ -174,42 +162,16 @@ export default function ShopView({ routeParams, onAddToBag }) {
     setFilteredProducts(list);
   }, [products, routeParams, filters, activeSubcat]);
 
-  // Handle category shape toggle
-  const handleCategorySelect = (catId) => {
-    if (routeParams.category === catId) {
-      // Toggle off to show full collection
-      navigateTo('shop', { ...routeParams, category: undefined });
+  // Handle category tab change
+  const handleCategoryTab = (catId) => {
+    if (catId === 'all') {
+      navigateTo('shop', {});
     } else {
-      navigateTo('shop', { ...routeParams, category: catId });
+      navigateTo('shop', { category: catId });
     }
     setActiveSubcat(null);
   };
 
-  // Toggle filter chip options
-  const handleToggleFilter = (group, value) => {
-    const current = filters[group] || [];
-    let updated;
-    if (current.includes(value)) {
-      updated = current.filter(v => v !== value);
-    } else {
-      updated = [...current, value];
-    }
-    setFilters(prev => ({ ...prev, [group]: updated }));
-  };
-
-  // Apply inputs and filters
-  const handleApplyHorizontalFilters = () => {
-    setFilters(prev => ({
-      ...prev,
-      customPriceMin: priceMinInput,
-      customPriceMax: priceMaxInput
-    }));
-    if (searchVal.trim()) {
-      navigateTo('shop', { ...routeParams, q: searchVal.trim() || undefined });
-    }
-  };
-
-  // Reset all horizontal filters
   const handleResetFilters = () => {
     setFilters({
       material: [],
@@ -219,97 +181,178 @@ export default function ShopView({ routeParams, onAddToBag }) {
       customPriceMin: '',
       customPriceMax: ''
     });
-    setPriceMinInput('');
-    setPriceMaxInput('');
     setActiveSubcat(null);
-    setSearchVal('');
     navigateTo('shop', {});
   };
 
   const getPageTitle = () => {
-    if (routeParams.q) return `Search Results for "${routeParams.q}"`;
-
-    // Combined material + category (two-step navigation)
+    if (routeParams.q) return `Search: "${routeParams.q}"`;
     if (routeParams.material && routeParams.category) {
-      const catName = routeParams.category.charAt(0).toUpperCase() + routeParams.category.slice(1);
-      return `${routeParams.material} — ${catName}`;
+      const cat = categories.find(c => c.id === routeParams.category);
+      return `${routeParams.material} · ${cat ? cat.name : routeParams.category}`;
     }
-
     if (routeParams.category) {
-      return routeParams.category.charAt(0).toUpperCase() + routeParams.category.slice(1);
+      const cat = categories.find(c => c.id === routeParams.category);
+      return cat ? cat.name : routeParams.category;
     }
     if (routeParams.collection) {
-      const parts = routeParams.collection.split('_');
-      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+      const map = {
+        new_arrivals: 'New Arrivals',
+        best_sellers: 'Best Sellers',
+        trending: 'Trending Pieces',
+        premium: 'Premium Collection',
+        sale: 'Special Offers'
+      };
+      return map[routeParams.collection] || 'Collection';
     }
     if (routeParams.gender) return `${routeParams.gender}'s Jewelry`;
     if (routeParams.occasion) return `${routeParams.occasion} Collection`;
-    if (routeParams.material) return `${routeParams.material} Collection`;
-    return 'Full Collection';
+    if (routeParams.material) return `${routeParams.material} Series`;
+    return 'COLLECTIONS';
   };
 
-
-  // Check subcategory options mapping for active category
-  const activeSubcats = routeParams.category 
-    ? subcategories.filter(sub => sub.categoryId === routeParams.category)
-    : [];
-
-  const shouldShowHero = !routeParams.category && 
-                       !routeParams.collection && 
-                       !routeParams.gender && 
-                       !routeParams.occasion && 
-                       !routeParams.q;
+  const currentCategory = routeParams.category || 'all';
 
   return (
-    <div className="shop-view dainty-home-container" style={{ minHeight: '100vh', paddingBottom: '4rem' }}>
-      {/* Category or Default Slideshow Hero */}
-      {shouldShowHero && (
-        <HeroSlideshow 
-          category={routeParams.category} 
-          collection={routeParams.collection} 
-        />
-      )}
-
-      {/* Horizontal Dashboard-style layout below the Hero */}
-      <div className="shop-layout" style={{ marginTop: shouldShowHero ? '3rem' : '1.5rem' }}>
-        
-
-
-        {/* Clean White Catalogue Grid Section (corresponds to BEST SELLER layout) */}
-        <div className="shop-content-horizontal">
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '2.5rem', borderBottom: '1px solid var(--color-border-light)', paddingBottom: '0.8rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-luxury)', color: 'var(--color-brown-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {getPageTitle()}
-            </h2>
-            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'creation' : 'creations'} found
-            </span>
-          </div>
-
-          {filteredProducts.length > 0 ? (
-            <div className="product-grid animate-fade-in">
-              {filteredProducts.map(product => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  onAddToBag={onAddToBag} 
-                />
-              ))}
-            </div>
-          ) : (
-            <div style={{ padding: '6rem 2rem', textAlign: 'center', background: '#faf8f5', borderRadius: '8px', border: '1px dashed var(--color-border-gold)', margin: '2rem 0' }}>
-              <h3 style={{ fontSize: '1.25rem', color: 'var(--color-brown-primary)', marginBottom: '0.5rem', fontWeight: 700 }}>No Products Found</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-                We couldn't find any products matching your specific combinations. Try resetting filters or using simpler search words.
-              </p>
-              <button className="btn-primary" onClick={handleResetFilters}>
-                Clear All Filters
-              </button>
-            </div>
-          )}
+    <div className="dainty-shop-view dainty-home-container">
+      {/* 1. Collection Header matching attached photo */}
+      <div className="dainty-collection-page-header">
+        <div className="dainty-section-header-centered">
+          <span className="dainty-eyebrow-text">
+            <Sparkles size={13} className="eyebrow-icon" />
+            Kampala High Jewelry
+          </span>
+          <h1 className="dainty-page-title">{getPageTitle()}</h1>
+          <div className="dainty-title-accent-line"></div>
+          <p className="dainty-page-subtitle">
+            Tarnish-resistant, water-friendly 18K gold-plated studs, chains, promise rings, and bracelets.
+          </p>
         </div>
 
+        {/* 2. Interactive Category Tabs Bar */}
+        <div className="dainty-category-tabs-scroll">
+          <div className="dainty-category-tabs-inner">
+            <button
+              className={`dainty-cat-tab-btn ${currentCategory === 'all' && !routeParams.collection ? 'active' : ''}`}
+              onClick={() => handleCategoryTab('all')}
+            >
+              All Series
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                className={`dainty-cat-tab-btn ${currentCategory === cat.id ? 'active' : ''}`}
+                onClick={() => handleCategoryTab(cat.id)}
+              >
+                <span>{cat.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Filter and Count Toolbar */}
+        <div className="dainty-catalog-toolbar">
+          <div className="toolbar-count">
+            Showing <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'piece' : 'pieces'}
+          </div>
+
+          <div className="toolbar-actions">
+            {(routeParams.category || routeParams.collection || routeParams.q || routeParams.material) && (
+              <button className="toolbar-reset-btn" onClick={handleResetFilters}>
+                <RotateCcw size={13} />
+                <span>Reset View</span>
+              </button>
+            )}
+            <button
+              className="toolbar-filter-btn"
+              onClick={() => setShowFiltersModal(!showFiltersModal)}
+            >
+              <SlidersHorizontal size={14} />
+              <span>Filter By Price / Occasion</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Filter Drawer / Accordion */}
+        {showFiltersModal && (
+          <div className="dainty-filters-drawer animate-fade-in">
+            <div className="filters-drawer-grid">
+              {/* Occasion */}
+              <div>
+                <h4 className="drawer-col-title">Occasion</h4>
+                <div className="drawer-tags-wrap">
+                  {['Everyday', 'Wedding', 'Engagement', 'Birthday', 'Gift', "Valentine's"].map((occ) => (
+                    <button
+                      key={occ}
+                      className={`drawer-chip ${routeParams.occasion === occ ? 'active' : ''}`}
+                      onClick={() => navigateTo('shop', { ...routeParams, occasion: routeParams.occasion === occ ? undefined : occ })}
+                    >
+                      {occ}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Material */}
+              <div>
+                <h4 className="drawer-col-title">Material</h4>
+                <div className="drawer-tags-wrap">
+                  {['Gold-Plated', 'Stainless Steel', 'Titanium', 'Sterling Silver'].map((mat) => (
+                    <button
+                      key={mat}
+                      className={`drawer-chip ${routeParams.material === mat ? 'active' : ''}`}
+                      onClick={() => navigateTo('shop', { ...routeParams, material: routeParams.material === mat ? undefined : mat })}
+                    >
+                      {mat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <h4 className="drawer-col-title">Recipient</h4>
+                <div className="drawer-tags-wrap">
+                  {['Women', 'Men', 'Unisex'].map((g) => (
+                    <button
+                      key={g}
+                      className={`drawer-chip ${routeParams.gender === g ? 'active' : ''}`}
+                      onClick={() => navigateTo('shop', { ...routeParams, gender: routeParams.gender === g ? undefined : g })}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 4. The 4-Column Desktop / 2-Column Mobile Grid matching photo */}
+      <div className="dainty-catalog-grid-wrap">
+        {filteredProducts.length > 0 ? (
+          <div className="dainty-responsive-grid-4">
+            {filteredProducts.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToBag={onAddToBag}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="dainty-empty-catalog">
+            <Sparkles size={36} className="empty-icon" />
+            <h3 className="empty-title">No Jewelry Matches Your Selection</h3>
+            <p className="empty-text">
+              We couldn't find items with those exact filters. Reset your filters to explore our full handcrafted collection.
+            </p>
+            <button className="btn-primary" onClick={handleResetFilters}>
+              Explore Full Collection
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

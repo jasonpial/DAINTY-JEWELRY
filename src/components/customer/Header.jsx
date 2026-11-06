@@ -78,6 +78,15 @@ export default function Header({ cartCount, currentRoute }) {
 
   return (
     <header className="site-header-container" ref={headerRef}>
+      {/* ── Top Announcement Bar (Matching Attached Photo) ── */}
+      <div className="dainty-top-announcement-bar">
+        <span className="announcement-arrow">‹</span>
+        <span className="announcement-text">
+          Free Delivery in Kampala On Orders Over UGX 150,000 · Cash on Delivery &amp; Mobile Money
+        </span>
+        <span className="announcement-arrow">›</span>
+      </div>
+
       {/* ── Row 1: Logo, Search Bar, Right Actions ── */}
       <div className="header-middle-row">
         <a href="#" className="header-logo-link" onClick={(e) => { e.preventDefault(); navigateTo('home'); }}>

@@ -1,111 +1,218 @@
-import { useRef } from 'react';
 import HeroSlideshow from './HeroSlideshow';
 import ProductCard from './ProductCard';
+import CollectionCard from './CollectionCard';
 import { getProducts } from '../../db';
 import { navigateTo } from '../../Router';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Star,
   Award,
   Truck,
   ShieldCheck,
   RefreshCw,
-  Headphones
+  Headphones,
+  Star,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 
 export default function HomeView({ onAddToBag }) {
   const allProducts = getProducts();
 
-  // Show a shuffled mix of all products for new arrivals (up to 3)
+  // Curated collections matching the attached photo
+  const featuredCollections = [
+    {
+      id: 'rings',
+      title: 'Antique & Rings',
+      subtitle: 'Handcrafted',
+      image: '/images/hero_rings.png',
+      categoryId: 'rings'
+    },
+    {
+      id: 'bracelets',
+      title: 'Bangles & Cuffs',
+      subtitle: '18K Plated',
+      image: '/images/hero_bracelets.png',
+      categoryId: 'bracelets'
+    },
+    {
+      id: 'best_sellers',
+      title: 'Best Seller Series',
+      subtitle: 'Popular',
+      image: '/images/hero_home_chains.png',
+      collectionId: 'best_sellers'
+    },
+    {
+      id: 'necklaces',
+      title: 'Chains & Pendants',
+      subtitle: 'Tarnish-Free',
+      image: '/images/hero_necklaces.png',
+      categoryId: 'necklaces'
+    },
+    {
+      id: 'bridal',
+      title: 'Bridal Jewellery',
+      subtitle: 'Wedding',
+      image: '/images/hero_home_luxury.png',
+      occasion: 'Wedding'
+    },
+    {
+      id: 'earrings',
+      title: 'Studs & Hoops',
+      subtitle: 'Hypoallergenic',
+      image: '/images/hero_home_earrings.png',
+      categoryId: 'earrings'
+    },
+    {
+      id: 'watches',
+      title: 'Luxury Watches',
+      subtitle: 'Quartz Movement',
+      image: '/images/hero_watches.png',
+      categoryId: 'watches'
+    },
+    {
+      id: 'sets',
+      title: 'Complete Sets',
+      subtitle: 'Gift Ready',
+      image: '/images/hero_accessories.png',
+      categoryId: 'sets'
+    }
+  ];
+
+  // New arrivals (first 4 items for 4-column desktop / 2-column mobile layout)
   const newArrivals = allProducts
     .filter(p => p.new_arrival)
-    .slice(0, 3);
+    .slice(0, 4);
 
-  // Best sellers — up to 6, from any category
+  // Best sellers (8 items for 4-column desktop x 2 rows / 2-column mobile x 4 rows)
   const bestSellers = allProducts
     .filter(p => p.best_seller)
-    .slice(0, 6);
+    .slice(0, 8);
 
   return (
     <div className="dainty-home-container">
-      {/* 1. Full-width Hero Slideshow */}
+      {/* 1. Full-width Hero Slideshow (Preserved exactly as requested) */}
       <HeroSlideshow />
 
-      {/* 2. NEW ARRIVALS SECTION */}
-      <div className="dainty-section-header-row">
-        <div className="dainty-section-title-wrap" style={{ margin: 0 }}>
-          <div className="title-line"></div>
-          <h2 className="title-text">NEW ARRIVALS</h2>
-          <div className="title-line"></div>
+      {/* 2. COLLECTIONS SECTION (Matching the attached photo) */}
+      <section className="dainty-collection-page-section">
+        <div className="dainty-section-header-centered">
+          <span className="dainty-eyebrow-text">
+            <Sparkles size={13} className="eyebrow-icon" />
+            Curated Series
+          </span>
+          <h2 className="dainty-page-title">COLLECTIONS</h2>
+          <div className="dainty-title-accent-line"></div>
+          <p className="dainty-page-subtitle">
+            Explore our signature 18K gold-plated studs, tarnish-resistant chains, promise rings, and luxury jewelry sets.
+          </p>
         </div>
 
-        <button
-          className="dainty-btn-view-all"
-          onClick={() => navigateTo('shop', { collection: 'new_arrivals' })}
-        >
-          VIEW ALL
-        </button>
-      </div>
+        {/* 4-column desktop, 2-column mobile collection grid matching photo */}
+        <div className="dainty-responsive-grid-4">
+          {featuredCollections.map((col) => (
+            <CollectionCard
+              key={col.id}
+              title={col.title}
+              subtitle={col.subtitle}
+              image={col.image}
+              categoryId={col.categoryId}
+              collectionId={col.collectionId}
+              occasion={col.occasion}
+            />
+          ))}
+        </div>
+      </section>
 
-      <div className="dainty-home-grid-4">
-        {/* New Arrival Product Cards */}
-        {newArrivals.map(product => (
-          <ProductCard key={product.id} product={product} onAddToBag={onAddToBag} />
-        ))}
-
-        {/* 4th Column: SPECIAL OFFER Promo Card */}
-        <div className="dainty-promo-card">
+      {/* 3. NEW ARRIVALS SECTION */}
+      <section className="dainty-product-section">
+        <div className="dainty-section-header-row">
           <div>
-            <span className="promo-tag">SPECIAL OFFER</span>
-            <h3 className="promo-heading">COMPLETE<br />THE LOOK</h3>
-            <p className="promo-desc">
-              Buy any chain + bracelet and get 10% OFF
-            </p>
+            <span className="dainty-section-kicker">Just Landed</span>
+            <h2 className="dainty-section-heading">NEW ARRIVALS</h2>
           </div>
-
           <button
-            className="promo-btn"
-            onClick={() => navigateTo('shop', { collection: 'sale' })}
+            className="dainty-btn-view-all"
+            onClick={() => navigateTo('shop', { collection: 'new_arrivals' })}
           >
-            SHOP THE SET
+            <span>View All</span>
+            <ArrowRight size={13} />
           </button>
-
-          <img
-            src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&auto=format&fit=crop&q=80"
-            alt="Gold Chain Set"
-            className="dainty-promo-bg-img"
-          />
         </div>
-      </div>
 
-      {/* 3. BEST SELLERS SECTION */}
-      <div className="dainty-section-title-wrap">
-        <button className="dainty-nav-arrow" style={{ width: 28, height: 28 }}>
-          <ChevronLeft size={16} />
-        </button>
-        <div className="title-line" style={{ maxWidth: 80 }}></div>
-        <h2 className="title-text">BEST SELLERS</h2>
-        <div className="title-line" style={{ maxWidth: 80 }}></div>
-        <button className="dainty-nav-arrow" style={{ width: 28, height: 28 }}>
-          <ChevronRight size={16} />
-        </button>
-      </div>
+        {/* 4-column desktop, 2-column mobile product grid */}
+        <div className="dainty-responsive-grid-4">
+          {newArrivals.map(product => (
+            <ProductCard key={product.id} product={product} onAddToBag={onAddToBag} />
+          ))}
+        </div>
+      </section>
 
-      <div className="dainty-home-grid-6">
-        {bestSellers.map(product => (
-          <ProductCard key={product.id} product={product} onAddToBag={onAddToBag} />
-        ))}
-      </div>
+      {/* 4. PROMOTIONAL FEATURE BANNER */}
+      <section className="dainty-feature-strip-section">
+        <div className="dainty-feature-strip-inner">
+          <div className="dainty-feature-strip-content">
+            <span className="strip-tag">LIMITED EXCLUSIVE OFFER</span>
+            <h3 className="strip-title">Pair Any Chain with a Matching Bracelet &amp; Save 10%</h3>
+            <p className="strip-desc">
+              Every piece is crafted with hypoallergenic stainless steel &amp; titanium cores, finished with 18K gold plating designed for Kampala’s climate.
+            </p>
+            <div className="strip-actions">
+              <button
+                className="btn-primary"
+                onClick={() => navigateTo('shop', { collection: 'sale' })}
+              >
+                Shop The Set Offer
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => navigateTo('shop', { category: 'sets' })}
+                style={{ borderColor: 'rgba(255,255,255,0.4)', color: '#ffffff' }}
+              >
+                Explore Sets
+              </button>
+            </div>
+          </div>
+          <div className="dainty-feature-strip-image">
+            <img
+              src="/images/hero_home_luxury.png"
+              alt="Luxury jewelry set"
+              className="strip-img"
+            />
+          </div>
+        </div>
+      </section>
 
-      {/* 4. VALUE PROPOSITIONS STRIP */}
+      {/* 5. BEST SELLERS SECTION */}
+      <section className="dainty-product-section">
+        <div className="dainty-section-header-row">
+          <div>
+            <span className="dainty-section-kicker">Most Loved in Uganda</span>
+            <h2 className="dainty-section-heading">BEST SELLERS</h2>
+          </div>
+          <button
+            className="dainty-btn-view-all"
+            onClick={() => navigateTo('shop', { collection: 'best_sellers' })}
+          >
+            <span>View All</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+
+        {/* 4-column desktop, 2-column mobile product grid */}
+        <div className="dainty-responsive-grid-4">
+          {bestSellers.map(product => (
+            <ProductCard key={product.id} product={product} onAddToBag={onAddToBag} />
+          ))}
+        </div>
+      </section>
+
+      {/* 6. VALUE PROPOSITIONS STRIP */}
       <div className="dainty-value-bar">
         <div className="dainty-value-grid">
           <div className="dainty-value-item">
             <Award size={24} className="dainty-value-icon" />
             <div>
               <h4 className="dainty-value-title">QUALITY GUARANTEE</h4>
-              <p className="dainty-value-text">We ensure premium quality in every piece.</p>
+              <p className="dainty-value-text">18K gold-plated, tarnish-resistant pieces crafted to last.</p>
             </div>
           </div>
 
@@ -113,7 +220,7 @@ export default function HomeView({ onAddToBag }) {
             <Truck size={24} className="dainty-value-icon" />
             <div>
               <h4 className="dainty-value-title">DELIVERY ACROSS UGANDA</h4>
-              <p className="dainty-value-text">Fast &amp; reliable delivery to your doorstep.</p>
+              <p className="dainty-value-text">Prompt, secure delivery in Kampala &amp; upcountry.</p>
             </div>
           </div>
 
@@ -121,33 +228,33 @@ export default function HomeView({ onAddToBag }) {
             <ShieldCheck size={24} className="dainty-value-icon" />
             <div>
               <h4 className="dainty-value-title">SECURE PAYMENTS</h4>
-              <p className="dainty-value-text">Pay safely with MTN, Airtel Money or Card.</p>
+              <p className="dainty-value-text">Pay easily via MTN MoMo, Airtel Money, or Cash on Delivery.</p>
             </div>
           </div>
 
           <div className="dainty-value-item">
             <RefreshCw size={24} className="dainty-value-icon" />
             <div>
-              <h4 className="dainty-value-title">EASY RETURNS</h4>
-              <p className="dainty-value-text">Not satisfied? Return within 7 days.</p>
+              <h4 className="dainty-value-title">EASY EXCHANGES</h4>
+              <p className="dainty-value-text">Hassle-free 7-day exchange on standard items.</p>
             </div>
           </div>
 
           <div className="dainty-value-item">
             <Headphones size={24} className="dainty-value-icon" />
             <div>
-              <h4 className="dainty-value-title">DEDICATED SUPPORT</h4>
-              <p className="dainty-value-text">We're here to help you choose the perfect piece.</p>
+              <h4 className="dainty-value-title">PERSONAL STYLING</h4>
+              <p className="dainty-value-text">Chat with our Kampala team on WhatsApp anytime.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 5. SOCIAL & COMMUNITY SECTION (3 Columns) */}
+      {/* 7. SOCIAL & COMMUNITY SECTION (3 Columns) */}
       <div className="dainty-community-section">
         {/* Column 1: Testimonials */}
         <div className="dainty-community-box">
-          <h3 className="box-title">WHAT OUR CUSTOMERS SAY</h3>
+          <h3 className="box-title">WHAT OUR CLIENTS SAY</h3>
           <div>
             <div style={{ display: 'flex', gap: '0.2rem', color: '#c59b27', marginBottom: '0.8rem' }}>
               <Star size={16} fill="#c59b27" />
@@ -156,68 +263,65 @@ export default function HomeView({ onAddToBag }) {
               <Star size={16} fill="#c59b27" />
               <Star size={16} fill="#c59b27" />
             </div>
-            <p style={{ fontSize: '0.82rem', color: '#44403c', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '1rem' }}>
-              "The quality is amazing and delivery was so fast. I will definitely shop again!"
+            <p style={{ fontSize: '0.85rem', color: '#44403c', fontStyle: 'italic', lineHeight: 1.6, marginBottom: '1.2rem' }}>
+              "I wear my DAINTY paperclip necklace every single day, even in the shower, and it hasn't tarnished at all. Dispatch to Kololo was within 3 hours!"
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                alt="Peace"
-                style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
-              />
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c1917' }}>— Peace, Kampala</span>
+              <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--gradient-gold-metallic)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', color: '#000000' }}>
+                PN
+              </div>
+              <div>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1c1917', display: 'block' }}>Peace N.</span>
+                <span style={{ fontSize: '0.72rem', color: '#78716c' }}>Kampala, Uganda</span>
+              </div>
             </div>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginTop: '1.2rem' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#b8860b' }}></span>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ded7ce' }}></span>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ded7ce' }}></span>
           </div>
         </div>
 
         {/* Column 2: Instagram Grid */}
         <div className="dainty-community-box">
-          <h3 className="box-title">FOLLOW US @DAINTY.JEWELRY</h3>
+          <h3 className="box-title">FOLLOW @DAINTY.JEWELRY</h3>
           <div className="dainty-ig-grid">
             <div className="dainty-ig-item">
-              <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200&auto=format&fit=crop&q=80" alt="Instagram 1" />
+              <img src="/images/hero_rings.png" alt="Rings collection" />
             </div>
             <div className="dainty-ig-item">
-              <img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=200&auto=format&fit=crop&q=80" alt="Instagram 2" />
+              <img src="/images/hero_necklaces.png" alt="Chains collection" />
             </div>
             <div className="dainty-ig-item">
-              <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=200&auto=format&fit=crop&q=80" alt="Instagram 3" />
+              <img src="/images/hero_bracelets.png" alt="Bracelets collection" />
             </div>
             <div className="dainty-ig-item">
-              <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200&auto=format&fit=crop&q=80" alt="Instagram 4" />
+              <img src="/images/hero_watches.png" alt="Watches collection" />
             </div>
           </div>
           <button
             className="dainty-btn-ig"
             onClick={() => window.open('https://instagram.com', '_blank')}
           >
-            FOLLOW US ON INSTAGRAM
+            EXPLORE ON INSTAGRAM
           </button>
         </div>
 
         {/* Column 3: Newsletter */}
         <div className="dainty-community-box">
           <div>
-            <h3 className="box-title">JOIN THE DAINTY FAMILY</h3>
-            <p style={{ fontSize: '0.8rem', color: '#78716c', marginBottom: '1.2rem', lineHeight: 1.4 }}>
-              Subscribe for updates, new arrivals and exclusive offers.
+            <h3 className="box-title">JOIN THE DAINTY CIRCLE</h3>
+            <p style={{ fontSize: '0.82rem', color: '#78716c', marginBottom: '1.2rem', lineHeight: 1.5 }}>
+              Receive exclusive private sale access, ring sizing guides, and first notification on new chain drops.
             </p>
-            <form className="dainty-newsletter-form" onSubmit={(e) => e.preventDefault()}>
+            <form className="dainty-newsletter-form" onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing to DAINTY!'); }}>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
+                required
                 className="dainty-newsletter-input"
               />
               <button type="submit" className="dainty-newsletter-btn">SUBSCRIBE</button>
             </form>
           </div>
-          <p style={{ fontSize: '0.68rem', color: '#a8a29e', marginTop: '1rem' }}>
-            We respect your privacy.
+          <p style={{ fontSize: '0.7rem', color: '#a8a29e', marginTop: '1rem' }}>
+            We respect your privacy. Unsubscribe anytime.
           </p>
         </div>
       </div>

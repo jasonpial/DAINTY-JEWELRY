@@ -9,7 +9,7 @@ import ProductDetailView from './components/customer/ProductDetailView';
 import CartView from './components/customer/CartView';
 import ContactView from './components/customer/ContactView';
 import AdminPortal from './components/admin/AdminPortal';
-import { ShieldCheck, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 function App() {
   const route = useHashRoute();
@@ -152,7 +152,10 @@ function App() {
           !isAdminLoggedIn ? (
             <AdminLoginOnboarding onLoginSuccess={() => setIsAdminLoggedIn(true)} />
           ) : (
-            <AdminPortal />
+            <AdminPortal onLogout={() => {
+              sessionStorage.removeItem('dainty_admin_auth');
+              setIsAdminLoggedIn(false);
+            }} />
           )
         )}
       </main>
@@ -162,101 +165,132 @@ function App() {
         <ChatWidget />
       )}
 
-      {/* 4. Footer (Metallic Gold Gradient Theme) */}
+      {/* 4. Footer (Directly Inspired by four.jpeg with Metallic Gold Background & Pure Black Text) */}
       {!isAdminView && (
-        <footer className="site-footer-gold" style={{ background: '#141210', color: '#e7e5e4' }}>
-          {/* Metallic Gold Accent Bar */}
-          <div style={{ height: '4px', width: '100%', background: 'var(--gradient-gold-metallic)' }}></div>
-          
-          <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '3.5rem 2rem 2.5rem 2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2.5rem' }}>
-            
-            {/* Branding Column */}
-            <div>
-              <h3 style={{ color: '#ffffff', fontFamily: 'var(--font-luxury, serif)', fontSize: '1.5rem', letterSpacing: '0.12em', marginBottom: '0.4rem' }}>
-                DAINTY
-              </h3>
-              <span style={{ background: 'var(--gradient-gold-metallic)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.3em', display: 'block', marginBottom: '1.2rem' }}>
-                STUDS & CHAINS
-              </span>
-              <p style={{ fontSize: '0.82rem', lineHeight: '1.7', color: 'rgba(255,255,255,0.75)' }}>
-                Premium handcrafted copper-gold plated studs, chains, wedding bands, and couple jewelry sets. Durable, tarnish-resistant pieces for everyday wear.
-              </p>
-            </div>
+        <footer className="dainty-site-footer">
+          <div className="dainty-footer-content-wrap">
+            <div className="dainty-footer-grid">
 
-            {/* Quick links */}
-            <div>
-              <h4 style={{ color: '#c59b27', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.2rem' }}>Collections</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.82rem' }}>
-                <li><a href="#/shop?collection=new_arrivals" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>New Arrivals</a></li>
-                <li><a href="#/shop?collection=best_sellers" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Best Sellers</a></li>
-                <li><a href="#/shop?collection=premium" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Premium Collection</a></li>
-                <li><a href="#/shop?collection=sale" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Special Offers & Sales</a></li>
-              </ul>
-            </div>
-
-            {/* Customer Care */}
-            <div>
-              <h4 style={{ color: '#c59b27', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.2rem' }}>Shop By Occasion</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.82rem' }}>
-                <li><a href="#/shop?occasion=Wedding" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Bridal & Wedding</a></li>
-                <li><a href="#/shop?occasion=Engagement" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Engagement Rings</a></li>
-                <li><a href="#/shop?occasion=Birthday" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Birthday Gifts</a></li>
-                <li><a href="#/shop?occasion=Gift" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = '#c59b27'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>Gift Vouchers</a></li>
-              </ul>
-            </div>
-
-            {/* Contact details */}
-            <div>
-              <h4 style={{ color: '#c59b27', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.2rem' }}>Contact Info</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.82rem' }}>
-                <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'rgba(255,255,255,0.85)' }}>
-                  <MapPin size={15} style={{ color: '#c59b27' }} /> Plot 45, Acacia Ave, Kampala
-                </li>
-                <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'rgba(255,255,255,0.85)' }}>
-                  <Phone size={15} style={{ color: '#c59b27' }} /> +256 788 227027
-                </li>
-                <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'rgba(255,255,255,0.85)' }}>
-                  <Mail size={15} style={{ color: '#c59b27' }} /> info@daintystuds.com
-                </li>
-              </ul>
-            </div>
-
-          </div>
-
-          {/* Metallic Gold Gradient Bottom Strip */}
-          <div style={{ background: 'var(--gradient-gold-metallic)', color: '#000000', padding: '1rem 2rem' }}>
-            <div style={{ maxWidth: '1240px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.78rem', fontWeight: '700' }}>
-              
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <span>© {new Date().getFullYear()} DAINTY STUDS AND CHAINS. All Rights Reserved. Designed in White & Metallic Gold.</span>
-                
-                {/* Left side padlock and shopping bag shortcut icon group */}
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', borderLeft: '1px solid rgba(0,0,0,0.2)', paddingLeft: '1rem' }}>
-                  <a 
-                    href="#/cart" 
-                    onClick={(e) => { e.preventDefault(); navigateTo('cart'); }} 
-                    style={{ color: '#000000', display: 'flex', alignItems: 'center' }} 
-                    title="Shopping Bag"
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                  </a>
-                  <a 
-                    href="#/admin" 
-                    onClick={(e) => { e.preventDefault(); navigateTo('admin'); }} 
-                    style={{ color: '#000000', display: 'flex', alignItems: 'center' }} 
-                    title="Admin Console Login"
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  </a>
+              {/* Column 1: Luxdiamond-style Brand Column */}
+              <div className="dainty-footer-col brand-col">
+                <div className="dainty-footer-brand-header">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="brand-diamond-icon">
+                    <path d="M6 3h12l4 6-10 12L2 9z" />
+                    <path d="M2 9h20" />
+                    <path d="M10 3l-2 6 4 12 4-12-2-6" />
+                  </svg>
+                  <h3 className="dainty-footer-brand-title">DAINTY</h3>
                 </div>
+                <p className="dainty-footer-brand-desc">
+                  Uganda&apos;s premier destination for 18K gold-plated studs, tarnish-resistant chains, promise rings, and luxury jewelry sets. Handcrafted with precision for everyday elegance.
+                </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <a href="https://instagram.com" style={{ color: '#000000', display: 'flex', alignItems: 'center' }} title="Instagram">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              {/* Column 2: Company */}
+              <div className="dainty-footer-col">
+                <h4 className="dainty-footer-heading">Company</h4>
+                <ul className="dainty-footer-contact-list">
+                  <li>
+                    <Phone size={16} className="contact-icon" />
+                    <a href="tel:+256788227027">+256 788 227027</a>
+                  </li>
+                  <li>
+                    <Mail size={16} className="contact-icon" />
+                    <a href="mailto:info@daintystuds.com">info@daintystuds.com</a>
+                  </li>
+                  <li>
+                    <MapPin size={16} className="contact-icon" />
+                    <span>Plot 45, Acacia Ave, Kampala, Uganda</span>
+                  </li>
+                  <li>
+                    <Clock size={16} className="contact-icon" />
+                    <span>9:00 AM – 7:30 PM (Mon – Sat)</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 3: Informations */}
+              <div className="dainty-footer-col">
+                <h4 className="dainty-footer-heading">Informations</h4>
+                <ul className="dainty-footer-links">
+                  <li><a href="#/contact" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }}>FAQ</a></li>
+                  <li><a href="#/contact" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }}>Customer Care</a></li>
+                  <li><a href="#/contact" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }}>Terms &amp; Conditions</a></li>
+                  <li><a href="#/shop?collection=best_sellers" onClick={(e) => { e.preventDefault(); navigateTo('shop', { collection: 'best_sellers' }); }}>Testimonials</a></li>
+                  <li><a href="#/shop" onClick={(e) => { e.preventDefault(); navigateTo('shop'); }}>Delivery &amp; Exchanges</a></li>
+                </ul>
+              </div>
+
+              {/* Column 4: Social Media */}
+              <div className="dainty-footer-col">
+                <h4 className="dainty-footer-heading">Social Media</h4>
+                <ul className="dainty-footer-social-list">
+                  <li>
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                      </svg>
+                      <span>Facebook Page</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                      </svg>
+                      <span>Official Instagram</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://wa.me/256788227027" target="_blank" rel="noopener noreferrer">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                      </svg>
+                      <span>WhatsApp Direct Order</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
+                        <line x1="12" y1="4" x2="12" y2="20" />
+                        <path d="M18 10a6 6 0 0 0-12 0c0 3 2 5.5 5 6.5" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                      <span>Official Pinterest</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Bottom Bar Aligned Container */}
+          <div className="dainty-footer-bottom-bar">
+            <div className="dainty-footer-bottom-inner">
+              <span className="bottom-copyright">
+                © {new Date().getFullYear()} DAINTY STUDS &amp; CHAINS. All Rights Reserved. Handcrafted in Kampala.
+              </span>
+              <div className="bottom-shortcuts">
+                <a
+                  href="#/cart"
+                  onClick={(e) => { e.preventDefault(); navigateTo('cart'); }}
+                  className="bottom-shortcut-link"
+                  title="Shopping Bag"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  <span>Bag ({cart.reduce((sum, item) => sum + (item.quantity || 1), 0)})</span>
                 </a>
-                <a href="https://facebook.com" style={{ color: '#000000', display: 'flex', alignItems: 'center' }} title="Facebook">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                <a
+                  href="#/admin"
+                  onClick={(e) => { e.preventDefault(); navigateTo('admin'); }}
+                  className="bottom-shortcut-link"
+                  title="Admin Console"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <span>Portal</span>
                 </a>
               </div>
             </div>

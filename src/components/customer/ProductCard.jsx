@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, Heart } from 'lucide-react';
+import { useState } from 'react';
+import { Star, Heart, ShoppingBag } from 'lucide-react';
 import { navigateTo } from '../../Router';
 
 // Formatter for Ugandan Shilling (UGX)
@@ -21,44 +21,26 @@ export default function ProductCard({ product, onAddToBag }) {
     sale_price,
     stock_quantity,
     images = [],
-    new_arrival,
-    best_seller,
-    limited_edition,
-    clearance
+    material
   } = product;
 
   // Filter out empty strings or invalid images
-  const validImages = (images && images.length > 0) 
-    ? images.filter(img => img && img.trim() !== '') 
-    : ['https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80'];
+  const validImages = (images && images.length > 0)
+    ? images.filter(img => img && img.trim() !== '')
+    : ['/images/hero_necklaces.png'];
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [slideshowInterval] = useState(() => Math.floor(Math.random() * (5000 - 2400 + 1)) + 2400);
+  const [isAdded, setIsAdded] = useState(false);
 
-  const cardRef = useRef(null);
-
-  useEffect(() => {
-    if (validImages.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % validImages.length);
-    }, slideshowInterval);
-
-    return () => clearInterval(interval);
-  }, [validImages.length, slideshowInterval]);
+  // Consistent rating and review count per product
+  const rating = '4.9';
+  const reviewCount = ((id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 1500) + 850).toLocaleString('en-US');
 
   const isSale = sale_price && sale_price < price;
+  const activePrice = isSale ? sale_price : price;
   const isOutOfStock = stock_quantity <= 0;
 
-  // Badge text determination matching screenshot
-  let badgeText = null;
-  if (new_arrival) badgeText = 'NEW';
-  else if (best_seller) badgeText = 'BEST SELLER';
-  else if (clearance) badgeText = 'SALE';
-  else if (limited_edition) badgeText = 'LIMITED';
-
-  const handleDetailsClick = () => {
+  const handleCardClick = () => {
     navigateTo('product', { id });
   };
 
@@ -66,6 +48,8 @@ export default function ProductCard({ product, onAddToBag }) {
     e.stopPropagation();
     if (!isOutOfStock && onAddToBag) {
       onAddToBag(product);
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 1800);
     }
   };
 
@@ -75,80 +59,90 @@ export default function ProductCard({ product, onAddToBag }) {
   };
 
   return (
-    <div 
-      ref={cardRef}
-      className="dainty-product-card"
-      onClick={handleDetailsClick} 
+    <div
+      className="dainty-bestselling-card"
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
     >
-      {/* Warm beige image wrapper box */}
-      <div className="dainty-card-img-box">
-        {/* Top-left Pill Badge */}
-        {badgeText && (
-          <span className="dainty-card-badge">{badgeText}</span>
-        )}
-
-        {/* Top-right Wishlist Heart Button */}
-        <button 
-          className={`dainty-card-wishlist-btn ${isWishlisted ? 'active' : ''}`}
-          onClick={handleWishlistToggle}
-          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          type="button"
-        >
-          <Heart size={15} fill={isWishlisted ? "#b91c1c" : "none"} color={isWishlisted ? "#b91c1c" : "#222222"} strokeWidth={2} />
-        </button>
-
-        {/* Auto-slideshow Product Images */}
-        {validImages.map((imgUrl, index) => (
-          <img 
-            key={index}
-            src={imgUrl} 
-            alt={`${name} view ${index + 1}`} 
-            className="dainty-card-img" 
-            style={{ 
-              opacity: index === currentImageIndex ? 1 : 0,
-              transition: 'opacity 1s ease-in-out',
-              zIndex: index === currentImageIndex ? 2 : 1
-            }}
-            loading="lazy" 
-          />
-        ))}
-      </div>
-
-      {/* Content below image container */}
-      <div className="dainty-card-body">
-        <h3 className="dainty-card-title" title={name}>{name}</h3>
-        
-        <div className="dainty-card-price">
-          {isSale ? (
-            <div className="price-container">
-              <span className="price-active">{formatUGX(sale_price)}</span>
-              <span className="price-slashed">{formatUGX(price)}</span>
-            </div>
-          ) : (
-            <span className="price-active">{formatUGX(price)}</span>
-          )}
+      {/* 1. Image Studio Container Matching three_364bc333.jpg */}
+      <div className="dainty-bestselling-img-box">
+        {/* Top-left Star Rating & Review Count */}
+        <div className="dainty-bestselling-rating" title={`${rating} out of 5 stars (${reviewCount} reviews)`}>
+          <Star size={13} className="star-icon" fill="#1c1917" stroke="#1c1917" />
+          <span className="rating-score">{rating}</span>
+          <span className="rating-count">({reviewCount})</span>
         </div>
 
-        {/* Action Buttons Row */}
-        <div className="dainty-card-actions">
-          <button 
-            className="dainty-btn-cart-text"
+        {/* Top-right Heart Wishlist Button */}
+        <button
+          className={`dainty-bestselling-wishlist-btn ${isWishlisted ? 'active' : ''}`}
+          onClick={handleWishlistToggle}
+          title={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+          type="button"
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+        >
+          <Heart
+            size={18}
+            className="heart-icon"
+            fill={isWishlisted ? '#1c1917' : 'none'}
+            color="#1c1917"
+            strokeWidth={1.8}
+          />
+        </button>
+
+        {/* Full-bleed Product Image filling the entire container */}
+        <img
+          src={validImages[0]}
+          alt={name}
+          className="dainty-bestselling-img"
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = '/images/hero_rings.png';
+          }}
+        />
+
+        {/* Hover / Tap Quick Add to Bag Bar */}
+        <div className="dainty-bestselling-quick-action">
+          <button
+            className={`dainty-bestselling-add-btn ${isAdded ? 'added' : ''}`}
             onClick={handleAddToBagClick}
             disabled={isOutOfStock}
             type="button"
+            aria-label={`Add ${name} to bag`}
           >
-            {isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}
+            <ShoppingBag size={14} />
+            <span>{isOutOfStock ? 'Sold Out' : isAdded ? 'Added to Bag! ✓' : 'Add to Bag'}</span>
           </button>
-          
-          <button 
-            className="dainty-btn-cart-icon"
-            onClick={handleAddToBagClick}
-            disabled={isOutOfStock}
-            title="Add to Cart"
-            type="button"
-          >
-            <ShoppingBag size={16} color="#ffffff" />
-          </button>
+        </div>
+      </div>
+
+      {/* 2. Text Info Block (Matching three_364bc333.jpg) */}
+      <div className="dainty-bestselling-info">
+        {/* Product Name */}
+        <h3 className="dainty-bestselling-name" title={name}>
+          {name}
+        </h3>
+
+        {/* Brand / Atelier Subtitle */}
+        <p className="dainty-bestselling-sub">
+          by DAINTY Atelier · {material || '18K Gold Plated'}
+        </p>
+
+        {/* Pricing in UGX and USD */}
+        <div className="dainty-bestselling-price-row">
+          <span className="bestselling-price-ugx">{formatUGX(activePrice)}</span>
+          {isSale && (
+            <span className="bestselling-price-slashed">{formatUGX(price)}</span>
+          )}
+          <span className="bestselling-price-usd">({formatUSD(activePrice)})</span>
         </div>
       </div>
     </div>

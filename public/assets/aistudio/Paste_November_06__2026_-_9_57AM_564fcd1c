@@ -1,0 +1,2030 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  Gem,
+  LayoutDashboard,
+  Package,
+  Boxes,
+  ShoppingBag,
+  Users,
+  MessageSquare,
+  Search,
+  Bell,
+  Plus,
+  Filter,
+  ArrowUpRight,
+  ArrowDownRight,
+  TrendingUp,
+  AlertTriangle,
+  Eye,
+  Edit3,
+  Trash2,
+  CheckCircle2,
+  Clock,
+  Truck,
+  Sparkles,
+  ChevronRight,
+  ChevronDown,
+  X,
+  Upload,
+  Check,
+  Send,
+  MoreVertical,
+  DollarSign,
+  Layers,
+  Scale,
+  SlidersHorizontal,
+  RefreshCw,
+  ExternalLink,
+  ShieldCheck,
+  Calendar,
+  Sparkle
+} from 'lucide-react';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
+
+// --- INITIAL MOCK DATA ---
+const INITIAL_PRODUCTS = [
+  {
+    id: 'PRD-001',
+    sku: 'AUR-RNG-082',
+    name: 'Solitaire Marquise Diamond Ring',
+    category: 'Rings',
+    collection: 'Bridal & Solitaire',
+    metal: '18K Yellow Gold',
+    gemstone: 'Natural Diamond',
+    carat: '1.85 ct',
+    cut: 'Marquise (Excellent)',
+    clarity: 'VVS1',
+    color: 'E (Colorless)',
+    price: 6450,
+    cost: 3200,
+    stock: 4,
+    threshold: 3,
+    status: 'In Stock',
+    views: 4890,
+    conversions: 14,
+    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80',
+    description: 'An elongated marquise diamond in a bespoke 6-prong cathedral setting of recycled 18k yellow gold.'
+  },
+  {
+    id: 'PRD-002',
+    sku: 'AUR-NCK-114',
+    name: 'Serpentine Emerald & Diamond Rivière',
+    category: 'Necklaces',
+    collection: 'Haute Joaillerie',
+    metal: '950 Platinum',
+    gemstone: 'Colombian Emerald',
+    carat: '4.20 ctw',
+    cut: 'Emerald Cut & Round',
+    clarity: 'Minor Clarity Enhancement',
+    color: 'Vivid Green',
+    price: 18900,
+    cost: 9800,
+    stock: 2,
+    threshold: 2,
+    status: 'Low Stock',
+    views: 7320,
+    conversions: 5,
+    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80',
+    description: 'A cascading graduated strand of unheated Colombian emeralds flanked by brilliant micro-pavé diamonds.'
+  },
+  {
+    id: 'PRD-003',
+    sku: 'AUR-EAR-045',
+    name: 'Celestial South Sea Pearl Drops',
+    category: 'Earrings',
+    collection: 'Oceanique',
+    metal: '18K White Gold',
+    gemstone: 'South Sea Pearl',
+    carat: '13mm Pearl / 0.65 ctw Dia',
+    cut: 'Round Brilliant Accent',
+    clarity: 'VS1',
+    color: 'F',
+    price: 3200,
+    cost: 1450,
+    stock: 7,
+    threshold: 3,
+    status: 'In Stock',
+    views: 3120,
+    conversions: 22,
+    image: 'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=300&q=80',
+    description: 'Lustrous silvery-white Australian South Sea cultured pearls suspended from brilliant diamond constellations.'
+  },
+  {
+    id: 'PRD-004',
+    sku: 'AUR-BRC-029',
+    name: 'Imperial Pavé Tennis Bracelet',
+    category: 'Bracelets',
+    collection: 'Timeless Classics',
+    metal: '18K Rose Gold',
+    gemstone: 'Natural Diamond',
+    carat: '7.50 ctw',
+    cut: 'Round Brilliant (Ideal)',
+    clarity: 'VVS2',
+    color: 'D-F',
+    price: 12800,
+    cost: 6500,
+    stock: 1,
+    threshold: 2,
+    status: 'Low Stock',
+    views: 6410,
+    conversions: 9,
+    image: 'https://images.unsplash.com/photo-1611591475870-077038166c4c?auto=format&fit=crop&w=300&q=80',
+    description: 'Four-prong box clasp luxury tennis bracelet handcrafted with precision calibrated lab-certified diamonds.'
+  },
+  {
+    id: 'PRD-005',
+    sku: 'AUR-RNG-099',
+    name: 'The Sovereign Sapphire Halo Ring',
+    category: 'Rings',
+    collection: 'Haute Joaillerie',
+    metal: '950 Platinum',
+    gemstone: 'Ceylon Royal Sapphire',
+    carat: '3.15 ct',
+    cut: 'Oval Modified Brilliant',
+    clarity: 'Eye Clean',
+    color: 'Royal Cornflower Blue',
+    price: 15400,
+    cost: 7900,
+    stock: 0,
+    threshold: 2,
+    status: 'Sold Out',
+    views: 5120,
+    conversions: 3,
+    image: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=300&q=80',
+    description: 'Unheated royal blue sapphire framed with scalloped tapered baguette and brilliant melee diamonds.'
+  },
+  {
+    id: 'PRD-006',
+    sku: 'AUR-NCK-077',
+    name: 'L’Aura Constellation Choker',
+    category: 'Necklaces',
+    collection: 'Celestial',
+    metal: '14K Yellow Gold',
+    gemstone: 'Diamond & Moissanite',
+    carat: '1.20 ctw',
+    cut: 'Round Brilliant',
+    clarity: 'VS2',
+    color: 'G',
+    price: 2450,
+    cost: 1100,
+    stock: 9,
+    threshold: 3,
+    status: 'In Stock',
+    views: 8900,
+    conversions: 41,
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=300&q=80',
+    description: 'Delicate gold link chain featuring starburst motifs set with bezel diamonds for modern layering.'
+  }
+];
+
+const INITIAL_ORDERS = [
+  {
+    id: 'ORD-9821',
+    customer: 'Eleanor Vance-Croft',
+    email: 'eleanor.vance@vanceholdings.co.uk',
+    date: 'Today, 2:45 PM',
+    items: [
+      { name: 'Solitaire Marquise Diamond Ring', size: 'US 6.5', engraving: '"E & C • Always"', price: 6450, qty: 1 }
+    ],
+    total: 6450,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Engraving / Workshop',
+    shippingMethod: 'Armored White-Glove Courier',
+    shippingAddress: '48 Belgrave Square, Knightsbridge, London SW1X 8NY'
+  },
+  {
+    id: 'ORD-9820',
+    customer: 'Jonathan Sterling',
+    email: 'j.sterling@sterling-cap.com',
+    date: 'Today, 11:15 AM',
+    items: [
+      { name: 'Imperial Pavé Tennis Bracelet', size: '7.0 inches', engraving: 'None', price: 12800, qty: 1 }
+    ],
+    total: 12800,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Processing',
+    shippingMethod: 'FedEx Priority Insured',
+    shippingAddress: '740 Park Avenue, Apt 11B, New York, NY 10021'
+  },
+  {
+    id: 'ORD-9819',
+    customer: 'Countess Diane de Montmirail',
+    email: 'diane.montmirail@luxeprive.fr',
+    date: 'Yesterday, 6:30 PM',
+    items: [
+      { name: 'Celestial South Sea Pearl Drops', size: 'Standard', engraving: 'None', price: 3200, qty: 1 },
+      { name: 'L’Aura Constellation Choker', size: '16 inches', engraving: '"D 1994"', price: 2450, qty: 1 }
+    ],
+    total: 5650,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Shipped',
+    shippingMethod: 'DHL Express Valuables Tracked',
+    shippingAddress: '14 Place Vendôme, 75001 Paris, France'
+  },
+  {
+    id: 'ORD-9818',
+    customer: 'Dr. Alistair Finch',
+    email: 'finch.medical@zurichmed.ch',
+    date: 'Yesterday, 1:10 PM',
+    items: [
+      { name: 'The Sovereign Sapphire Halo Ring', size: 'US 5.75', engraving: '"Aeturnum"', price: 15400, qty: 1 }
+    ],
+    total: 15400,
+    paymentStatus: 'Paid',
+    fulfillmentStatus: 'Delivered',
+    shippingMethod: 'Secured Swiss Courier',
+    shippingAddress: 'Seestrasse 142, 8700 Küsnacht, Zurich, Switzerland'
+  },
+  {
+    id: 'ORD-9817',
+    customer: 'Vivienne Laurent',
+    email: 'v.laurent@studioarch.com',
+    date: '2 days ago',
+    items: [
+      { name: 'L’Aura Constellation Choker', size: '18 inches', engraving: 'None', price: 2450, qty: 1 }
+    ],
+    total: 2450,
+    paymentStatus: 'Pending Wire',
+    fulfillmentStatus: 'Pending Payment',
+    shippingMethod: 'FedEx Priority Insured',
+    shippingAddress: '333 South Hope St, Suite 4000, Los Angeles, CA 90071'
+  }
+];
+
+const INITIAL_INQUIRIES = [
+  {
+    id: 'INQ-402',
+    sender: 'Lady Camilla Ravenscroft',
+    email: 'c.ravenscroft@mayfair-arts.com',
+    subject: 'Bespoke Engagement Ring - 3.5ct Cushion Cut Diamond Inquiry',
+    date: '24 mins ago',
+    unread: true,
+    tag: 'Bespoke Commission',
+    avatar: 'CR',
+    messages: [
+      {
+        from: 'customer',
+        time: '24 mins ago',
+        text: 'Greetings Aura Atelier. I am inquiring whether the Solitaire Marquise setting could be reimagined with a 3.5 carat antique elongated cushion cut diamond in 950 Platinum. We are planning a December engagement in St. Moritz.'
+      }
+    ]
+  },
+  {
+    id: 'INQ-401',
+    sender: 'Harrison Blake, Esq.',
+    email: 'hblake@blakelegal.com',
+    subject: 'Ring Resizing for ORD-9812 (Marquise Band)',
+    date: '3 hours ago',
+    unread: true,
+    tag: 'Aftercare & Sizing',
+    avatar: 'HB',
+    messages: [
+      {
+        from: 'customer',
+        time: '3 hours ago',
+        text: 'Hello, the ring arrived safely yesterday and is breathtaking! However, my fiancée requires a size 5.25 instead of 6. Could your Mayfair or Manhattan salon handle a complimentary precision sizing without disturbing the prong integrity?'
+      }
+    ]
+  },
+  {
+    id: 'INQ-400',
+    sender: 'Sofia Kournikova',
+    email: 'sofia.k@monacoyachting.mc',
+    subject: 'GIA Certificate verification for Serpentine Rivière',
+    date: '1 day ago',
+    unread: false,
+    tag: 'Authentication',
+    avatar: 'SK',
+    messages: [
+      {
+        from: 'customer',
+        time: 'Yesterday',
+        text: 'Could you please email me the digital GIA / SSEF certificates and high-resolution gemological report for the Colombian Emerald Rivière necklace prior to wire release?'
+      },
+      {
+        from: 'admin',
+        time: 'Yesterday',
+        text: 'Bonjour Sofia, absolutely. We have dispatched the SSEF emerald origin dossier and GIA report #21950291 via encrypted courier transfer to your verified email address.'
+      }
+    ]
+  }
+];
+
+const REVENUE_DATA = [
+  { month: 'Jun', revenue: 142000, orders: 38, avgValue: 3736 },
+  { month: 'Jul', revenue: 168000, orders: 42, avgValue: 4000 },
+  { month: 'Aug', revenue: 154000, orders: 36, avgValue: 4277 },
+  { month: 'Sep', revenue: 210000, orders: 49, avgValue: 4285 },
+  { month: 'Oct', revenue: 275000, orders: 61, avgValue: 4508 },
+  { month: 'Nov', revenue: 340000, orders: 74, avgValue: 4594 }
+];
+
+const CATEGORY_SHARE = [
+  { name: 'Rings (Engagement & Cocktail)', value: 42, color: '#D4AF37' },
+  { name: 'High Jewelry Necklaces', value: 28, color: '#C5A059' },
+  { name: 'Bracelets & Bangles', value: 16, color: '#997B34' },
+  { name: 'Earrings & Drops', value: 14, color: '#E8D5A0' }
+];
+
+// --- MAIN APPLICATION COMPONENT ---
+export default function App() {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  const [orders, setOrders] = useState(INITIAL_ORDERS);
+  const [inquiries, setInquiries] = useState(INITIAL_INQUIRIES);
+
+  // Search & Filters
+  const [productSearch, setProductSearch] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('All');
+
+  // Modals & Sliders
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [viewingOrder, setViewingOrder] = useState(null);
+  const [selectedInquiry, setSelectedInquiry] = useState(INITIAL_INQUIRIES[0]);
+  const [replyText, setReplyText] = useState('');
+
+  // Toast system
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3600);
+  };
+
+  // Form State for Add / Edit Product
+  const [productForm, setProductForm] = useState({
+    title: '',
+    sku: '',
+    category: 'Rings',
+    collection: 'Bridal & Solitaire',
+    metal: '18K Yellow Gold',
+    gemstone: 'Natural Diamond',
+    carat: '',
+    cut: 'Round Brilliant (Ideal)',
+    clarity: 'VVS1',
+    color: 'D-F',
+    price: '',
+    cost: '',
+    stock: '',
+    threshold: 2,
+    description: '',
+    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=400&q=80'
+  });
+
+  const openNewProductModal = () => {
+    setEditingProduct(null);
+    setProductForm({
+      title: '',
+      sku: `AUR-${Math.floor(100 + Math.random() * 900)}`,
+      category: 'Rings',
+      collection: 'Bridal & Solitaire',
+      metal: '18K Yellow Gold',
+      gemstone: 'Natural Diamond',
+      carat: '1.50 ct',
+      cut: 'Round Brilliant (Ideal)',
+      clarity: 'VVS1',
+      color: 'E',
+      price: 5200,
+      cost: 2600,
+      stock: 5,
+      threshold: 2,
+      description: '',
+      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=400&q=80'
+    });
+    setIsProductModalOpen(true);
+  };
+
+  const openEditProductModal = (product) => {
+    setEditingProduct(product);
+    setProductForm({
+      title: product.name,
+      sku: product.sku,
+      category: product.category,
+      collection: product.collection,
+      metal: product.metal,
+      gemstone: product.gemstone,
+      carat: product.carat,
+      cut: product.cut,
+      clarity: product.clarity,
+      color: product.color,
+      price: product.price,
+      cost: product.cost,
+      stock: product.stock,
+      threshold: product.threshold,
+      description: product.description,
+      image: product.image
+    });
+    setIsProductModalOpen(true);
+  };
+
+  const handleSaveProduct = (e) => {
+    e.preventDefault();
+    if (!productForm.title || !productForm.price) {
+      showToast('Please provide diamond or jewelry name and price', 'error');
+      return;
+    }
+
+    const priceNum = Number(productForm.price);
+    const stockNum = Number(productForm.stock);
+    const threshNum = Number(productForm.threshold);
+
+    let status = 'In Stock';
+    if (stockNum === 0) status = 'Sold Out';
+    else if (stockNum <= threshNum) status = 'Low Stock';
+
+    if (editingProduct) {
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === editingProduct.id
+            ? {
+                ...item,
+                name: productForm.title,
+                sku: productForm.sku,
+                category: productForm.category,
+                collection: productForm.collection,
+                metal: productForm.metal,
+                gemstone: productForm.gemstone,
+                carat: productForm.carat,
+                cut: productForm.cut,
+                clarity: productForm.clarity,
+                color: productForm.color,
+                price: priceNum,
+                cost: Number(productForm.cost),
+                stock: stockNum,
+                threshold: threshNum,
+                status,
+                description: productForm.description,
+                image: productForm.image
+              }
+            : item
+        )
+      );
+      showToast(`Piece "${productForm.title}" updated successfully.`);
+    } else {
+      const newProduct = {
+        id: `PRD-00${products.length + 1}`,
+        sku: productForm.sku,
+        name: productForm.title,
+        category: productForm.category,
+        collection: productForm.collection,
+        metal: productForm.metal,
+        gemstone: productForm.gemstone,
+        carat: productForm.carat,
+        cut: productForm.cut,
+        clarity: productForm.clarity,
+        color: productForm.color,
+        price: priceNum,
+        cost: Number(productForm.cost),
+        stock: stockNum,
+        threshold: threshNum,
+        status,
+        views: 120,
+        conversions: 0,
+        image: productForm.image,
+        description: productForm.description
+      };
+      setProducts([newProduct, ...products]);
+      showToast(`Exquisite piece "${productForm.title}" added to catalog.`);
+    }
+    setIsProductModalOpen(false);
+  };
+
+  const handleDeleteProduct = (id, name) => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    showToast(`Removed "${name}" from archives.`, 'info');
+  };
+
+  const handleStockAdjustment = (productId, delta) => {
+    setProducts((prev) =>
+      prev.map((item) => {
+        if (item.id === productId) {
+          const newQty = Math.max(0, item.stock + delta);
+          let newStatus = 'In Stock';
+          if (newQty === 0) newStatus = 'Sold Out';
+          else if (newQty <= item.threshold) newStatus = 'Low Stock';
+          return { ...item, stock: newQty, status: newStatus };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleUpdateOrderStatus = (orderId, newStatus) => {
+    setOrders((prev) =>
+      prev.map((ord) => (ord.id === orderId ? { ...ord, fulfillmentStatus: newStatus } : ord))
+    );
+    if (viewingOrder && viewingOrder.id === orderId) {
+      setViewingOrder((prev) => ({ ...prev, fulfillmentStatus: newStatus }));
+    }
+    showToast(`Order ${orderId} updated to: ${newStatus}`);
+  };
+
+  const handleSendInquiryReply = (e) => {
+    e.preventDefault();
+    if (!replyText.trim() || !selectedInquiry) return;
+
+    const newMsg = {
+      from: 'admin',
+      time: 'Just now',
+      text: replyText.trim()
+    };
+
+    setInquiries((prev) =>
+      prev.map((inq) =>
+        inq.id === selectedInquiry.id
+          ? {
+              ...inq,
+              messages: [...inq.messages, newMsg],
+              unread: false
+            }
+          : inq
+      )
+    );
+
+    setSelectedInquiry((prev) => ({
+      ...prev,
+      messages: [...prev.messages, newMsg],
+      unread: false
+    }));
+
+    setReplyText('');
+    showToast('Concierge dispatch sent to customer.');
+  };
+
+  // Metrics
+  const totalRevenue = useMemo(() => orders.reduce((sum, o) => sum + o.total, 0), [orders]);
+  const lowStockCount = useMemo(() => products.filter((p) => p.stock <= p.threshold).length, [products]);
+  const totalInventoryValue = useMemo(() => products.reduce((sum, p) => sum + p.price * p.stock, 0), [products]);
+
+  // Filtered Products
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesSearch =
+        p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+        p.sku.toLowerCase().includes(productSearch.toLowerCase()) ||
+        p.gemstone.toLowerCase().includes(productSearch.toLowerCase());
+      const matchesCat = selectedCategoryFilter === 'All' || p.category === selectedCategoryFilter;
+      return matchesSearch && matchesCat;
+    });
+  }, [products, productSearch, selectedCategoryFilter]);
+
+  // Filtered Orders
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const matchSearch =
+        o.id.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        o.customer.toLowerCase().includes(orderSearch.toLowerCase());
+      const matchStatus = orderStatusFilter === 'All' || o.fulfillmentStatus === orderStatusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [orders, orderSearch, orderStatusFilter]);
+
+  return (
+    <div className="flex h-screen w-full bg-[#0F1115] text-[#E4E4E7] font-sans overflow-hidden antialiased selection:bg-[#D4AF37]/30 selection:text-[#FBFBFC]">
+      {/* --- TOAST ALERT --- */}
+      {toast && (
+        <div className="fixed top-5 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg border border-[#D4AF37]/30 bg-[#1A1D24] text-white shadow-2xl backdrop-blur-md animate-fade-in">
+          <Sparkle className="w-4 h-4 text-[#D4AF37] animate-spin" />
+          <span className="text-sm font-medium tracking-wide">{toast.message}</span>
+        </div>
+      )}
+
+      {/* --- SIDEBAR NAVIGATION --- */}
+      <aside
+        className={`relative flex flex-col justify-between border-r border-[#262A33] bg-[#14171E] transition-all duration-300 z-20 ${
+          sidebarCollapsed ? 'w-20' : 'w-64'
+        }`}
+      >
+        <div>
+          {/* Brand Emblem */}
+          <div className="flex items-center gap-3 px-6 py-6 border-b border-[#262A33]">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-[#D4AF37] via-[#B89730] to-[#8C6D23] shadow-lg shadow-[#D4AF37]/15">
+              <Gem className="w-5 h-5 text-black" />
+            </div>
+            {!sidebarCollapsed && (
+              <div className="overflow-hidden">
+                <h1 className="font-serif tracking-wider text-lg font-semibold text-white uppercase">
+                  LUMIÈRE
+                </h1>
+                <p className="text-[10px] tracking-widest text-[#D4AF37] font-light uppercase">
+                  Haute Joaillerie
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation Items */}
+          <nav className="p-3 space-y-1">
+            {[
+              { id: 'overview', label: 'Maison Overview', icon: LayoutDashboard },
+              { id: 'products', label: 'Fine Catalog', icon: Gem },
+              { id: 'inventory', label: 'Vault Inventory', icon: Boxes },
+              { id: 'orders', label: 'Bespoke Orders', icon: ShoppingBag, badge: orders.length },
+              { id: 'customers', label: 'Private Clients', icon: Users },
+              { id: 'inquiries', label: 'Concierge Inbox', icon: MessageSquare, badge: 2 }
+            ].map((nav) => {
+              const Icon = nav.icon;
+              const isActive = activeTab === nav.id;
+              return (
+                <button
+                  key={nav.id}
+                  onClick={() => setActiveTab(nav.id)}
+                  className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#D4AF37]/15 to-transparent text-[#EBD79A] border-l-2 border-[#D4AF37]'
+                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-[#1E232B]'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#D4AF37]' : 'text-zinc-400'}`} />
+                  {!sidebarCollapsed && (
+                    <span className="flex-1 text-left tracking-wide">{nav.label}</span>
+                  )}
+                  {!sidebarCollapsed && nav.badge && (
+                    <span className="px-1.5 py-0.5 text-[11px] font-semibold bg-[#2A2E39] text-[#D4AF37] rounded-full border border-[#D4AF37]/20">
+                      {nav.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer & Collapser */}
+        <div className="p-4 border-t border-[#262A33] flex items-center justify-between">
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#262A33] border border-[#D4AF37]/40 flex items-center justify-center text-xs font-serif text-[#D4AF37]">
+                LA
+              </div>
+              <div>
+                <p className="text-xs font-medium text-white">Curator Atelier</p>
+                <p className="text-[10px] text-zinc-500">Master Jeweler ID</p>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="p-1.5 rounded-md hover:bg-[#20252E] text-zinc-400 hover:text-white transition-colors"
+            title="Toggle Sidebar"
+          >
+            <ChevronRight
+              className={`w-4 h-4 transition-transform duration-200 ${
+                sidebarCollapsed ? 'rotate-0' : 'rotate-180'
+              }`}
+            />
+          </button>
+        </div>
+      </aside>
+
+      {/* --- MAIN CONTENT AREA --- */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#0E1015] overflow-y-auto">
+        {/* TOP BAR */}
+        <header className="sticky top-0 z-10 flex items-center justify-between px-8 py-4 bg-[#14171E]/80 backdrop-blur-md border-b border-[#262A33]">
+          <div className="flex items-center gap-4">
+            <span className="text-xs tracking-widest uppercase font-serif text-zinc-400">
+              Maison Admin Suite
+            </span>
+            <span className="text-zinc-600">/</span>
+            <span className="text-xs font-medium uppercase tracking-wider text-[#D4AF37]">
+              {activeTab}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Live Indicator */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live Salon Visitors: 42
+            </div>
+
+            {/* Quick Action Button */}
+            <button
+              onClick={openNewProductModal}
+              className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-black bg-gradient-to-r from-[#DFBF58] via-[#D4AF37] to-[#B38C26] rounded-md shadow-md hover:brightness-110 active:scale-95 transition-all tracking-wider uppercase font-semibold"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              New Haute Creation
+            </button>
+
+            {/* Notification Bell */}
+            <div className="relative">
+              <button className="p-2 rounded-lg bg-[#1B1F27] border border-[#2B303C] hover:border-[#D4AF37]/50 text-zinc-300 transition-colors">
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#D4AF37]" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* TAB CONTENTS */}
+        <div className="p-8 max-w-7xl w-full mx-auto space-y-8">
+          {/* =========================================================================
+              VIEW 1: OVERVIEW / ANALYTICS
+             ========================================================================= */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8 animate-fade-in">
+              {/* Header greeting */}
+              <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-[#262A33] pb-6">
+                <div>
+                  <h2 className="text-2xl font-serif text-white tracking-wide">
+                    Atelier Executive Overview
+                  </h2>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Real-time salon performance, VIP client inquiries & vault status.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#161921] px-3.5 py-2 rounded-lg border border-[#262A33]">
+                  <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Q4 Fiscal Vault Season • Live Currency: USD ($)</span>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {[
+                  {
+                    title: 'Total Monthly Sales',
+                    value: `$${totalRevenue.toLocaleString()}`,
+                    change: '+18.4% vs last mo.',
+                    trend: 'up',
+                    icon: DollarSign,
+                    subtitle: '74 completed acquisitions'
+                  },
+                  {
+                    title: 'Vault Assets Valuation',
+                    value: `$${totalInventoryValue.toLocaleString()}`,
+                    change: '16 high pieces reserved',
+                    trend: 'neutral',
+                    icon: Gem,
+                    subtitle: 'Certified stones in custody'
+                  },
+                  {
+                    title: 'Average Order Value (AOV)',
+                    value: '$5,980',
+                    change: '+11.2% bridal uplift',
+                    trend: 'up',
+                    icon: TrendingUp,
+                    subtitle: 'Top category: Engagement Rings'
+                  },
+                  {
+                    title: 'Low Stock Safeguard',
+                    value: `${lowStockCount} Creations`,
+                    change: 'Requires artisan casting',
+                    trend: 'alert',
+                    icon: AlertTriangle,
+                    subtitle: 'Threshold ≤ 2 available'
+                  }
+                ].map((kpi, idx) => {
+                  const Icon = kpi.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-xl bg-gradient-to-b from-[#181C24] to-[#12151B] border border-[#262A33] hover:border-[#D4AF37]/40 transition-all shadow-lg"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-zinc-400 tracking-wider uppercase">
+                          {kpi.title}
+                        </span>
+                        <div
+                          className={`p-2 rounded-lg ${
+                            kpi.trend === 'alert'
+                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              : 'bg-[#232834] text-[#D4AF37]'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <div className="text-2xl font-serif text-white font-semibold tracking-tight">
+                          {kpi.value}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-2">
+                          {kpi.trend === 'up' && (
+                            <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+                          )}
+                          {kpi.trend === 'alert' && (
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                          )}
+                          <span
+                            className={`text-xs ${
+                              kpi.trend === 'up'
+                                ? 'text-emerald-400 font-medium'
+                                : kpi.trend === 'alert'
+                                ? 'text-amber-400'
+                                : 'text-zinc-400'
+                            }`}
+                          >
+                            {kpi.change}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-zinc-500 mt-1">{kpi.subtitle}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Revenue Growth Chart */}
+                <div className="lg:col-span-2 p-6 rounded-xl bg-[#14171E] border border-[#262A33]">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="font-serif text-base text-white">Revenue Performance (6-Month Trajectory)</h3>
+                      <p className="text-xs text-zinc-400">Total volume from high jewelry and online orders</p>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 bg-[#1F232D] text-[#D4AF37] border border-[#D4AF37]/30 rounded">
+                      Audited Currency (USD)
+                    </span>
+                  </div>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={REVENUE_DATA} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#D4AF37" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#232732" vertical={false} />
+                        <XAxis dataKey="month" stroke="#686F7E" fontSize={11} tickLine={false} />
+                        <YAxis
+                          stroke="#686F7E"
+                          fontSize={11}
+                          tickLine={false}
+                          tickFormatter={(val) => `$${val / 1000}k`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#181C24',
+                            borderColor: '#363C4A',
+                            borderRadius: 8,
+                            fontSize: 12
+                          }}
+                          formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#D4AF37"
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill="url(#goldGradient)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Category Revenue Distribution */}
+                <div className="p-6 rounded-xl bg-[#14171E] border border-[#262A33] flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-serif text-base text-white">Share by Category</h3>
+                    <p className="text-xs text-zinc-400 mb-4">Volume generated per jewelry department</p>
+                    <div className="h-44 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={CATEGORY_SHARE}
+                            innerRadius={50}
+                            outerRadius={75}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {CATEGORY_SHARE.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#181C24',
+                              borderColor: '#363C4A',
+                              borderRadius: 8,
+                              fontSize: 12
+                            }}
+                            formatter={(v) => [`${v}%`, 'Category Share']}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  <div className="space-y-2 mt-2 pt-2 border-t border-[#232834]">
+                    {CATEGORY_SHARE.map((cat, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                          <span className="text-zinc-300">{cat.name}</span>
+                        </div>
+                        <span className="font-mono text-zinc-400">{cat.value}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lower Section: Recent Orders & Low Stock Quick Alert */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Recent High Value Orders */}
+                <div className="lg:col-span-2 p-6 rounded-xl bg-[#14171E] border border-[#262A33]">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-serif text-base text-white">Recent Atelier Orders</h3>
+                    <button
+                      onClick={() => setActiveTab('orders')}
+                      className="text-xs text-[#D4AF37] hover:underline flex items-center gap-1"
+                    >
+                      View All Orders <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="divide-y divide-[#232732]">
+                    {orders.slice(0, 3).map((ord) => (
+                      <div
+                        key={ord.id}
+                        onClick={() => {
+                          setViewingOrder(ord);
+                          setActiveTab('orders');
+                        }}
+                        className="py-3.5 flex items-center justify-between hover:bg-[#1A1E26] px-2 rounded-lg cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-md bg-[#212632] flex items-center justify-center text-[#D4AF37]">
+                            <ShoppingBag className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">{ord.customer}</p>
+                            <p className="text-xs text-zinc-400">
+                              {ord.items[0]?.name} {ord.items.length > 1 && `+${ord.items.length - 1} more`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-mono text-white">${ord.total.toLocaleString()}</p>
+                          <span className="inline-block mt-0.5 text-[10px] px-2 py-0.5 rounded-full bg-[#272D3B] text-[#D4AF37] border border-[#D4AF37]/30">
+                            {ord.fulfillmentStatus}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Vault Replenishment / Stock Alert */}
+                <div className="p-6 rounded-xl bg-[#14171E] border border-[#262A33] flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold tracking-wider uppercase mb-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Stock Attention</span>
+                    </div>
+                    <h3 className="font-serif text-base text-white">Pieces Nearing Depletion</h3>
+                    <p className="text-xs text-zinc-400 mt-1 mb-4">
+                      Pieces below reserved showroom threshold
+                    </p>
+                    <div className="space-y-3">
+                      {products
+                        .filter((p) => p.stock <= p.threshold)
+                        .map((p) => (
+                          <div
+                            key={p.id}
+                            className="p-3 rounded-lg bg-[#191D26] border border-[#282E3C] flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="text-xs font-medium text-white line-clamp-1">{p.name}</p>
+                              <p className="text-[11px] text-zinc-400 font-mono">
+                                Stock: <span className="text-amber-400 font-bold">{p.stock}</span> (Min: {p.threshold})
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                handleStockAdjustment(p.id, 1);
+                                showToast(`Replenished 1 unit for ${p.name}`);
+                              }}
+                              className="px-2.5 py-1 text-xs bg-[#2B303C] hover:bg-[#D4AF37] hover:text-black rounded text-zinc-200 transition-colors"
+                            >
+                              +1 Unit
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('inventory')}
+                    className="w-full mt-4 py-2 text-xs text-center border border-[#333948] hover:border-[#D4AF37] text-zinc-300 rounded transition-colors"
+                  >
+                    Manage Vault Replenishment
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              VIEW 2: PRODUCT CATALOG MANAGEMENT
+             ========================================================================= */}
+          {activeTab === 'products' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-serif text-white tracking-wide">Fine Jewelry Catalog</h2>
+                  <p className="text-sm text-zinc-400">
+                    Curate diamond specs, gemstone certificates, precious metals, and pricing.
+                  </p>
+                </div>
+                <button
+                  onClick={openNewProductModal}
+                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-black bg-gradient-to-r from-[#DFBF58] via-[#D4AF37] to-[#B38C26] rounded-md shadow hover:brightness-110 active:scale-95 transition-all"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  Add Jewelry Creation
+                </button>
+              </div>
+
+              {/* Filters & Search */}
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#14171E] p-3 rounded-xl border border-[#262A33]">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <input
+                    type="text"
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    placeholder="Search by gemstone, SKU (e.g. AUR-RNG), or design title..."
+                    className="w-full bg-[#181C25] pl-10 pr-4 py-2 text-xs rounded-lg border border-[#2B303C] focus:outline-none focus:border-[#D4AF37] text-white placeholder-zinc-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                  {['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets'].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategoryFilter(cat)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                        selectedCategoryFilter === cat
+                          ? 'bg-[#D4AF37] text-black font-semibold'
+                          : 'bg-[#1C202A] text-zinc-400 hover:text-white border border-[#2A2F3D]'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Products Table */}
+              <div className="rounded-xl border border-[#262A33] bg-[#14171E] overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#181B23] border-b border-[#262A33] text-zinc-400 uppercase tracking-wider font-medium text-[11px]">
+                      <tr>
+                        <th className="py-3.5 px-4">Creation & SKU</th>
+                        <th className="py-3.5 px-4">Category / Metal</th>
+                        <th className="py-3.5 px-4">Gemstone & 4Cs</th>
+                        <th className="py-3.5 px-4">Vault Status</th>
+                        <th className="py-3.5 px-4">Price</th>
+                        <th className="py-3.5 px-4">Views / Demand</th>
+                        <th className="py-3.5 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#232732]">
+                      {filteredProducts.map((p) => (
+                        <tr key={p.id} className="hover:bg-[#181C24] transition-colors group">
+                          {/* Image & Title */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={p.image}
+                                alt={p.name}
+                                className="w-12 h-12 object-cover rounded-md border border-[#2F3442]"
+                              />
+                              <div>
+                                <p className="font-serif text-sm text-white font-medium group-hover:text-[#D4AF37] transition-colors">
+                                  {p.name}
+                                </p>
+                                <span className="text-[11px] font-mono text-zinc-400">{p.sku}</span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Category & Metal */}
+                          <td className="py-3.5 px-4">
+                            <p className="text-white font-medium">{p.category}</p>
+                            <p className="text-zinc-400 text-[11px]">{p.metal}</p>
+                          </td>
+
+                          {/* Gemstone specs */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-1.5 text-zinc-200">
+                              <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                              <span className="font-medium">{p.gemstone}</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400">
+                              {p.carat} • {p.clarity} • {p.color}
+                            </p>
+                          </td>
+
+                          {/* Stock Status */}
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium border ${
+                                p.status === 'In Stock'
+                                  ? 'bg-emerald-950/40 text-emerald-300 border-emerald-700/40'
+                                  : p.status === 'Low Stock'
+                                  ? 'bg-amber-950/40 text-amber-300 border-amber-700/40'
+                                  : 'bg-rose-950/40 text-rose-300 border-rose-700/40'
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  p.status === 'In Stock'
+                                    ? 'bg-emerald-400'
+                                    : p.status === 'Low Stock'
+                                    ? 'bg-amber-400'
+                                    : 'bg-rose-400'
+                                }`}
+                              />
+                              {p.stock} available ({p.status})
+                            </span>
+                          </td>
+
+                          {/* Price & Cost Margin */}
+                          <td className="py-3.5 px-4">
+                            <p className="font-mono text-white font-medium text-sm">
+                              ${p.price.toLocaleString()}
+                            </p>
+                            <p className="text-[10px] text-zinc-500">
+                              Cost: ${p.cost.toLocaleString()} (
+                              {Math.round(((p.price - p.cost) / p.price) * 100)}% margin)
+                            </p>
+                          </td>
+
+                          {/* Views */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-1.5 text-zinc-300">
+                              <Eye className="w-3.5 h-3.5 text-zinc-500" />
+                              <span>{p.views.toLocaleString()}</span>
+                            </div>
+                            <span className="text-[10px] text-zinc-500">
+                              {p.conversions} direct inquiries
+                            </span>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => openEditProductModal(p)}
+                                title="Edit Specifications"
+                                className="p-1.5 text-zinc-400 hover:text-[#D4AF37] hover:bg-[#202530] rounded transition-colors"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(p.id, p.name)}
+                                title="Archive Piece"
+                                className="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-[#202530] rounded transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              VIEW 3: INVENTORY & STOCK MANAGEMENT
+             ========================================================================= */}
+          {activeTab === 'inventory' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-serif text-white tracking-wide">
+                    Vault & Showroom Inventory
+                  </h2>
+                  <p className="text-sm text-zinc-400">
+                    Real-time count, minimum threshold governance, and quick adjustments.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="px-4 py-2 rounded-lg bg-[#191D26] border border-[#2B303E] text-xs">
+                    <span className="text-zinc-400">Total Units in Vault: </span>
+                    <span className="font-mono font-bold text-[#D4AF37]">
+                      {products.reduce((acc, p) => acc + p.stock, 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Replenishment Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {products.map((p) => (
+                  <div
+                    key={p.id}
+                    className={`p-5 rounded-xl border transition-all ${
+                      p.stock <= p.threshold
+                        ? 'bg-[#181514] border-amber-500/30 shadow-lg shadow-amber-950/20'
+                        : 'bg-[#14171E] border-[#262A33]'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className="w-14 h-14 object-cover rounded-lg border border-[#2A2F3D]"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-mono text-[#D4AF37] uppercase">{p.sku}</span>
+                        <h4 className="text-sm font-medium text-white truncate">{p.name}</h4>
+                        <p className="text-xs text-zinc-400">{p.metal}</p>
+                      </div>
+                    </div>
+
+                    <div className="my-4 pt-3 border-t border-[#232732] flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] text-zinc-500">Vault Level</span>
+                        <div className="text-xl font-bold font-mono text-white flex items-center gap-2">
+                          {p.stock}
+                          <span className="text-xs font-normal text-zinc-400">units</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[11px] text-zinc-500">Alert Trigger</span>
+                        <div className="text-xs font-mono text-zinc-300">≤ {p.threshold} units</div>
+                      </div>
+                    </div>
+
+                    {/* Quick Adjust Buttons */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleStockAdjustment(p.id, -1)}
+                        disabled={p.stock <= 0}
+                        className="flex-1 py-1.5 text-xs font-semibold bg-[#1C202A] hover:bg-[#282E3C] disabled:opacity-30 disabled:pointer-events-none rounded border border-[#2E3342] text-white transition-colors"
+                      >
+                        -1 Sale
+                      </button>
+                      <button
+                        onClick={() => handleStockAdjustment(p.id, 1)}
+                        className="flex-1 py-1.5 text-xs font-semibold bg-[#222733] hover:bg-[#D4AF37] hover:text-black rounded border border-[#33394A] text-[#D4AF37] transition-colors"
+                      >
+                        +1 Restock
+                      </button>
+                      <button
+                        onClick={() => handleStockAdjustment(p.id, 5)}
+                        className="px-2.5 py-1.5 text-xs font-mono bg-[#181B23] hover:bg-[#282E3C] rounded border border-[#2E3342] text-zinc-300 transition-colors"
+                        title="Bulk cast 5 units"
+                      >
+                        +5
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              VIEW 4: ORDERS MANAGEMENT
+             ========================================================================= */}
+          {activeTab === 'orders' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-serif text-white tracking-wide">Acquisitions & Orders</h2>
+                  <p className="text-sm text-zinc-400">
+                    Track bespoke engravings, white-glove courier status, and client invoices.
+                  </p>
+                </div>
+              </div>
+
+              {/* Order Filter & Search */}
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#14171E] p-3 rounded-xl border border-[#262A33]">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <input
+                    type="text"
+                    value={orderSearch}
+                    onChange={(e) => setOrderSearch(e.target.value)}
+                    placeholder="Search by Order ID (ORD-9821) or VIP customer name..."
+                    className="w-full bg-[#181C25] pl-10 pr-4 py-2 text-xs rounded-lg border border-[#2B303C] focus:outline-none focus:border-[#D4AF37] text-white placeholder-zinc-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto">
+                  {['All', 'Processing', 'Engraving / Workshop', 'Shipped', 'Delivered'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setOrderStatusFilter(status)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                        orderStatusFilter === status
+                          ? 'bg-[#D4AF37] text-black font-semibold'
+                          : 'bg-[#1C202A] text-zinc-400 hover:text-white border border-[#2A2F3D]'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Orders Table */}
+              <div className="rounded-xl border border-[#262A33] bg-[#14171E] overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#181B23] border-b border-[#262A33] text-zinc-400 uppercase tracking-wider font-medium text-[11px]">
+                      <tr>
+                        <th className="py-3.5 px-4">Order ID & Date</th>
+                        <th className="py-3.5 px-4">Client</th>
+                        <th className="py-3.5 px-4">Ordered Pieces</th>
+                        <th className="py-3.5 px-4">Payment</th>
+                        <th className="py-3.5 px-4">Fulfillment Phase</th>
+                        <th className="py-3.5 px-4">Amount</th>
+                        <th className="py-3.5 px-4 text-right">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#232732]">
+                      {filteredOrders.map((ord) => (
+                        <tr key={ord.id} className="hover:bg-[#181C24] transition-colors">
+                          <td className="py-3.5 px-4">
+                            <span className="font-mono text-white font-semibold text-sm">
+                              {ord.id}
+                            </span>
+                            <p className="text-[11px] text-zinc-500">{ord.date}</p>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <p className="text-white font-medium">{ord.customer}</p>
+                            <p className="text-zinc-500 text-[11px]">{ord.email}</p>
+                          </td>
+                          <td className="py-3.5 px-4 max-w-xs">
+                            <div className="space-y-1">
+                              {ord.items.map((item, idx) => (
+                                <div key={idx} className="text-zinc-300 truncate">
+                                  • {item.name} <span className="text-zinc-500">({item.size})</span>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium ${
+                                ord.paymentStatus === 'Paid'
+                                  ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-700/40'
+                                  : 'bg-amber-950/40 text-amber-300 border border-amber-700/40'
+                              }`}
+                            >
+                              <ShieldCheck className="w-3 h-3" />
+                              {ord.paymentStatus}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2.5 py-1 rounded text-[11px] font-medium bg-[#1F242F] text-[#D4AF37] border border-[#D4AF37]/20">
+                              {ord.fulfillmentStatus}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-sm text-white font-medium">
+                            ${ord.total.toLocaleString()}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              onClick={() => setViewingOrder(ord)}
+                              className="px-3 py-1.5 rounded bg-[#202530] hover:bg-[#D4AF37] hover:text-black text-zinc-300 font-medium transition-colors"
+                            >
+                              Inspect Order
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              VIEW 5: CUSTOMER INSIGHTS & VIP ANALYTICS
+             ========================================================================= */}
+          {activeTab === 'customers' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h2 className="text-2xl font-serif text-white tracking-wide">
+                  Private Clientèle & VIP Salon
+                </h2>
+                <p className="text-sm text-zinc-400">
+                  Track lifetime value, custom commission history, and high jewelry views.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* VIP List */}
+                <div className="lg:col-span-2 p-6 rounded-xl bg-[#14171E] border border-[#262A33]">
+                  <h3 className="font-serif text-base text-white mb-4">High Net Worth Client Tier</h3>
+                  <div className="divide-y divide-[#232732]">
+                    {[
+                      {
+                        name: 'Eleanor Vance-Croft',
+                        tier: 'Platinum Patron',
+                        location: 'London, UK',
+                        totalSpent: '$54,200',
+                        piecesAcquired: 7,
+                        preferredMetal: '18K Yellow Gold & Emeralds'
+                      },
+                      {
+                        name: 'Jonathan Sterling',
+                        tier: 'Imperial Tier',
+                        location: 'New York, US',
+                        totalSpent: '$88,400',
+                        piecesAcquired: 11,
+                        preferredMetal: 'Platinum & Pavé Diamonds'
+                      },
+                      {
+                        name: 'Countess Diane de Montmirail',
+                        tier: 'High Joaillerie Collector',
+                        location: 'Paris, FR',
+                        totalSpent: '$112,000',
+                        piecesAcquired: 9,
+                        preferredMetal: 'South Sea Pearls & Burma Rubies'
+                      },
+                      {
+                        name: 'Dr. Alistair Finch',
+                        tier: 'Patron',
+                        location: 'Zurich, CH',
+                        totalSpent: '$32,600',
+                        piecesAcquired: 4,
+                        preferredMetal: 'Royal Blue Sapphires'
+                      }
+                    ].map((client, idx) => (
+                      <div key={idx} className="py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#1E232E] border border-[#D4AF37]/30 flex items-center justify-center font-serif text-xs text-[#D4AF37]">
+                            {client.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-medium text-white">{client.name}</h4>
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-[#252A38] text-[#D4AF37]">
+                                {client.tier}
+                              </span>
+                            </div>
+                            <p className="text-xs text-zinc-400 mt-0.5">
+                              {client.location} • Prefers: {client.preferredMetal}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-mono text-white font-semibold">
+                            {client.totalSpent}
+                          </p>
+                          <p className="text-[11px] text-zinc-500">
+                            {client.piecesAcquired} creations collected
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Engagement / Conversion Analytics */}
+                <div className="p-6 rounded-xl bg-[#14171E] border border-[#262A33] flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-serif text-base text-white">Showroom Page Demand</h3>
+                    <p className="text-xs text-zinc-400 mb-4">Most viewed creations this month</p>
+                    <div className="space-y-4">
+                      {products.slice(0, 4).map((p) => (
+                        <div key={p.id}>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-zinc-200 truncate max-w-[180px]">{p.name}</span>
+                            <span className="text-zinc-400 font-mono">{p.views} views</span>
+                          </div>
+                          <div className="w-full bg-[#232734] h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-gradient-to-r from-[#B89730] to-[#E6C665] h-full rounded-full"
+                              style={{ width: `${Math.min(100, (p.views / 9000) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-[#181C26] border border-[#2B303F] mt-6">
+                    <p className="text-xs text-zinc-300 font-medium">Bespoke Concierge Ratio</p>
+                    <p className="text-xl font-serif text-[#D4AF37] mt-1">28.4%</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Of clients request custom stone selection prior to purchase.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              VIEW 6: MESSAGES & INQUIRIES (CONCIERGE / BESPOKE REQUESTS)
+             ========================================================================= */}
+          {activeTab === 'inquiries' && (
+            <div className="h-[700px] flex rounded-xl border border-[#262A33] bg-[#14171E] overflow-hidden shadow-2xl animate-fade-in">
+              {/* Inquiries Thread List */}
+              <div className="w-80 border-r border-[#262A33] flex flex-col bg-[#12141A]">
+                <div className="p-4 border-b border-[#262A33]">
+                  <h3 className="font-serif text-base text-white">Concierge Inquiries</h3>
+                  <p className="text-xs text-zinc-400">Sizing requests & bespoke bridal consultations</p>
+                </div>
+                <div className="flex-1 overflow-y-auto divide-y divide-[#222631]">
+                  {inquiries.map((inq) => {
+                    const isSelected = selectedInquiry && selectedInquiry.id === inq.id;
+                    return (
+                      <div
+                        key={inq.id}
+                        onClick={() => {
+                          setSelectedInquiry(inq);
+                          setInquiries((prev) =>
+                            prev.map((i) => (i.id === inq.id ? { ...i, unread: false } : i))
+                          );
+                        }}
+                        className={`p-4 cursor-pointer transition-colors ${
+                          isSelected ? 'bg-[#1C202B] border-l-2 border-[#D4AF37]' : 'hover:bg-[#181B23]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-white">{inq.sender}</span>
+                          <span className="text-[10px] text-zinc-500">{inq.date}</span>
+                        </div>
+                        <p className="text-xs text-zinc-300 font-medium line-clamp-1">{inq.subject}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-[#252A36] text-[#D4AF37] border border-[#D4AF37]/20">
+                            {inq.tag}
+                          </span>
+                          {inq.unread && (
+                            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Message Details & Reply Panel */}
+              {selectedInquiry ? (
+                <div className="flex-1 flex flex-col bg-[#14171E]">
+                  {/* Inquiry Header */}
+                  <div className="p-5 border-b border-[#262A33] flex items-center justify-between">
+                    <div>
+                      <h4 className="font-serif text-base text-white">{selectedInquiry.subject}</h4>
+                      <p className="text-xs text-zinc-400">
+                        From: <span className="text-zinc-200">{selectedInquiry.sender}</span> ({selectedInquiry.email})
+                      </p>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 bg-[#202532] text-[#D4AF37] rounded border border-[#D4AF37]/30">
+                      {selectedInquiry.tag}
+                    </span>
+                  </div>
+
+                  {/* Conversation Body */}
+                  <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                    {selectedInquiry.messages.map((msg, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex flex-col max-w-lg ${
+                          msg.from === 'admin' ? 'ml-auto items-end' : 'mr-auto items-start'
+                        }`}
+                      >
+                        <div className="text-[10px] text-zinc-500 mb-1">
+                          {msg.from === 'admin' ? 'Atelier Concierge' : selectedInquiry.sender} • {msg.time}
+                        </div>
+                        <div
+                          className={`p-4 rounded-xl text-xs leading-relaxed ${
+                            msg.from === 'admin'
+                              ? 'bg-gradient-to-r from-[#322A16] to-[#252014] text-[#F3E7C4] border border-[#D4AF37]/30'
+                              : 'bg-[#1C202B] text-zinc-200 border border-[#2B303F]'
+                          }`}
+                        >
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Reply Composer */}
+                  <form onSubmit={handleSendInquiryReply} className="p-4 border-t border-[#262A33] bg-[#12141A]">
+                    <div className="flex gap-3">
+                      <input
+                        type="text"
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder={`Draft an answer to ${selectedInquiry.sender}...`}
+                        className="flex-1 bg-[#181C26] px-4 py-2.5 text-xs rounded-lg border border-[#2C3241] focus:outline-none focus:border-[#D4AF37] text-white"
+                      />
+                      <button
+                        type="submit"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E2BE4B] text-black text-xs font-semibold rounded-lg transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        Dispatch Reply
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-zinc-500 text-sm">
+                  Select a concierge consultation request
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* =========================================================================
+          MODAL 1: ADD / EDIT JEWELRY CREATION
+         ========================================================================= */}
+      {isProductModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#14171E] rounded-xl border border-[#D4AF37]/30 shadow-2xl flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-[#262A33] flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-lg text-white">
+                  {editingProduct ? 'Refine Jewelry Specifications' : 'Catalog New Haute Creation'}
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Configure precious metals, the 4 Cs, carat weight, and inventory limits.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsProductModalOpen(false)}
+                className="p-1 rounded-md text-zinc-400 hover:text-white hover:bg-[#202530]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSaveProduct} className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Basic Details */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">
+                  1. Creation Identity & Category
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-zinc-400">Creation Title *</label>
+                    <input
+                      type="text"
+                      required
+                      value={productForm.title}
+                      onChange={(e) => setProductForm({ ...productForm, title: e.target.value })}
+                      placeholder="e.g. Royal Marquise Diamond Ring"
+                      className="mt-1 w-full bg-[#1A1E27] px-3.5 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">SKU Code</label>
+                    <input
+                      type="text"
+                      value={productForm.sku}
+                      onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3.5 py-2 text-xs rounded-lg border border-[#2B303E] text-white font-mono focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-zinc-400">Department</label>
+                    <select
+                      value={productForm.category}
+                      onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3.5 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option>Rings</option>
+                      <option>Necklaces</option>
+                      <option>Earrings</option>
+                      <option>Bracelets</option>
+                      <option>Haute Joaillerie</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Atelier Collection</label>
+                    <select
+                      value={productForm.collection}
+                      onChange={(e) => setProductForm({ ...productForm, collection: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3.5 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option>Bridal & Solitaire</option>
+                      <option>Haute Joaillerie</option>
+                      <option>Oceanique</option>
+                      <option>Timeless Classics</option>
+                      <option>Celestial</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Jewelry Specifics & Gemological Specs */}
+              <div className="space-y-4 pt-4 border-t border-[#232732]">
+                <h4 className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">
+                  2. Gemological & Precious Metal Specs
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs text-zinc-400">Precious Metal</label>
+                    <select
+                      value={productForm.metal}
+                      onChange={(e) => setProductForm({ ...productForm, metal: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option>18K Yellow Gold</option>
+                      <option>18K White Gold</option>
+                      <option>18K Rose Gold</option>
+                      <option>950 Platinum</option>
+                      <option>14K Yellow Gold</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Primary Stone</label>
+                    <input
+                      type="text"
+                      value={productForm.gemstone}
+                      onChange={(e) => setProductForm({ ...productForm, gemstone: e.target.value })}
+                      placeholder="e.g. Natural Diamond, Ceylon Sapphire"
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Carat Weight</label>
+                    <input
+                      type="text"
+                      value={productForm.carat}
+                      onChange={(e) => setProductForm({ ...productForm, carat: e.target.value })}
+                      placeholder="e.g. 2.10 ct"
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs text-zinc-400">Cut Grade</label>
+                    <select
+                      value={productForm.cut}
+                      onChange={(e) => setProductForm({ ...productForm, cut: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option>Round Brilliant (Ideal)</option>
+                      <option>Marquise (Excellent)</option>
+                      <option>Emerald Cut</option>
+                      <option>Oval Modified</option>
+                      <option>Pear Brilliant</option>
+                      <option>Cushion Antique</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Clarity Grade</label>
+                    <select
+                      value={productForm.clarity}
+                      onChange={(e) => setProductForm({ ...productForm, clarity: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option>FL / IF (Flawless)</option>
+                      <option>VVS1 (Exceptional)</option>
+                      <option>VVS2</option>
+                      <option>VS1</option>
+                      <option>VS2</option>
+                      <option>Minor Clarity Enhancement</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Color Grade</label>
+                    <select
+                      value={productForm.color}
+                      onChange={(e) => setProductForm({ ...productForm, color: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option>D (Colorless)</option>
+                      <option>E (Colorless)</option>
+                      <option>F (Colorless)</option>
+                      <option>G-H (Near Colorless)</option>
+                      <option>Fancy Intense Yellow</option>
+                      <option>Royal Cornflower Blue</option>
+                      <option>Vivid Green</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing & Vault Inventory */}
+              <div className="space-y-4 pt-4 border-t border-[#232732]">
+                <h4 className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">
+                  3. Pricing & Vault Thresholds
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="text-xs text-zinc-400">Retail Price ($) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={productForm.price}
+                      onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white font-mono focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Artisan Cost ($)</label>
+                    <input
+                      type="number"
+                      value={productForm.cost}
+                      onChange={(e) => setProductForm({ ...productForm, cost: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white font-mono focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Units in Stock</label>
+                    <input
+                      type="number"
+                      value={productForm.stock}
+                      onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white font-mono focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400">Alert Min. Threshold</label>
+                    <input
+                      type="number"
+                      value={productForm.threshold}
+                      onChange={(e) => setProductForm({ ...productForm, threshold: e.target.value })}
+                      className="mt-1 w-full bg-[#1A1E27] px-3 py-2 text-xs rounded-lg border border-[#2B303E] text-white font-mono focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-zinc-400">Description / Provenance Notes</label>
+                  <textarea
+                    rows={2}
+                    value={productForm.description}
+                    onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                    placeholder="Handcrafted details, provenance of stones, hallmarking..."
+                    className="mt-1 w-full bg-[#1A1E27] p-3 text-xs rounded-lg border border-[#2B303E] text-white focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-4 border-t border-[#232732] flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsProductModalOpen(false)}
+                  className="px-4 py-2 text-xs text-zinc-400 hover:text-white rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 text-xs font-semibold text-black bg-[#D4AF37] hover:bg-[#E3BF4C] rounded-lg shadow-md transition-all uppercase tracking-wider"
+                >
+                  {editingProduct ? 'Save Modifications' : 'Commit to Maison Catalog'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 2: VIEW ORDER DETAILS & FULFILLMENT MODAL
+         ========================================================================= */}
+      {viewingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-2xl bg-[#14171E] rounded-xl border border-[#D4AF37]/30 shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-[#262A33] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-mono text-[#D4AF37]">
+                  Order Dossier
+                </span>
+                <h3 className="font-serif text-lg text-white font-medium">{viewingOrder.id}</h3>
+              </div>
+              <button
+                onClick={() => setViewingOrder(null)}
+                className="p-1 rounded text-zinc-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Client & Shipping */}
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-[#181C26] border border-[#282D3B]">
+                <div>
+                  <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Client Details</p>
+                  <p className="text-sm font-medium text-white mt-1">{viewingOrder.customer}</p>
+                  <p className="text-xs text-zinc-400">{viewingOrder.email}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Shipping Method</p>
+                  <p className="text-xs font-medium text-[#D4AF37] mt-1">{viewingOrder.shippingMethod}</p>
+                  <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
+                    {viewingOrder.shippingAddress}
+                  </p>
+                </div>
+              </div>
+
+              {/* Items Breakdown with Engravings */}
+              <div>
+                <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-3">
+                  Jewelry Creations in Order
+                </h4>
+                <div className="space-y-3">
+                  {viewingOrder.items.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-lg bg-[#191D27] border border-[#2B303F] flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-white">{item.name}</p>
+                        <p className="text-xs text-zinc-400">
+                          Finger Size / Length: <span className="text-zinc-200">{item.size}</span>
+                        </p>
+                        {item.engraving !== 'None' && (
+                          <div className="flex items-center gap-1.5 mt-1 text-xs text-[#E8D5A0]">
+                            <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                            <span>Custom Engraving: {item.engraving}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-mono text-white font-medium">
+                          ${item.price.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-zinc-500">Qty: {item.qty}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phase Progression */}
+              <div>
+                <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-3">
+                  Update Workshop / Transit Phase
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {['Processing', 'Engraving / Workshop', 'Shipped', 'Delivered'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleUpdateOrderStatus(viewingOrder.id, status)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        viewingOrder.fulfillmentStatus === status
+                          ? 'bg-[#D4AF37] text-black font-semibold'
+                          : 'bg-[#1E232E] text-zinc-300 hover:text-white border border-[#2E3342]'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Financial Total */}
+              <div className="pt-4 border-t border-[#232732] flex items-center justify-between">
+                <div>
+                  <span className="text-xs text-zinc-400">Payment Status: </span>
+                  <span className="text-xs font-semibold text-emerald-400">{viewingOrder.paymentStatus}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-zinc-400 mr-2">Total Settled:</span>
+                  <span className="text-xl font-mono font-bold text-white">
+                    ${viewingOrder.total.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
