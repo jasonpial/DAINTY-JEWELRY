@@ -151,7 +151,20 @@ export default function AdminPortal({ onLogout } = {}) {
   // Navigation State
   // Valid activeTab nodes: 'dashboard' | 'catalog' | 'orders' | 'messages' | 'settings'
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Formatted date string for header
+  const [todayFormattedDate] = useState(() => {
+    try {
+      return new Date().toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
+    } catch {
+      return 'Saturday, 7th November';
+    }
+  });
 
   // Data States connected to db.js
   const [products, setProducts] = useState([]);
@@ -341,7 +354,9 @@ export default function AdminPortal({ onLogout } = {}) {
   // Navigation item click helper
   const handleNavClick = (tabId) => {
     setActiveTab(tabId);
-    setMobileMenuOpen(false);
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
   };
 
   return (
@@ -360,223 +375,202 @@ export default function AdminPortal({ onLogout } = {}) {
       )}
 
       {/* =========================================================================
-          TOP NAVBAR (White bar matching five.webp Luxora styling with gold accents)
+          TOP NAVBAR (Single real DAINTY logo, organized and non-overlapping)
          ========================================================================= */}
-      <nav className="h-16 bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-        {/* Left: Brand Logo, Back Button & Search */}
-        <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
+      <nav className="h-16 bg-white border-b border-gray-100 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        {/* Left: Back button, Sidebar Toggle, Single Website Logo, and Search */}
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           {/* Back Navigation Button */}
           <button
             type="button"
             onClick={() => goBack('home')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-black bg-gray-50 hover:bg-amber-50 border border-gray-200/80 shadow-2xs transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-black bg-gray-50 hover:bg-amber-50 border border-gray-200/80 shadow-2xs transition-all cursor-pointer shrink-0"
             title="Go Back to Previous Page"
           >
             <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
             <span className="hidden sm:inline">Back</span>
           </button>
 
-          {/* Real Website Logo */}
+          {/* Sidebar Toggle Button (Collapses/expands sidebar for ALL screen sizes) */}
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+            className="p-2 rounded-xl text-gray-700 hover:text-black hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
+            title={isSidebarOpen ? 'Hide Sidebar' : 'Show Sidebar'}
+            aria-label="Toggle Sidebar Navigation"
+          >
+            <Menu className="w-5 h-5 stroke-[2.2]" />
+          </button>
+
+          {/* Single Website Logo (DAINTY STUDS & CHAINS) */}
           <div 
-            className="flex items-center gap-2.5 cursor-pointer py-1"
+            className="flex items-center gap-2.5 cursor-pointer py-1 shrink-0"
             onClick={() => navigateTo('home')}
             title="DAINTY STUDS & CHAINS Storefront"
           >
             <img
               src="/images/logo-image.png"
               alt="DAINTY STUDS & CHAINS"
-              className="h-10 w-auto object-contain hover:scale-105 transition-transform"
+              className="h-9 sm:h-10 w-auto object-contain hover:scale-105 transition-transform"
             />
+            <div className="hidden xl:flex flex-col">
+              <span className="font-serif font-bold text-xs tracking-wider text-gray-900 leading-tight">DAINTY</span>
+              <span className="text-[9px] font-mono tracking-widest text-[#b38728] uppercase leading-tight">STUDS &amp; CHAINS</span>
+            </div>
           </div>
 
-          {/* Hamburger toggle button for Mobile */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-gray-500 hover:text-[#b38728] hover:bg-gray-50 transition-colors lg:hidden"
-            aria-label="Toggle menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          {/* Search bar capsule (Matches five.webp "Search ...") */}
-          <div className="relative hidden md:block w-64 lg:w-72">
-            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          {/* Search bar */}
+          <div className="relative hidden md:block w-44 lg:w-60 xl:w-72">
+            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search ..."
+              placeholder="Search catalog, orders..."
               value={globalSearch}
               onChange={(e) => {
                 setGlobalSearch(e.target.value);
                 setCatalogSearch(e.target.value);
                 setOrderSearch(e.target.value);
               }}
-              className="w-full pl-9 pr-3.5 py-2 text-xs text-gray-800 placeholder-gray-400 bg-[#f8f9fd] border border-gray-100 rounded-full outline-none focus:border-[#b38728] focus:bg-white transition-all font-sans"
+              className="w-full pl-9 pr-3.5 py-1.5 sm:py-2 text-xs text-gray-800 placeholder-gray-400 bg-[#f8f9fd] border border-gray-200/70 rounded-full outline-none focus:border-[#b38728] focus:bg-white transition-all font-sans"
             />
           </div>
         </div>
 
-        {/* Right: Date, Notifications & Profile (Matches five.webp) */}
-        <div className="flex items-center gap-3 sm:gap-6">
-          {/* Date pill with Calendar icon (Matches five.webp "Monday, 4th September") */}
-          <div className="hidden lg:flex items-center gap-2 text-xs text-gray-500 font-medium">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span>
-              {new Date().toLocaleDateString('en-GB', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long'
-              })}
-            </span>
+        {/* Right: Date, Notifications, Profile, and Power Logout (Clean non-overlapping flex layout) */}
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          {/* Date pill with Calendar icon */}
+          <div className="hidden lg:flex items-center gap-2 text-xs text-gray-600 font-medium px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 shrink-0">
+            <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <span className="whitespace-nowrap">{todayFormattedDate}</span>
           </div>
 
-          {/* Notification bell with count badge 12 (Matches five.webp) */}
+          {/* Notification bell with count badge 12 */}
           <div
-            className="relative p-2 text-gray-600 hover:text-[#b38728] cursor-pointer transition-colors"
+            className="relative p-2 text-gray-600 hover:text-[#b38728] cursor-pointer transition-colors shrink-0"
             onClick={() => showToast('12 unread boutique events and notifications.')}
             title="12 New Notifications"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
               12
             </span>
           </div>
 
-          {/* Mail icon */}
+          {/* Customer Messages Icon */}
           <div
-            className="relative p-2 text-gray-600 hover:text-[#b38728] cursor-pointer transition-colors hidden sm:block"
+            className="relative p-2 text-gray-600 hover:text-[#b38728] cursor-pointer transition-colors hidden sm:block shrink-0"
             onClick={() => handleNavClick('messages')}
             title="Customer Messages"
           >
             <Mail className="w-4 h-4" />
             {chats.length > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#b38728] ring-2 ring-white"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#b38728] ring-2 ring-white"></span>
             )}
           </div>
 
-          {/* User Profile Info (Matches five.webp: Ahmed Al-Farsi / Company Manager) */}
+          {/* User Profile Info */}
           <div 
             onClick={() => handleNavClick('settings')}
-            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
             title="Admin Profile & Settings"
           >
-            <div className="relative">
+            <div className="relative shrink-0">
               <div 
-                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-sans font-bold text-black shadow-xs ring-2 ring-[#b38728]/30"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-sans font-bold text-black shadow-xs ring-2 ring-[#b38728]/30"
                 style={{ background: 'var(--gradient-gold-metallic)' }}
               >
                 DS
               </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
             </div>
-            <div className="hidden sm:flex flex-col">
+            <div className="hidden sm:flex flex-col text-left">
               <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-gray-900 leading-tight">DAINTY Curator</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                <span className="text-xs font-bold text-gray-900 leading-tight whitespace-nowrap">DAINTY Curator</span>
+                <ChevronDown className="w-3 h-3 text-gray-400 shrink-0" />
               </div>
-              <span className="text-[10px] text-gray-400 font-normal leading-tight">Company Manager</span>
+              <span className="text-[10px] text-gray-400 font-normal leading-tight whitespace-nowrap">Company Manager</span>
             </div>
           </div>
 
           {/* Power / Logout button */}
-          <div
-            className="p-1.5 text-gray-400 hover:text-rose-600 cursor-pointer transition-colors"
+          <button
             onClick={handleLogoutAction}
+            className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer shrink-0"
             title="Log Out"
           >
             <Power className="w-4 h-4" />
-          </div>
+          </button>
         </div>
       </nav>
 
       {/* Main Body: Sidebar + Content Canvas */}
       <div className="flex-1 flex min-h-[calc(100vh-64px)] relative">
         {/* Mobile Backdrop Overlay */}
-        {mobileMenuOpen && (
+        {isSidebarOpen && (
           <div
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => setIsSidebarOpen(false)}
             className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs lg:hidden transition-opacity"
           />
         )}
 
         {/* =====================================================================
-            SIDEBAR (Professional, spacious layout filling full vertical space)
-           ===================================================================== */}
-        {/* =====================================================================
-            SIDEBAR (Exact match to eight.jpeg Column 2 UI, fonts, spacing, and icons)
+            SIDEBAR (Collapsible for all screen sizes, filling vertical space with large buttons)
            ===================================================================== */}
         <aside
-          className={`fixed lg:static inset-y-0 left-0 z-40 lg:z-auto bg-white border-r border-gray-100 flex flex-col justify-between shrink-0 transition-all duration-200 ease-in-out w-64 lg:w-68 min-h-[calc(100vh-64px)] p-5 ${
-            mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+          className={`fixed lg:relative inset-y-0 left-0 z-40 bg-white border-r border-gray-100 flex flex-col justify-between shrink-0 transition-all duration-300 ease-in-out min-h-[calc(100vh-64px)] ${
+            isSidebarOpen
+              ? 'w-72 p-5 translate-x-0 shadow-xl lg:shadow-none'
+              : 'w-0 p-0 -translate-x-full lg:translate-x-0 overflow-hidden border-r-0'
           }`}
         >
-          {/* Top & Navigation Section Wrapper */}
-          <div className="flex-1 flex flex-col">
-            {/* Top Logo (Real Website Logo preserved) */}
-            <div 
-              className="flex items-center gap-2.5 px-2 pb-5 border-b border-gray-100 cursor-pointer"
-              onClick={() => navigateTo('home')}
-              title="Return to DAINTY Store"
-            >
-              <img
-                src="/images/logo-image.png"
-                alt="DAINTY"
-                className="h-8 w-auto object-contain hover:scale-105 transition-transform"
-              />
-              <div className="flex items-baseline gap-1.5 font-sans">
-                <span className="font-extrabold text-[15px] tracking-tight text-gray-900">DAINTY</span>
-                <span className="text-[10px] font-bold text-[#b38728] uppercase tracking-wider">Atelier</span>
-              </div>
-            </div>
-
-            {/* Profile Row (Exact styling to eight.jpeg user profile: Jhon Doe / UI/UX/Director design) */}
-            <div className="flex items-center gap-3 px-2 py-4 my-1">
-              <div className="relative shrink-0">
-                <div 
-                  className="w-9 h-9 rounded-full flex items-center justify-center font-sans font-bold text-black text-xs shadow-xs ring-2 ring-[#b38728]/30"
-                  style={{ background: 'var(--gradient-gold-metallic)' }}
-                >
-                  DS
+          {/* Top Section & Primary Navigation (Filling vertical space) */}
+          <div className="flex-1 flex flex-col justify-between">
+            {/* Curator Identity Header */}
+            <div>
+              <div className="flex items-center gap-3 px-3 py-3 mb-4 rounded-2xl bg-[#faf8f5] border border-[#dfc9b2]/30">
+                <div className="relative shrink-0">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-sans font-extrabold text-black text-sm shadow-xs ring-2 ring-[#b38728]/30"
+                    style={{ background: 'var(--gradient-gold-metallic)' }}
+                  >
+                    DS
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                 </div>
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+                <div className="overflow-hidden font-sans">
+                  <h4 className="font-bold text-[14px] text-gray-900 leading-snug truncate">DAINTY Curator</h4>
+                  <p className="text-[11px] text-[#b38728] font-semibold leading-snug truncate">Store Management HQ</p>
+                </div>
               </div>
-              <div className="overflow-hidden font-sans">
-                <h4 className="font-semibold text-[13px] text-gray-900 leading-snug truncate">DAINTY Curator</h4>
-                <p className="text-[11px] text-gray-400 font-normal leading-snug truncate">Store Management HQ</p>
-              </div>
-            </div>
 
-            {/* ── SECTION 1: MENU ── */}
-            <div className="mt-3">
-              <p className="font-sans text-[11px] font-medium text-gray-400 px-3 mb-2">
-                Menu
-              </p>
-              <div className="space-y-1">
-                {/* Node: Dashboard (Matches 4-square grid active pill in eight.jpeg) */}
+              {/* Primary Navigation Buttons (Generous clickable buttons filling vertical space) */}
+              <div className="space-y-2.5">
+                {/* 1. Dashboard */}
                 <button
                   onClick={() => handleNavClick('dashboard')}
-                  className={`w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans ${
+                  className={`w-full flex items-center justify-start gap-3.5 px-4 py-3.5 rounded-2xl text-[14px] transition-all font-sans cursor-pointer ${
                     activeTab === 'dashboard'
-                      ? 'font-semibold shadow-xs'
-                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
+                      ? 'font-bold shadow-sm'
+                      : 'font-semibold text-gray-700 hover:text-black hover:bg-gray-100/70'
                   }`}
                   style={
                     activeTab === 'dashboard'
                       ? { background: 'var(--gradient-gold-metallic)', color: '#000000' }
                       : {}
                   }
-                  title="Dashboard"
+                  title="Dashboard Overview"
                 >
-                  <LayoutGrid className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-black stroke-[2.2]' : 'text-gray-400'}`} />
+                  <LayoutGrid className={`w-5 h-5 shrink-0 ${activeTab === 'dashboard' ? 'text-black stroke-[2.4]' : 'text-gray-500'}`} />
                   <span>Dashboard</span>
                 </button>
 
-                {/* Node: Manage Catalog */}
+                {/* 2. Manage Catalog */}
                 <button
                   onClick={() => handleNavClick('catalog')}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-[14px] transition-all font-sans group cursor-pointer ${
                     activeTab === 'catalog'
-                      ? 'font-semibold shadow-xs'
-                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
+                      ? 'font-bold shadow-sm'
+                      : 'font-semibold text-gray-700 hover:text-black hover:bg-gray-100/70'
                   }`}
                   style={
                     activeTab === 'catalog'
@@ -585,26 +579,26 @@ export default function AdminPortal({ onLogout } = {}) {
                   }
                   title="Manage Catalog"
                 >
-                  <div className="flex items-center gap-3">
-                    <FolderKanban className={`w-4 h-4 shrink-0 ${activeTab === 'catalog' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                  <div className="flex items-center gap-3.5">
+                    <FolderKanban className={`w-5 h-5 shrink-0 ${activeTab === 'catalog' ? 'text-black stroke-[2.4]' : 'text-gray-500 group-hover:text-black'}`} />
                     <span>Manage Catalog</span>
                   </div>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      activeTab === 'catalog' ? 'bg-black/15 text-black' : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+                    className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                      activeTab === 'catalog' ? 'bg-black/15 text-black' : 'bg-gray-100 text-gray-700 group-hover:bg-gray-200'
                     }`}
                   >
                     {products.length || 10}
                   </span>
                 </button>
 
-                {/* Node: Customer Orders */}
+                {/* 3. Customer Orders */}
                 <button
                   onClick={() => handleNavClick('orders')}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-[14px] transition-all font-sans group cursor-pointer ${
                     activeTab === 'orders'
-                      ? 'font-semibold shadow-xs'
-                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
+                      ? 'font-bold shadow-sm'
+                      : 'font-semibold text-gray-700 hover:text-black hover:bg-gray-100/70'
                   }`}
                   style={
                     activeTab === 'orders'
@@ -613,13 +607,13 @@ export default function AdminPortal({ onLogout } = {}) {
                   }
                   title="Customer Orders"
                 >
-                  <div className="flex items-center gap-3">
-                    <ClipboardList className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                  <div className="flex items-center gap-3.5">
+                    <ClipboardList className={`w-5 h-5 shrink-0 ${activeTab === 'orders' ? 'text-black stroke-[2.4]' : 'text-gray-500 group-hover:text-black'}`} />
                     <span>Customer Orders</span>
                   </div>
                   {orders.length > 0 && (
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                         activeTab === 'orders' ? 'bg-black/15 text-black' : 'bg-amber-100 text-amber-900'
                       }`}
                     >
@@ -628,13 +622,13 @@ export default function AdminPortal({ onLogout } = {}) {
                   )}
                 </button>
 
-                {/* Node: Customer Messages */}
+                {/* 4. Customer Messages */}
                 <button
                   onClick={() => handleNavClick('messages')}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-[14px] transition-all font-sans group cursor-pointer ${
                     activeTab === 'messages'
-                      ? 'font-semibold shadow-xs'
-                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
+                      ? 'font-bold shadow-sm'
+                      : 'font-semibold text-gray-700 hover:text-black hover:bg-gray-100/70'
                   }`}
                   style={
                     activeTab === 'messages'
@@ -643,128 +637,81 @@ export default function AdminPortal({ onLogout } = {}) {
                   }
                   title="Customer Messages"
                 >
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className={`w-4 h-4 shrink-0 ${activeTab === 'messages' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                  <div className="flex items-center gap-3.5">
+                    <MessageSquare className={`w-5 h-5 shrink-0 ${activeTab === 'messages' ? 'text-black stroke-[2.4]' : 'text-gray-500 group-hover:text-black'}`} />
                     <span>Customer Messages</span>
                   </div>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                       activeTab === 'messages' ? 'bg-black/15 text-black' : 'bg-emerald-100 text-emerald-800'
                     }`}
                   >
                     {chats.length > 0 ? chats.length : 1}
                   </span>
                 </button>
-              </div>
-            </div>
 
-            {/* ── SECTION 2: SETTINGS ── */}
-            <div className="mt-5">
-              <p className="font-sans text-[11px] font-medium text-gray-400 px-3 mb-2">
-                Settings
-              </p>
-              <div className="space-y-1">
-                {/* Node: Settings */}
+                {/* 5. Settings */}
                 <button
                   onClick={() => handleNavClick('settings')}
-                  className={`w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all font-sans group ${
+                  className={`w-full flex items-center justify-start gap-3.5 px-4 py-3.5 rounded-2xl text-[14px] transition-all font-sans group cursor-pointer ${
                     activeTab === 'settings'
-                      ? 'font-semibold shadow-xs'
-                      : 'font-medium text-gray-600 hover:text-black hover:bg-gray-50'
+                      ? 'font-bold shadow-sm'
+                      : 'font-semibold text-gray-700 hover:text-black hover:bg-gray-100/70'
                   }`}
                   style={
                     activeTab === 'settings'
                       ? { background: 'var(--gradient-gold-metallic)', color: '#000000' }
                       : {}
                   }
-                  title="Settings & Credentials"
+                  title="Settings &amp; Credentials"
                 >
-                  <Settings className={`w-4 h-4 shrink-0 ${activeTab === 'settings' ? 'text-black stroke-[2.2]' : 'text-gray-400 group-hover:text-black'}`} />
+                  <Settings className={`w-5 h-5 shrink-0 ${activeTab === 'settings' ? 'text-black stroke-[2.4]' : 'text-gray-500 group-hover:text-black'}`} />
                   <span>Settings</span>
                 </button>
-
-                {/* Node: Reset Sample Data */}
-                <button
-                  onClick={() => setIsResetConfirmOpen(true)}
-                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-rose-600 hover:bg-rose-50/50 transition-colors font-sans group"
-                  title="Reset Sample Data"
-                >
-                  <RotateCcw className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-rose-600 transition-colors" />
-                  <span>Reset Sample Data</span>
-                </button>
-
-                {/* Node: Return to Store */}
-                <button
-                  onClick={() => navigateTo('home')}
-                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-[#b38728] hover:bg-amber-50/50 transition-colors font-sans group cursor-pointer"
-                  title="Return to Store"
-                >
-                  <Store className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-[#b38728] transition-colors" />
-                  <span>Return to Store</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ── SECTION 3: NOTIFICATIONS & LOGOUT (Exact match to five.webp bottom) ── */}
-          <div className="pt-4 border-t border-gray-100 space-y-4">
-            <div>
-              <p className="font-sans text-[11px] font-medium text-gray-400 px-2 mb-2">
-                Notifications
-              </p>
-              <div className="space-y-2">
-                {/* Notification Card 1: Grace Kembabazi */}
-                <div
-                  onClick={() => handleNavClick('messages')}
-                  className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
-                >
-                  <div className="w-8 h-8 rounded-full bg-amber-100 text-[#b38728] flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-[#b38728]/20">
-                    GK
-                  </div>
-                  <div className="overflow-hidden font-sans">
-                    <p className="font-semibold text-xs text-gray-900 leading-tight">Grace Kembabazi</p>
-                    <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
-                      Hi, This product is available for n...
-                    </p>
-                  </div>
-                </div>
-
-                {/* Notification Card 2: Ibnul Shams */}
-                <div
-                  onClick={() => handleNavClick('messages')}
-                  className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
-                >
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-blue-300/30">
-                    IS
-                  </div>
-                  <div className="overflow-hidden font-sans">
-                    <p className="font-semibold text-xs text-gray-900 leading-tight">Ibnul Shams</p>
-                    <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
-                      Hi, Can I request custom eng...
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
 
-            {/* Bottom Log out Row with Toggle Switch (Matches five.webp "[-> Log out  (o)]") */}
-            <div className="pt-2 border-t border-gray-100 flex items-center justify-between px-2">
+            {/* Bottom Section Actions (Reset Data, Return to Store, Logout with switch) */}
+            <div className="pt-6 border-t border-gray-100 space-y-2.5">
+              {/* 6. Reset Sample Data */}
               <button
-                onClick={handleLogoutAction}
-                className="flex items-center gap-2.5 text-xs font-semibold text-gray-700 hover:text-rose-600 transition-colors cursor-pointer"
-                title="Log out of session"
+                onClick={() => setIsResetConfirmOpen(true)}
+                className="w-full flex items-center justify-start gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-gray-700 hover:text-rose-600 hover:bg-rose-50/60 transition-colors font-sans group cursor-pointer"
+                title="Reset Sample Data"
               >
-                <LogOut className="w-4 h-4 text-gray-400 group-hover:text-rose-600" />
-                <span>Log out</span>
+                <RotateCcw className="w-5 h-5 shrink-0 text-gray-500 group-hover:text-rose-600 transition-colors" />
+                <span>Reset Sample Data</span>
               </button>
 
+              {/* 7. Return to Store */}
               <button
-                onClick={handleLogoutAction}
-                className="w-10 h-5 rounded-full bg-slate-200 hover:bg-slate-300 p-0.5 flex items-center transition-colors cursor-pointer"
-                title="Toggle Login Session"
+                onClick={() => navigateTo('home')}
+                className="w-full flex items-center justify-start gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-gray-700 hover:text-[#b38728] hover:bg-amber-50/60 transition-colors font-sans group cursor-pointer"
+                title="Return to Customer Storefront"
               >
-                <span className="w-4 h-4 rounded-full bg-slate-700 shadow-xs block"></span>
+                <Store className="w-5 h-5 shrink-0 text-gray-500 group-hover:text-[#b38728] transition-colors" />
+                <span>Return to Store</span>
               </button>
+
+              {/* 8. Logout with Switch */}
+              <div className="pt-3 border-t border-gray-100 flex items-center justify-between px-3 py-2 rounded-2xl hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={handleLogoutAction}
+                  className="flex items-center gap-3 text-[13px] font-semibold text-gray-700 hover:text-rose-600 transition-colors cursor-pointer"
+                  title="Log out"
+                >
+                  <LogOut className="w-5 h-5 text-gray-500 group-hover:text-rose-600" />
+                  <span>Log out</span>
+                </button>
+
+                <button
+                  onClick={handleLogoutAction}
+                  className="w-10 h-5 rounded-full bg-slate-200 hover:bg-slate-300 p-0.5 flex items-center transition-colors cursor-pointer"
+                  title="Toggle Login Session"
+                >
+                  <span className="w-4 h-4 rounded-full bg-slate-700 shadow-xs block"></span>
+                </button>
+              </div>
             </div>
           </div>
         </aside>
@@ -1923,21 +1870,21 @@ export default function AdminPortal({ onLogout } = {}) {
                 </div>
               </div>
 
-              {/* Card 1: Admin Login Credentials Form */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#dfc9b2]/40 shadow-xs space-y-6">
-                <div className="border-b border-[#f3ece6] pb-4 flex items-center justify-between">
+              {/* Card 1: Admin Login Credentials Form (Spanning Full Space) */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-6 w-full">
+                <div className="border-b border-gray-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#b38728] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#b38728] flex items-center justify-center shrink-0">
                       <Key className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-serif font-bold text-base text-[#1c1917]">Admin Login Credentials</h3>
-                      <p className="text-xs text-gray-500">Change your administrative username and password stored in local system</p>
+                      <h3 className="font-serif font-bold text-base text-gray-900">Admin Login Credentials</h3>
+                      <p className="text-xs text-gray-500">Update your administrative username and access passcode</p>
                     </div>
                   </div>
-                  <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>Active Session</span>
+                    <span>Active Session Authenticated</span>
                   </span>
                 </div>
 
@@ -1952,39 +1899,42 @@ export default function AdminPortal({ onLogout } = {}) {
                   </div>
                 )}
 
-                <form onSubmit={handleSaveCredentials} className="space-y-4 max-w-xl">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Admin Username
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={settingsUser}
-                      onChange={(e) => setSettingsUser(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728] bg-gray-50/40"
-                      placeholder="Username"
-                    />
-                    <p className="text-[10px] text-gray-400 mt-1">This is the username used to log in at the admin portal gate.</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Current Password <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={currentPass}
-                      onChange={(e) => setCurrentPass(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728]"
-                      placeholder="Enter existing password to authorize update"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form onSubmit={handleSaveCredentials} className="space-y-6 w-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      <label className="block text-xs font-bold text-gray-800 mb-2">
+                        Admin Login Username <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={settingsUser}
+                        onChange={(e) => setSettingsUser(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#b38728] focus:ring-2 focus:ring-[#b38728]/20 bg-gray-50/50 transition-all"
+                        placeholder="Username"
+                      />
+                      <p className="text-[11px] text-gray-400 mt-1.5">This username is used to log in at the admin portal gate.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-2">
+                        Current Password <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={currentPass}
+                        onChange={(e) => setCurrentPass(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#b38728] focus:ring-2 focus:ring-[#b38728]/20 bg-gray-50/50 transition-all"
+                        placeholder="Enter current password to authorize update"
+                      />
+                      <p className="text-[11px] text-gray-400 mt-1.5">Default login passcode is <span className="font-mono font-bold text-gray-700">admin123</span>.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-2">
                         New Password <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -1992,13 +1942,14 @@ export default function AdminPortal({ onLogout } = {}) {
                         required
                         value={newPass}
                         onChange={(e) => setNewPass(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728]"
-                        placeholder="••••••••"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#b38728] focus:ring-2 focus:ring-[#b38728]/20 bg-gray-50/50 transition-all"
+                        placeholder="••••••••••••"
                       />
+                      <p className="text-[11px] text-gray-400 mt-1.5">Choose a secure password of at least 6 characters.</p>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      <label className="block text-xs font-bold text-gray-800 mb-2">
                         Confirm New Password <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -2006,53 +1957,88 @@ export default function AdminPortal({ onLogout } = {}) {
                         required
                         value={confirmPass}
                         onChange={(e) => setConfirmPass(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#b38728] focus:ring-1 focus:ring-[#b38728]"
-                        placeholder="••••••••"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#b38728] focus:ring-2 focus:ring-[#b38728]/20 bg-gray-50/50 transition-all"
+                        placeholder="••••••••••••"
                       />
+                      <p className="text-[11px] text-gray-400 mt-1.5">Re-enter new password to verify accuracy.</p>
                     </div>
                   </div>
 
-                  <div className="pt-3">
+                  <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <p className="text-xs text-gray-400">
+                      Credentials are saved immediately in your browser secure store.
+                    </p>
                     <button
                       type="submit"
-                      className="px-6 py-3 rounded-xl font-bold text-xs sm:text-sm text-black shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                      className="px-6 py-3 rounded-xl font-bold text-sm text-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
                       style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
                     >
-                      <Key className="w-4 h-4" />
+                      <Key className="w-4 h-4 stroke-[2.2]" />
                       <span>Save &amp; Persist Credentials</span>
                     </button>
                   </div>
                 </form>
               </div>
 
-              {/* Card 2: Atelier Boutique Status & Preferences */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#dfc9b2]/40 shadow-xs space-y-4">
-                <div className="flex items-center gap-3 border-b border-[#f3ece6] pb-3">
-                  <Store className="w-5 h-5 text-[#b38728]" />
+              {/* Card 2: Atelier Boutique Status & Preferences (Spanning Full Space) */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4 w-full">
+                <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#b38728] flex items-center justify-center shrink-0">
+                    <Store className="w-5 h-5" />
+                  </div>
                   <div>
-                    <h3 className="font-serif font-bold text-base text-[#1c1917]">DAINTY Atelier Boutique Status</h3>
-                    <p className="text-xs text-gray-500">Live configuration and operations for Uganda storefront</p>
+                    <h3 className="font-serif font-bold text-base text-gray-900">DAINTY Atelier Boutique Status</h3>
+                    <p className="text-xs text-gray-500">Live operational configurations for Uganda and global patrons</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-1">
-                    <p className="text-gray-400 font-medium">Boutique Currency</p>
-                    <p className="font-bold text-sm text-[#1c1917]">UGX (Ugandan Shillings)</p>
-                    <p className="text-[10px] text-[#b38728] font-semibold">USD live conversion enabled</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 w-full">
+                  <div className="p-5 rounded-2xl bg-[#f8f9fd] border border-gray-100 space-y-2">
+                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Boutique Currency</p>
+                    <p className="font-extrabold text-lg text-gray-900">UGX (Ugandan Shillings)</p>
+                    <p className="text-xs text-[#b38728] font-semibold">USD live conversion active (1 USD = 3,700 UGX)</p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-1">
-                    <p className="text-gray-400 font-medium">Kampala Express Delivery</p>
-                    <p className="font-bold text-sm text-[#1c1917]">Free Over UGX 150,000</p>
-                    <p className="text-[10px] text-emerald-600 font-semibold">Cash on Delivery &amp; Mobile Money</p>
+                  <div className="p-5 rounded-2xl bg-[#f8f9fd] border border-gray-100 space-y-2">
+                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Kampala Express Delivery</p>
+                    <p className="font-extrabold text-lg text-gray-900">Complimentary Over UGX 150k</p>
+                    <p className="text-xs text-emerald-600 font-semibold">Cash on Delivery &amp; Mobile Money ready</p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 space-y-1">
-                    <p className="text-gray-400 font-medium">Atelier Location</p>
-                    <p className="font-bold text-sm text-[#1c1917]">Kampala, Uganda</p>
-                    <p className="text-[10px] text-gray-500 font-medium">Online Showroom &amp; Dispatch</p>
+                  <div className="p-5 rounded-2xl bg-[#f8f9fd] border border-gray-100 space-y-2">
+                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Atelier Showroom</p>
+                    <p className="font-extrabold text-lg text-gray-900">Kampala, Uganda</p>
+                    <p className="text-xs text-gray-500 font-medium">Boutique showroom &amp; digital dispatch</p>
                   </div>
+                </div>
+              </div>
+
+              {/* Card 3: Quick Maintenance & Actions */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+                <div>
+                  <h4 className="font-serif font-bold text-base text-gray-900">Database &amp; Catalog Management</h4>
+                  <p className="text-xs text-gray-500 mt-0.5">Restore catalog default stock or explore the customer-facing boutique</p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsResetConfirmOpen(true)}
+                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Reset Sample Data</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigateTo('home')}
+                    className="px-5 py-2.5 rounded-xl text-xs font-bold text-black transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                    style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                  >
+                    <Store className="w-4 h-4" />
+                    <span>Visit Storefront</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -2301,271 +2287,406 @@ function ProductFormModal({ product, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-gray-100 space-y-4 max-h-[92vh] overflow-y-auto">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-          <div>
-            <h3 className="text-base font-serif font-bold text-[#3e2723]">
-              {product ? 'Edit Jewelry Piece' : 'Add New Jewelry Product'}
-            </h3>
-            <p className="text-[11px] text-gray-400">
-              Upload image, specify pricing and inventory in DAINTY STUDS catalog
-            </p>
-          </div>
+    <div className="fixed inset-0 z-50 bg-[#f8f9fd] flex flex-col overflow-y-auto animate-fade-in">
+      {/* Top Sticky Header */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button
+            type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs sm:text-sm transition-all shrink-0 cursor-pointer"
           >
-            ✕
+            <ChevronLeft className="w-4 h-4 sm:w-5 h-5 text-[#b38728] stroke-[2.5]" />
+            <span>Back to Catalog</span>
           </button>
+
+          <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span 
+                className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider text-black"
+                style={{ background: 'var(--gradient-gold-metallic)' }}
+              >
+                Catalog Studio
+              </span>
+              <span className="text-[11px] text-gray-400 font-medium hidden md:inline">
+                DAINTY STUDS &amp; CHAINS HQ
+              </span>
+            </div>
+            <h2 className="text-base sm:text-lg font-serif font-bold text-[#3e2723] truncate">
+              {product ? `Edit Piece: ${formData.name || 'Jewelry'}` : 'Add New Jewelry Creation to Catalog'}
+            </h2>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          {/* PRODUCT IMAGE UPLOAD SECTION */}
-          <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
-            <label className="block text-[11px] font-bold text-gray-800">
-              Product Image <span className="text-rose-500">*</span>
-            </label>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 sm:py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold text-xs sm:text-sm transition-all"
+          >
+            Discard
+          </button>
+          <button
+            type="submit"
+            form="product-studio-form"
+            className="inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-black font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer hover:brightness-105"
+            style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+          >
+            <CheckCircle2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+            <span>{product ? 'Update Piece' : 'Publish to Catalog'}</span>
+          </button>
+        </div>
+      </header>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-24 h-24 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/hero_rings.png';
-                    }}
-                  />
-                ) : (
-                  <ImageIcon className="w-8 h-8 text-gray-300" />
-                )}
-              </div>
-
-              <div className="flex-1 w-full space-y-2">
-                <div>
-                  <label 
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-black font-bold cursor-pointer text-xs shadow-xs"
-                    style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
-                  >
-                    <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
-                    <span>Upload Image File</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </label>
-                  <span className="text-[10px] text-gray-400 ml-2">PNG, JPG, or WEBP</span>
+      {/* Main Full-Page Studio Content */}
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <form id="product-studio-form" onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            
+            {/* LEFT COLUMN: Media & Image Studio (5 cols) */}
+            <div className="lg:col-span-5 space-y-6">
+              {/* Primary Image Preview Box */}
+              <div className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Product Studio Photo</h3>
+                    <p className="text-xs text-gray-400">High-resolution showcase image</p>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Active Preview
+                  </span>
                 </div>
 
-                <input
-                  type="url"
-                  placeholder="Or paste external image URL (https://...)"
-                  value={imagePreview.startsWith('data:') ? '' : imagePreview}
-                  onChange={(e) => handleImageUrlChange(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-[#b38728]"
-                />
+                {/* Big Preview Canvas */}
+                <div className="relative w-full aspect-square rounded-2xl bg-gradient-to-br from-[#faf8f5] to-[#f3ede4] border-2 border-dashed border-gray-200 overflow-hidden flex items-center justify-center group shadow-inner">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Product Preview"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/hero_rings.png';
+                      }}
+                    />
+                  ) : (
+                    <div className="text-center p-6 space-y-2">
+                      <ImageIcon className="w-12 h-12 text-gray-300 mx-auto" />
+                      <p className="text-xs text-gray-400 font-medium">No image loaded yet</p>
+                    </div>
+                  )}
+
+                  {/* Luxury floating watermark tag */}
+                  <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-bold text-white tracking-wider uppercase border border-white/20">
+                    {formData.material} · {formData.color}
+                  </div>
+                </div>
+
+                {/* Upload & URL Input Controls */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label 
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-black font-bold text-xs cursor-pointer shadow-xs hover:brightness-105 transition-all text-center"
+                      style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                    >
+                      <Upload className="w-4 h-4 stroke-[2.5]" />
+                      <span>Upload Photo from Device</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    <span className="text-[11px] text-gray-400 text-center sm:text-left">
+                      Supports JPG, PNG, WEBP (stored locally)
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                      Or Image Web Link / URL
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/photo-..."
+                        value={imagePreview.startsWith('data:') ? '' : imagePreview}
+                        onChange={(e) => handleImageUrlChange(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#b38728] focus:bg-white font-mono text-gray-700"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Studio Presets */}
+              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                    Quick Studio Presets (1-Click)
+                  </h4>
+                  <span className="text-[10px] text-[#b38728] font-bold">8 Presets</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {STUDIO_IMAGE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => handleImageUrlChange(preset.url)}
+                      className={`p-2 rounded-xl border text-left flex flex-col items-center gap-1.5 transition-all group cursor-pointer ${
+                        imagePreview === preset.url
+                          ? 'border-[#b38728] bg-[#fbf8f0] shadow-2xs'
+                          : 'border-gray-200 bg-gray-50/60 hover:border-gray-300 hover:bg-white'
+                      }`}
+                    >
+                      <img
+                        src={preset.url}
+                        alt={preset.label}
+                        className="w-12 h-12 object-cover rounded-lg border border-gray-200/60 group-hover:scale-105 transition-transform"
+                      />
+                      <span className="text-[10px] font-bold text-gray-700 text-center truncate w-full">
+                        {preset.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Quick Presets */}
-            <div>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                Quick Studio Presets:
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {STUDIO_IMAGE_PRESETS.map((preset) => (
+            {/* RIGHT COLUMN: Specifications, Pricing & Details (7 cols) */}
+            <div className="lg:col-span-7 space-y-6">
+              
+              {/* Card 1: Essential Information */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-5">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Jewelry Specifications</h3>
+                  <p className="text-xs text-gray-400">Title, category classification, and metal finish</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Product Title <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g. 18K Gold Plated Solitaire Marquise Ring"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 outline-none focus:border-[#b38728] focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Category</label>
+                      <select
+                        value={formData.category_id}
+                        onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white capitalize"
+                      >
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Material</label>
+                      <select
+                        value={formData.material}
+                        onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                      >
+                        <option value="Gold-Plated">18K Gold-Plated</option>
+                        <option value="Stainless Steel">Stainless Steel (Tarnish-Free)</option>
+                        <option value="Titanium">Pure Titanium</option>
+                        <option value="Sterling Silver">925 Sterling Silver</option>
+                        <option value="Rose Gold">18K Rose Gold Finish</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Color / Tone</label>
+                      <select
+                        value={formData.color}
+                        onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                      >
+                        <option value="Gold">Gold</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Rose Gold">Rose Gold</option>
+                        <option value="White">White / Pearl</option>
+                        <option value="Black">Black</option>
+                        <option value="Mixed">Mixed / Dual-Tone</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">SKU Inventory Code</label>
+                      <input
+                        type="text"
+                        value={formData.sku}
+                        onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                        placeholder="DSC-RG-01"
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-mono outline-none focus:border-[#b38728] focus:bg-white uppercase"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Pricing & Stock Inventory */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-5">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Pricing &amp; Inventory (Uganda)</h3>
+                  <p className="text-xs text-gray-400">Curated Ugandan Shillings (UGX) pricing</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Standard Price (UGX) <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-400">
+                        UGX
+                      </span>
+                      <input
+                        type="number"
+                        required
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        placeholder="85000"
+                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 outline-none focus:border-[#b38728] focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Sale / Promo Price (UGX)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-400">
+                        UGX
+                      </span>
+                      <input
+                        type="number"
+                        value={formData.sale_price || ''}
+                        onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
+                        placeholder="Optional sale"
+                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-emerald-600 outline-none focus:border-[#b38728] focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Available Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.stock_quantity}
+                      onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                      placeholder="15"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 outline-none focus:border-[#b38728] focus:bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Story & Description */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-5">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Product Story &amp; Details</h3>
+                  <p className="text-xs text-gray-400">Handcrafted notes, hypoallergenic details, and styling advice</p>
+                </div>
+
+                <div>
+                  <textarea
+                    rows={4}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Describe the artisan craftsmanship, waterproof and hypoallergenic finish, setting style, and recommended pairings..."
+                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-800 outline-none focus:border-[#b38728] focus:bg-white leading-relaxed resize-y"
+                  />
+                </div>
+
+                {/* Merchandising Badges */}
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-xs font-bold text-gray-800 mb-3">Storefront Merchandising Badges</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.new_arrival}
+                        onChange={(e) => setFormData({ ...formData, new_arrival: e.target.checked })}
+                        className="w-4 h-4 rounded text-[#b38728] focus:ring-[#b38728]"
+                      />
+                      <span className="text-xs font-bold text-gray-800">New Arrival</span>
+                    </label>
+
+                    <label className="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.best_seller}
+                        onChange={(e) => setFormData({ ...formData, best_seller: e.target.checked })}
+                        className="w-4 h-4 rounded text-[#b38728] focus:ring-[#b38728]"
+                      />
+                      <span className="text-xs font-bold text-gray-800">Best Seller</span>
+                    </label>
+
+                    <label className="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.featured}
+                        onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                        className="w-4 h-4 rounded text-[#b38728] focus:ring-[#b38728]"
+                      />
+                      <span className="text-xs font-bold text-gray-800">Featured on Home</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Submit Row */}
+              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-xs text-gray-500 text-center sm:text-left">
+                  Ready to update DAINTY STUDS &amp; CHAINS live catalog for Kampala and global clients?
+                </p>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                   <button
-                    key={preset.label}
                     type="button"
-                    onClick={() => handleImageUrlChange(preset.url)}
-                    className="px-2 py-1 rounded-md bg-white border border-gray-200 hover:border-[#b38728] text-[10px] font-semibold text-gray-700 hover:text-[#b38728] transition-colors"
+                    onClick={onClose}
+                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold text-xs sm:text-sm transition-all"
                   >
-                    {preset.label}
+                    Cancel
                   </button>
-                ))}
+                  <button
+                    type="submit"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-black font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer hover:brightness-105"
+                    style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                  >
+                    <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                    <span>{product ? 'Save & Update Catalog' : 'Publish Product to Catalog'}</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* BASIC PRODUCT DETAILS */}
-          <div>
-            <label className="block text-[11px] font-bold text-gray-800 mb-1">
-              Product Title <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g. 18K Gold Plated Solitaire Marquise Ring"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728]"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">Category</label>
-              <select
-                value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728] bg-white capitalize"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">Material</label>
-              <select
-                value={formData.material}
-                onChange={(e) => setFormData({ ...formData, material: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728] bg-white"
-              >
-                <option value="Gold-Plated">18K Gold-Plated</option>
-                <option value="Stainless Steel">Stainless Steel</option>
-                <option value="Titanium">Titanium</option>
-                <option value="Sterling Silver">925 Sterling Silver</option>
-                <option value="Rose Gold">Rose Gold</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">
-                Price (UGX) <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="number"
-                required
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                placeholder="85000"
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">Sale Price (UGX)</label>
-              <input
-                type="number"
-                value={formData.sale_price}
-                onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
-                placeholder="Optional discount"
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">Stock Quantity</label>
-              <input
-                type="number"
-                value={formData.stock_quantity}
-                onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
-                placeholder="15"
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728]"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">Color Finish</label>
-              <select
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728] bg-white"
-              >
-                <option value="Gold">Gold</option>
-                <option value="Silver">Silver</option>
-                <option value="Rose Gold">Rose Gold</option>
-                <option value="White">White / Pearl</option>
-                <option value="Black">Black</option>
-                <option value="Mixed">Mixed / Dual-Tone</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-800 mb-1">SKU Number</label>
-              <input
-                type="text"
-                value={formData.sku}
-                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728] font-mono text-xs"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-gray-800 mb-1">Product Description</label>
-            <textarea
-              rows={2}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe handcrafted elegance, setting, water-resistance, and styling tips..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:border-[#b38728]"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 pt-1">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-gray-700">
-              <input
-                type="checkbox"
-                checked={formData.new_arrival}
-                onChange={(e) => setFormData({ ...formData, new_arrival: e.target.checked })}
-                className="rounded text-[#b38728] focus:ring-[#b38728]"
-              />
-              <span>New Arrival</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-gray-700">
-              <input
-                type="checkbox"
-                checked={formData.best_seller}
-                onChange={(e) => setFormData({ ...formData, best_seller: e.target.checked })}
-                className="rounded text-[#b38728] focus:ring-[#b38728]"
-              />
-              <span>Best Seller</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-gray-700">
-              <input
-                type="checkbox"
-                checked={formData.featured}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                className="rounded text-[#b38728] focus:ring-[#b38728]"
-              />
-              <span>Featured on Homepage</span>
-            </label>
-          </div>
-
-          <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 font-semibold"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 text-black rounded-xl font-bold transition-all shadow-xs"
-              style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
-            >
-              Save Product to Catalog
-            </button>
           </div>
         </form>
-      </div>
+      </main>
     </div>
   );
 }
