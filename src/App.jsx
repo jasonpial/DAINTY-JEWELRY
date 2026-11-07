@@ -140,17 +140,19 @@ function App() {
         </>
       )}
 
-      {/* Floating Back Navigation Button for instant access when scrolling on any page */}
-      <button
-        type="button"
-        onClick={() => goBack('home')}
-        className="dainty-floating-back-btn"
-        title="Go Back to Previous Page"
-        aria-label="Go Back to Previous Page"
-      >
-        <ChevronLeft size={16} strokeWidth={2.5} />
-        <span>Back</span>
-      </button>
+      {/* Floating Back Navigation Button for customer storefront views */}
+      {!isAdminView && (
+        <button
+          type="button"
+          onClick={() => goBack('home')}
+          className="dainty-floating-back-btn"
+          title="Go Back to Previous Page"
+          aria-label="Go Back to Previous Page"
+        >
+          <ChevronLeft size={16} strokeWidth={2.5} />
+          <span>Back</span>
+        </button>
+      )}
 
       {/* 2. Main Page Render */}
       <main className="main-content">

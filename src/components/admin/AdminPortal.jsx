@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Home,
   LayoutGrid,
   FolderKanban,
   ClipboardList,
@@ -22,21 +21,27 @@ import {
   Edit2,
   Trash2,
   Eye,
-  TrendingUp,
   Upload,
   Image as ImageIcon,
-  Bookmark,
   Sparkles,
-  Diamond,
   ChevronDown,
-  ChevronLeft
+  ChevronLeft,
+  MoreVertical,
+  Calendar,
+  SlidersHorizontal,
+  ArrowDown,
+  ArrowUp,
+  ZoomIn,
+  ZoomOut,
+  CheckCircle2,
+  AlertCircle,
+  Phone,
+  Package,
+  Coins
 } from 'lucide-react';
 import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -75,21 +80,20 @@ function formatDate(dateStr) {
   }
 }
 
-// Visit and Sales Statistics Data for BarChart (Themed to Gold Metallic & Bronze Palette)
-const VISIT_SALES_DATA = [
-  { year: '2013', storefront: 340, whatsapp: 490, direct: 680 },
-  { year: '2014', storefront: 460, whatsapp: 380, direct: 420 },
-  { year: '2015', storefront: 280, whatsapp: 310, direct: 450 },
-  { year: '2016', storefront: 420, whatsapp: 320, direct: 510 },
-  { year: '2017', storefront: 380, whatsapp: 590, direct: 470 },
-  { year: '2018', storefront: 580, whatsapp: 390, direct: 600 }
-];
-
-// Traffic Sources Donut Data (Themed to Gold Metallic & Bronze Palette)
-const TRAFFIC_SOURCES_DATA = [
-  { name: 'Search Engines', value: 30, color: '#b38728' },
-  { name: 'Direct Storefront', value: 30, color: '#f5e6a5' },
-  { name: 'WhatsApp & Social', value: 40, color: '#8a640f' }
+// 12-Month Performance Dataset for Spline Chart (Matches five.webp "Statistic: Revenue and Sales")
+const STATISTIC_SPLINE_DATA = [
+  { month: 'Jan', revenue: 220, sales: 380, cancel: 110 },
+  { month: 'Feb', revenue: 280, sales: 410, cancel: 140 },
+  { month: 'Mar', revenue: 450, sales: 480, cancel: 180 },
+  { month: 'Apr', revenue: 560, sales: 520, cancel: 210 },
+  { month: 'May', revenue: 490, sales: 670, cancel: 160 },
+  { month: 'Jun', revenue: 720, sales: 610, cancel: 280 },
+  { month: 'Jul', revenue: 680, sales: 740, cancel: 200 },
+  { month: 'Aug', revenue: 890, sales: 810, cancel: 190 },
+  { month: 'Sep', revenue: 790, sales: 830, cancel: 230 },
+  { month: 'Nov', revenue: 980, sales: 890, cancel: 170 },
+  { month: 'Oct', revenue: 840, sales: 940, cancel: 210 },
+  { month: 'Dec', revenue: 1120, sales: 1050, cancel: 240 }
 ];
 
 // Curated Studio Image Presets for 1-Click Product Image Selection
@@ -104,26 +108,38 @@ const STUDIO_IMAGE_PRESETS = [
   { label: 'Pearl Choker', url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop&q=80' }
 ];
 
-// Custom Tooltip for Visit & Sales BarChart with Gold Accents
-function CustomBarTooltip({ active, payload, label }) {
+// Custom Tooltip for Spline Chart (Matches dark floating tooltip in five.webp)
+function CustomSplineTooltip({ active, payload, label }) {
   if (active && payload && payload.length) {
+    const rev = payload.find(p => p.dataKey === 'revenue')?.value;
+    const sal = payload.find(p => p.dataKey === 'sales')?.value;
+    const can = payload.find(p => p.dataKey === 'cancel')?.value;
     return (
-      <div className="bg-[#1c1917] text-white p-3 rounded-lg shadow-2xl text-xs space-y-1.5 border border-[#b38728]/40">
-        <p className="font-bold text-[#f5e6a5] border-b border-white/10 pb-1">{label} Performance</p>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#b38728]"></span>
-          <span className="text-gray-300">Online Store:</span>
-          <span className="font-bold text-white">{payload[0]?.value}</span>
+      <div className="bg-[#0f172a] text-white p-3 rounded-xl shadow-2xl text-xs space-y-1.5 border border-slate-700/60 min-w-[150px] z-50">
+        <div className="text-[11px] font-bold text-gray-400 border-b border-white/10 pb-1 flex items-center justify-between">
+          <span>{label}</span>
+          <span className="text-[#f5e6a5]">DAINTY Boutique</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#dfc9b2]"></span>
-          <span className="text-gray-300">WhatsApp Dispatch:</span>
-          <span className="font-bold text-white">{payload[1]?.value}</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#3b82f6]"></span>
+            <span className="text-gray-300">Revenue :</span>
+          </div>
+          <span className="font-bold text-white">{rev ? (rev / 1000).toFixed(2) + ' M' : '0.68 M'}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#8a640f]"></span>
-          <span className="text-gray-300">Showroom Direct:</span>
-          <span className="font-bold text-white">{payload[2]?.value}</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#d4af37]"></span>
+            <span className="text-gray-300">Sales :</span>
+          </div>
+          <span className="font-bold text-[#f5e6a5]">{sal ? `${sal}k` : '92.6%'}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#f43f5e]"></span>
+            <span className="text-gray-300">Cancel :</span>
+          </div>
+          <span className="font-bold text-rose-400">{can ? `${can}k` : '7.4%'}</span>
         </div>
       </div>
     );
@@ -344,109 +360,126 @@ export default function AdminPortal({ onLogout } = {}) {
       )}
 
       {/* =========================================================================
-          TOP NAVBAR (White bar with real DAINTY logo and gold accents)
+          TOP NAVBAR (White bar matching five.webp Luxora styling with gold accents)
          ========================================================================= */}
-      <nav className="h-16 bg-white border-b border-[#dfc9b2]/40 px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(62,39,35,0.03)]">
-        {/* Left: Brand Logo & Hamburger */}
+      <nav className="h-16 bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        {/* Left: Brand Logo, Back Button & Search */}
         <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
-          {/* Back Navigation Button in Admin Bar */}
+          {/* Back Navigation Button */}
           <button
             type="button"
             onClick={() => goBack('home')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-black bg-[#faf8f5] hover:bg-amber-50 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-black bg-gray-50 hover:bg-amber-50 border border-gray-200/80 shadow-2xs transition-all cursor-pointer"
             title="Go Back to Previous Page"
           >
             <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
             <span className="hidden sm:inline">Back</span>
           </button>
 
-          {/* Real Website Logo in Top Navbar */}
+          {/* Real Website Logo */}
           <div 
-            className="flex items-center gap-3 cursor-pointer py-1"
+            className="flex items-center gap-2.5 cursor-pointer py-1"
             onClick={() => navigateTo('home')}
             title="DAINTY STUDS & CHAINS Storefront"
           >
             <img
               src="/images/logo-image.png"
               alt="DAINTY STUDS & CHAINS"
-              className="h-11 w-auto object-contain hover:scale-105 transition-transform"
+              className="h-10 w-auto object-contain hover:scale-105 transition-transform"
             />
           </div>
 
-          {/* Hamburger toggle button */}
+          {/* Hamburger toggle button for Mobile */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-gray-500 hover:text-[#b38728] hover:bg-[#faf8f5] transition-colors"
+            className="p-2 rounded-lg text-gray-500 hover:text-[#b38728] hover:bg-gray-50 transition-colors lg:hidden"
             aria-label="Toggle menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Search bar */}
-          <div className="relative hidden md:block w-64 lg:w-80">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          {/* Search bar capsule (Matches five.webp "Search ...") */}
+          <div className="relative hidden md:block w-64 lg:w-72">
+            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search catalog, orders, pieces..."
+              placeholder="Search ..."
               value={globalSearch}
               onChange={(e) => {
                 setGlobalSearch(e.target.value);
                 setCatalogSearch(e.target.value);
                 setOrderSearch(e.target.value);
               }}
-              className="w-full pl-9 pr-3 py-1.5 text-xs text-gray-800 placeholder-gray-400 bg-gray-50 border border-gray-200/80 rounded-lg outline-none focus:border-[#b38728] focus:bg-white transition-all"
+              className="w-full pl-9 pr-3.5 py-2 text-xs text-gray-800 placeholder-gray-400 bg-[#f8f9fd] border border-gray-100 rounded-full outline-none focus:border-[#b38728] focus:bg-white transition-all font-sans"
             />
           </div>
         </div>
 
-        {/* Right Action Icons & Profile */}
-        <div className="flex items-center gap-3 sm:gap-5">
-          {/* User Profile Info */}
-          <div className="flex items-center gap-2.5 cursor-pointer">
+        {/* Right: Date, Notifications & Profile (Matches five.webp) */}
+        <div className="flex items-center gap-3 sm:gap-6">
+          {/* Date pill with Calendar icon (Matches five.webp "Monday, 4th September") */}
+          <div className="hidden lg:flex items-center gap-2 text-xs text-gray-500 font-medium">
+            <Calendar className="w-4 h-4 text-gray-400" />
+            <span>
+              {new Date().toLocaleDateString('en-GB', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+              })}
+            </span>
+          </div>
+
+          {/* Notification bell with count badge 12 (Matches five.webp) */}
+          <div
+            className="relative p-2 text-gray-600 hover:text-[#b38728] cursor-pointer transition-colors"
+            onClick={() => showToast('12 unread boutique events and notifications.')}
+            title="12 New Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+              12
+            </span>
+          </div>
+
+          {/* Mail icon */}
+          <div
+            className="relative p-2 text-gray-600 hover:text-[#b38728] cursor-pointer transition-colors hidden sm:block"
+            onClick={() => handleNavClick('messages')}
+            title="Customer Messages"
+          >
+            <Mail className="w-4 h-4" />
+            {chats.length > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#b38728] ring-2 ring-white"></span>
+            )}
+          </div>
+
+          {/* User Profile Info (Matches five.webp: Ahmed Al-Farsi / Company Manager) */}
+          <div 
+            onClick={() => handleNavClick('settings')}
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+            title="Admin Profile & Settings"
+          >
             <div className="relative">
               <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-serif font-bold text-black shadow-xs ring-2 ring-[#b38728]/30"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-sans font-bold text-black shadow-xs ring-2 ring-[#b38728]/30"
                 style={{ background: 'var(--gradient-gold-metallic)' }}
               >
                 DS
               </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
             </div>
-            <div className="hidden sm:flex items-center gap-1">
-              <span className="text-xs font-bold text-gray-800">DAINTY Curator</span>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+            <div className="hidden sm:flex flex-col">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-bold text-gray-900 leading-tight">DAINTY Curator</span>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </div>
+              <span className="text-[10px] text-gray-400 font-normal leading-tight">Company Manager</span>
             </div>
-          </div>
-
-          {/* Mail icon with gold indicator */}
-          <div
-            className="relative p-1.5 text-gray-500 hover:text-[#b38728] cursor-pointer transition-colors"
-            onClick={() => handleNavClick('messages')}
-            title="Customer Messages"
-          >
-            <Mail className="w-4 h-4" />
-            <span 
-              className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-              style={{ background: '#b38728' }}
-            ></span>
-          </div>
-
-          {/* Bell notification with gold alert */}
-          <div
-            className="relative p-1.5 text-gray-500 hover:text-[#b38728] cursor-pointer transition-colors"
-            onClick={() => showToast('All orders and customer sync signals are active.')}
-            title="Notifications"
-          >
-            <Bell className="w-4 h-4" />
-            <span 
-              className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-              style={{ background: '#b38728' }}
-            ></span>
           </div>
 
           {/* Power / Logout button */}
           <div
-            className="p-1.5 text-gray-500 hover:text-rose-600 cursor-pointer transition-colors"
+            className="p-1.5 text-gray-400 hover:text-rose-600 cursor-pointer transition-colors"
             onClick={handleLogoutAction}
             title="Log Out"
           >
@@ -663,63 +696,75 @@ export default function AdminPortal({ onLogout } = {}) {
                 {/* Node: Return to Store */}
                 <button
                   onClick={() => navigateTo('home')}
-                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-[#b38728] hover:bg-amber-50/50 transition-colors font-sans group"
+                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-[#b38728] hover:bg-amber-50/50 transition-colors font-sans group cursor-pointer"
                   title="Return to Store"
                 >
                   <Store className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-[#b38728] transition-colors" />
                   <span>Return to Store</span>
                 </button>
-
-                {/* Node: Logout */}
-                <button
-                  onClick={handleLogoutAction}
-                  className="w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-600 hover:text-rose-600 hover:bg-rose-50/50 transition-colors font-sans group"
-                  title="Logout"
-                >
-                  <LogOut className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-rose-600 transition-colors" />
-                  <span>Logout</span>
-                </button>
               </div>
             </div>
           </div>
 
-          {/* ── SECTION 3: NOTIFICATIONS (Exact match to bottom cards in eight.jpeg) ── */}
-          <div className="pt-4 border-t border-gray-100">
-            <p className="font-sans text-[11px] font-medium text-gray-400 px-2 mb-2.5">
-              Notifications
-            </p>
-            <div className="space-y-2">
-              {/* Notification Card 1: Grace Kembabazi */}
-              <div
-                onClick={() => handleNavClick('messages')}
-                className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
-              >
-                <div className="w-8 h-8 rounded-full bg-amber-100 text-[#b38728] flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-[#b38728]/20">
-                  GK
+          {/* ── SECTION 3: NOTIFICATIONS & LOGOUT (Exact match to five.webp bottom) ── */}
+          <div className="pt-4 border-t border-gray-100 space-y-4">
+            <div>
+              <p className="font-sans text-[11px] font-medium text-gray-400 px-2 mb-2">
+                Notifications
+              </p>
+              <div className="space-y-2">
+                {/* Notification Card 1: Grace Kembabazi */}
+                <div
+                  onClick={() => handleNavClick('messages')}
+                  className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
+                >
+                  <div className="w-8 h-8 rounded-full bg-amber-100 text-[#b38728] flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-[#b38728]/20">
+                    GK
+                  </div>
+                  <div className="overflow-hidden font-sans">
+                    <p className="font-semibold text-xs text-gray-900 leading-tight">Grace Kembabazi</p>
+                    <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
+                      Hi, This product is available for n...
+                    </p>
+                  </div>
                 </div>
-                <div className="overflow-hidden font-sans">
-                  <p className="font-semibold text-xs text-gray-900 leading-tight">Grace Kembabazi</p>
-                  <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
-                    Hi, This product is available for n...
-                  </p>
-                </div>
-              </div>
 
-              {/* Notification Card 2: Ibnul Shams */}
-              <div
-                onClick={() => handleNavClick('messages')}
-                className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
-              >
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-blue-300/30">
-                  IS
-                </div>
-                <div className="overflow-hidden font-sans">
-                  <p className="font-semibold text-xs text-gray-900 leading-tight">Ibnul Shams</p>
-                  <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
-                    Hi, Can I request custom eng...
-                  </p>
+                {/* Notification Card 2: Ibnul Shams */}
+                <div
+                  onClick={() => handleNavClick('messages')}
+                  className="p-2.5 rounded-2xl bg-[#f8f9fa] hover:bg-amber-50/60 transition-all flex items-center gap-3 cursor-pointer border border-gray-100/70"
+                >
+                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[11px] shrink-0 ring-1 ring-blue-300/30">
+                    IS
+                  </div>
+                  <div className="overflow-hidden font-sans">
+                    <p className="font-semibold text-xs text-gray-900 leading-tight">Ibnul Shams</p>
+                    <p className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5 truncate">
+                      Hi, Can I request custom eng...
+                    </p>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Bottom Log out Row with Toggle Switch (Matches five.webp "[-> Log out  (o)]") */}
+            <div className="pt-2 border-t border-gray-100 flex items-center justify-between px-2">
+              <button
+                onClick={handleLogoutAction}
+                className="flex items-center gap-2.5 text-xs font-semibold text-gray-700 hover:text-rose-600 transition-colors cursor-pointer"
+                title="Log out of session"
+              >
+                <LogOut className="w-4 h-4 text-gray-400 group-hover:text-rose-600" />
+                <span>Log out</span>
+              </button>
+
+              <button
+                onClick={handleLogoutAction}
+                className="w-10 h-5 rounded-full bg-slate-200 hover:bg-slate-300 p-0.5 flex items-center transition-colors cursor-pointer"
+                title="Toggle Login Session"
+              >
+                <span className="w-4 h-4 rounded-full bg-slate-700 shadow-xs block"></span>
+              </button>
             </div>
           </div>
         </aside>
@@ -732,281 +777,686 @@ export default function AdminPortal({ onLogout } = {}) {
               VIEW 1: DASHBOARD OVERVIEW
              =================================================================== */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6 animate-fade-in">
-              {/* Breadcrumb Header Bar */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-black shadow-xs font-bold"
-                    style={{ background: 'var(--gradient-gold-metallic)' }}
-                  >
-                    <Home className="w-4 h-4 stroke-[2.4]" />
+            <div className="space-y-6 animate-fade-in font-sans">
+              {/* ROW 1: 4 STAT CARDS (Matches five.webp Top Stat Cards) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {/* Card 1: Total Sales */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-gray-500">Total Sales</span>
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                      <Coins className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-serif font-bold text-[#3e2723] tracking-tight">Dashboard</h2>
-                    <p className="text-[11px] text-gray-500">Executive Performance &amp; Boutique Status</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#dfc9b2]/60 text-xs text-[#8a640f] font-semibold shadow-xs">
-                  <span>Maison Overview</span>
-                  <Info className="w-3.5 h-3.5" />
-                </div>
-              </div>
-
-              {/* 3 SIGNATURE GRADIENT CARDS (Themed with Gold Metallic & Luxury Obsidian Accents) */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* 1. Weekly Sales (Signature Metallic Gold Gradient with Pure Black Text) */}
-                <div
-                  className="rounded-2xl p-6 text-black shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] border border-[#f5e6a5]"
-                  style={{ background: 'var(--gradient-gold-metallic)' }}
-                >
-                  <div className="absolute right-0 top-0 bottom-0 w-36 overflow-hidden pointer-events-none opacity-20">
-                    <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white" />
-                    <div className="absolute -right-2 top-8 w-28 h-28 rounded-full bg-white" />
-                  </div>
-
-                  <div className="flex items-center justify-between relative z-10">
-                    <span className="text-sm font-bold tracking-wide uppercase text-black/80">Weekly Sales</span>
-                    <TrendingUp className="w-5 h-5 stroke-[2.5]" />
-                  </div>
-
-                  <div className="my-3 relative z-10">
-                    <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                      {totalSalesUGX > 0 ? formatUGX(totalSalesUGX) : 'UGX 15,000,000'}
+                  <div className="my-2.5">
+                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                      {totalSalesUGX > 0 ? formatUGX(totalSalesUGX) : 'UGX 15,200,000'}
                     </h3>
                   </div>
-
-                  <div className="text-xs font-bold relative z-10 flex items-center gap-1">
-                    <span>Increased by 60%</span>
-                    <span className="text-black/60 font-semibold">• Vs last period</span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="inline-flex items-center font-bold text-emerald-600">
+                      <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      75.55%
+                    </span>
+                    <span className="text-gray-400 font-medium">+ UGX 1.2M Target</span>
                   </div>
                 </div>
 
-                {/* 2. Weekly Orders (Deep Obsidian & Warm Caramel Luxury Gradient) */}
-                <div
-                  className="rounded-2xl p-6 text-white shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] border border-[#3e2723]"
-                  style={{ background: 'linear-gradient(135deg, #1f1a17 0%, #3e2723 50%, #1a1512 100%)' }}
-                >
-                  <div className="absolute right-0 top-0 bottom-0 w-36 overflow-hidden pointer-events-none opacity-15">
-                    <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white" />
-                    <div className="absolute -right-2 top-8 w-28 h-28 rounded-full bg-white" />
+                {/* Card 2: Total Orders */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-gray-500">Total Orders</span>
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                      <Package className="w-4 h-4" />
+                    </div>
                   </div>
-
-                  <div className="flex items-center justify-between relative z-10">
-                    <span className="text-sm font-semibold tracking-wide text-[#f5e6a5]">Weekly Orders</span>
-                    <Bookmark className="w-5 h-5 text-[#f5e6a5]" />
-                  </div>
-
-                  <div className="my-3 relative z-10">
-                    <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                      {orders.length > 0 ? orders.length : '45,6334'}
+                  <div className="my-2.5">
+                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                      {orders.length > 0 ? (16920 + orders.length).toLocaleString() : '16,920'}
                     </h3>
                   </div>
-
-                  <div className="text-xs font-medium text-gray-300 relative z-10">
-                    <span>Decreased by 10%</span>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1">
+                      <span className="inline-flex items-center font-bold text-rose-500">
+                        <ArrowDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                        3%
+                      </span>
+                      <span className="text-gray-400 font-medium">Vs last month</span>
+                    </div>
+                    <button 
+                      onClick={() => handleNavClick('orders')}
+                      className="font-bold text-[#b38728] hover:underline cursor-pointer"
+                    >
+                      View orders
+                    </button>
                   </div>
                 </div>
 
-                {/* 3. Visitors Online & Catalog (Imperial Champagne Gold & Amber Glow Gradient) */}
-                <div
-                  className="rounded-2xl p-6 text-[#2a1a15] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] border border-[#dfc9b2]"
-                  style={{ background: 'linear-gradient(135deg, #dfc9b2 0%, #d4af37 50%, #b38728 100%)' }}
-                >
-                  <div className="absolute right-0 top-0 bottom-0 w-36 overflow-hidden pointer-events-none opacity-20">
-                    <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white" />
-                    <div className="absolute -right-2 top-8 w-28 h-28 rounded-full bg-white" />
+                {/* Card 3: Order Complete */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-gray-500">Order Complete</span>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
                   </div>
-
-                  <div className="flex items-center justify-between relative z-10">
-                    <span className="text-sm font-bold tracking-wide uppercase text-[#3e2723]">Visitors Online</span>
-                    <Diamond className="w-5 h-5 stroke-[2.2]" />
-                  </div>
-
-                  <div className="my-3 relative z-10">
-                    <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                      95,5741
+                  <div className="my-2.5">
+                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                      16,581
                     </h3>
                   </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="inline-flex items-center font-bold text-emerald-600">
+                      <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      98%
+                    </span>
+                    <span className="text-gray-400 font-medium">Vs last month</span>
+                  </div>
+                </div>
 
-                  <div className="text-xs font-bold text-[#3e2723] relative z-10">
-                    <span>Increased by 5%</span>
+                {/* Card 4: Cancel Order */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-gray-500">Cancel Order</span>
+                    <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                      <AlertCircle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="my-2.5">
+                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                      338
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="inline-flex items-center font-bold text-rose-500">
+                      <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      2%
+                    </span>
+                    <span className="text-gray-400 font-medium">227 Design changing *</span>
                   </div>
                 </div>
               </div>
 
-              {/* MIDDLE SECTION: Visit And Sales Statistics + Traffic Sources */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Visit And Sales Statistics Bar Chart (~65% / 8 cols) */}
-                <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs flex flex-col justify-between">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              {/* ROW 2: TARGET GAUGE & STATISTIC SPLINE CHART (Matches five.webp Middle Row) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                {/* Target Semi-Circular Arc Gauge Card (~38% / 5 cols) */}
+                <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h4 className="text-base font-bold text-[#3e2723]">
-                        Visit And Sales Statistics
-                      </h4>
-                      <p className="text-xs text-gray-400 mt-0.5">Online boutique orders vs direct showroom sales</p>
+                      <h4 className="text-base font-bold text-gray-900">Target</h4>
+                      <p className="text-xs text-gray-400 mt-0.5">Revenue Target / Today</p>
                     </div>
+                    <button 
+                      onClick={() => showToast('Target calculation synced with boutique daily goals.')}
+                      className="p-1 text-gray-400 hover:text-gray-700 transition-colors"
+                      title="More Options"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </div>
 
-                    {/* Chart Legend */}
-                    <div className="flex items-center gap-4 text-xs font-medium">
-                      <div className="flex items-center gap-1.5 text-gray-700">
-                        <span className="w-3 h-3 rounded-full bg-[#b38728]"></span>
-                        <span>Storefront</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-gray-700">
-                        <span className="w-3 h-3 rounded-full bg-[#dfc9b2]"></span>
-                        <span>WhatsApp</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-gray-700">
-                        <span className="w-3 h-3 rounded-full bg-[#5d4037]"></span>
-                        <span>Showroom</span>
-                      </div>
+                  {/* Semi-Circular Arc Gauge */}
+                  <div className="relative flex flex-col items-center justify-center my-3">
+                    <svg viewBox="0 0 200 125" className="w-56 h-36">
+                      <defs>
+                        <linearGradient id="targetGoldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#b38728" />
+                          <stop offset="50%" stopColor="#f5e6a5" />
+                          <stop offset="100%" stopColor="#d4af37" />
+                        </linearGradient>
+                      </defs>
+                      {/* Background Track */}
+                      <path
+                        d="M 25 105 A 75 75 0 0 1 175 105"
+                        fill="none"
+                        stroke="#f1f5f9"
+                        strokeWidth="16"
+                        strokeLinecap="round"
+                      />
+                      {/* Filled Arc (62.28% of 235.6 arc length = 146.7, strokeDashoffset = 88.9) */}
+                      <path
+                        d="M 25 105 A 75 75 0 0 1 175 105"
+                        fill="none"
+                        stroke="url(#targetGoldGradient)"
+                        strokeWidth="16"
+                        strokeLinecap="round"
+                        strokeDasharray="235.6"
+                        strokeDashoffset="88.9"
+                      />
+                    </svg>
+                    {/* Percentage Center Overlay */}
+                    <div className="absolute top-14 flex flex-col items-center text-center">
+                      <span className="text-3xl font-extrabold text-gray-900 tracking-tight">62.28%</span>
+                      <span className="text-[11px] font-bold text-rose-500 bg-rose-50 px-2.5 py-0.5 rounded-full mt-0.5">
+                        -37.72%
+                      </span>
                     </div>
                   </div>
 
-                  {/* Recharts BarChart Component */}
+                  {/* Gauge Subtitle Message */}
+                  <p className="text-center text-xs text-gray-500 font-medium px-4">
+                    You succeed earn <span className="font-bold text-gray-800">UGX 740,000</span> today, Current Sells Revenue is <span className="font-bold text-[#b38728]">40%</span> !
+                  </p>
+
+                  {/* Bottom 3 Columns Metrics with Vertical Dividers */}
+                  <div className="grid grid-cols-3 divide-x divide-gray-100 pt-4 mt-4 border-t border-gray-100 text-center">
+                    <div className="px-2">
+                      <p className="text-[11px] text-gray-400 font-medium">Target</p>
+                      <p className="text-xs font-bold text-gray-800 mt-1 flex items-center justify-center gap-0.5">
+                        <span>UGX 1.2M</span>
+                        <span className="text-rose-500 text-sm">↓</span>
+                      </p>
+                    </div>
+                    <div className="px-2">
+                      <p className="text-[11px] text-gray-400 font-medium">Revenue</p>
+                      <p className="text-xs font-bold text-gray-800 mt-1 flex items-center justify-center gap-0.5">
+                        <span>UGX 298k</span>
+                        <span className="text-emerald-500 text-sm">↑</span>
+                      </p>
+                    </div>
+                    <div className="px-2">
+                      <p className="text-[11px] text-gray-400 font-medium">Sells</p>
+                      <p className="text-xs font-bold text-gray-800 mt-1 flex items-center justify-center gap-0.5">
+                        <span>UGX 747k</span>
+                        <span className="text-emerald-500 text-sm">↑</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Statistic Spline Line Chart (~62% / 7 cols) */}
+                <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                      <h4 className="text-base font-bold text-gray-900">Statistic</h4>
+                      <p className="text-xs text-gray-400 mt-0.5">Revenue and Sales</p>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs font-medium">
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]"></span>
+                        <span>Cancel</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
+                        <span>Revenue</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#b38728]"></span>
+                        <span>Sales</span>
+                      </div>
+                      <button 
+                        onClick={() => showToast('Monthly statistical projection updated.')}
+                        className="p-1 text-gray-400 hover:text-gray-700 transition-colors ml-1"
+                        title="Options"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Spline Chart */}
                   <div className="h-64 sm:h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={VISIT_SALES_DATA} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f3ece6" vertical={false} />
-                        <XAxis dataKey="year" stroke="#a8a29e" fontSize={11} tickLine={false} axisLine={false} />
-                        <YAxis stroke="#a8a29e" fontSize={11} tickLine={false} axisLine={false} />
-                        <Tooltip content={<CustomBarTooltip />} />
-                        <Bar dataKey="storefront" fill="#b38728" radius={[4, 4, 0, 0]} maxBarSize={12} />
-                        <Bar dataKey="whatsapp" fill="#dfc9b2" radius={[4, 4, 0, 0]} maxBarSize={12} />
-                        <Bar dataKey="direct" fill="#5d4037" radius={[4, 4, 0, 0]} maxBarSize={12} />
-                      </BarChart>
+                      <LineChart data={STATISTIC_SPLINE_DATA} margin={{ top: 15, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                        <YAxis 
+                          stroke="#94a3b8" 
+                          fontSize={11} 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tickFormatter={(v) => v === 0 ? '0' : `${v >= 1000 ? (v / 1000).toFixed(1) + 'M' : v + 'K'}`} 
+                        />
+                        <Tooltip content={<CustomSplineTooltip />} />
+                        <Line 
+                          type="monotone" 
+                          dataKey="revenue" 
+                          stroke="#3b82f6" 
+                          strokeWidth={2.5} 
+                          dot={false} 
+                          activeDot={{ r: 5, fill: '#3b82f6', stroke: '#ffffff', strokeWidth: 2 }} 
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="sales" 
+                          stroke="#b38728" 
+                          strokeWidth={2.5} 
+                          dot={false} 
+                          activeDot={{ r: 5, fill: '#b38728', stroke: '#ffffff', strokeWidth: 2 }} 
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="cancel" 
+                          stroke="#f43f5e" 
+                          strokeWidth={2} 
+                          dot={false} 
+                          activeDot={{ r: 4, fill: '#f43f5e', stroke: '#ffffff', strokeWidth: 2 }} 
+                        />
+                      </LineChart>
                     </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Traffic Sources Donut Chart (~35% / 4 cols) */}
-                <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-base font-bold text-[#3e2723]">
-                      Traffic Sources
-                    </h4>
-                    <p className="text-xs text-gray-400 mt-0.5">Customer channels in Uganda</p>
-                  </div>
-
-                  {/* Donut Chart */}
-                  <div className="h-48 w-full flex items-center justify-center relative my-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={TRAFFIC_SOURCES_DATA}
-                          innerRadius={50}
-                          outerRadius={75}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {TRAFFIC_SOURCES_DATA.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* Bottom Legend with percentages */}
-                  <div className="space-y-2.5 pt-3 border-t border-[#f3ece6] text-xs font-medium">
-                    <div className="flex items-center justify-between text-gray-700">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#b38728]"></span>
-                        <span>Search Engines</span>
-                      </div>
-                      <span className="font-bold text-[#1c1917]">30%</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-gray-700">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#f5e6a5] border border-gray-300"></span>
-                        <span>Direct Storefront</span>
-                      </div>
-                      <span className="font-bold text-[#1c1917]">30%</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-gray-700">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#8a640f]"></span>
-                        <span>WhatsApp &amp; Social</span>
-                      </div>
-                      <span className="font-bold text-[#1c1917]">40%</span>
-                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* BOTTOM SECTION: Recent Store Orders Table */}
-              <div className="bg-white p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h4 className="text-base font-bold text-[#3e2723]">Recent Customer Orders</h4>
-                    <p className="text-xs text-gray-400">Direct checkouts placed on DAINTY boutique</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('orders')}
-                    className="text-xs font-bold text-[#b38728] hover:underline"
-                  >
-                    View All Orders →
-                  </button>
-                </div>
+              {/* ROW 3: LATEST ORDER TABLE & BUSINESS GROWTH MAP (Matches five.webp Bottom Row) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                {/* Latest Order Table (~65% / 8 cols) */}
+                <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <div className="flex items-center gap-2.5">
+                      <h4 className="text-base font-bold text-gray-900">Latest Order</h4>
+                      <span 
+                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-black"
+                        style={{ background: 'var(--gradient-gold-metallic)' }}
+                      >
+                        +2 New
+                      </span>
+                    </div>
 
-                <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-                  <table className="w-full text-left text-xs min-w-[550px]">
-                    <thead>
-                      <tr className="border-b border-[#f3ece6] text-[#a8a29e] uppercase text-[10px] tracking-wider">
-                        <th className="pb-3 font-semibold">Order ID</th>
-                        <th className="pb-3 font-semibold">Client</th>
-                        <th className="pb-3 font-semibold">Total Amount</th>
-                        <th className="pb-3 font-semibold">Status</th>
-                        <th className="pb-3 font-semibold text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#faf8f5]">
-                      {orders.length > 0 ? (
-                        orders.slice(0, 4).map((ord) => (
-                          <tr key={ord.id} className="hover:bg-amber-50/40 transition-colors">
-                            <td className="py-3.5 font-mono font-bold text-gray-800">{ord.id}</td>
-                            <td className="py-3.5">
-                              <p className="font-bold text-gray-800">{ord.customer_name || 'Store Patron'}</p>
-                              <p className="text-[10px] text-gray-400">{ord.customer_phone || ord.customer_email || 'Direct Checkout'}</p>
-                            </td>
-                            <td className="py-3.5 font-bold text-gray-800">{formatUGX(ord.total_amount)}</td>
-                            <td className="py-3.5">
-                              <span
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                  ord.status === 'Completed'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : ord.status === 'Cancelled'
-                                    ? 'bg-rose-100 text-rose-800'
-                                    : 'bg-amber-100 text-amber-900 border border-amber-200'
-                                }`}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => showToast('Date range filter applied.')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                        <span>Select Date</span>
+                      </button>
+
+                      <button
+                        onClick={() => showToast('Filter panel opened.')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <SlidersHorizontal className="w-3.5 h-3.5 text-gray-400" />
+                        <span>Filters</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick('orders')}
+                        className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-xs font-bold text-[#b38728] transition-colors cursor-pointer"
+                      >
+                        See All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table className="w-full text-left text-xs min-w-[580px]">
+                      <thead>
+                        <tr className="border-b border-gray-100 text-gray-400 text-[11px] font-medium">
+                          <th className="pb-3 font-medium">Source</th>
+                          <th className="pb-3 font-medium">Customer</th>
+                          <th className="pb-3 font-medium">Total</th>
+                          <th className="pb-3 font-medium">Status</th>
+                          <th className="pb-3 font-medium text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {/* Row 1: Ibnul Shams Al Asad */}
+                        <tr className="hover:bg-amber-50/30 transition-colors">
+                          <td className="py-3.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                                S
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-700 font-medium">
+                                <span>On Shop</span>
+                                <Phone className="w-3 h-3 text-gray-400" />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3.5">
+                            <p className="font-bold text-gray-800">Ibnul Shams Al Asad</p>
+                            <p className="text-[11px] text-gray-400">shams@hotmail.com</p>
+                          </td>
+                          <td className="py-3.5 font-bold text-gray-800">UGX 812,100</td>
+                          <td className="py-3.5">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100/70 text-amber-800 shadow-[0_0_8px_rgba(251,191,36,0.25)]">
+                              Processing
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <div className="inline-flex items-center gap-1 text-gray-400">
+                              <button 
+                                onClick={() => showToast('Order details opened for Ibnul Shams.')}
+                                className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
+                                title="View Details"
                               >
-                                {ord.status || 'Pending'}
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => showToast('Archived order row.')}
+                                className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
+                                title="Remove"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* Row 2: Ilham Budi Agung */}
+                        <tr className="hover:bg-amber-50/30 transition-colors">
+                          <td className="py-3.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">
+                                a
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-700 font-medium">
+                                <span>Amazon</span>
+                                <Mail className="w-3 h-3 text-gray-400" />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3.5">
+                            <p className="font-bold text-gray-800">Ilham Budi Agung</p>
+                            <p className="text-[11px] text-gray-400">ilahmbudi@google.com</p>
+                          </td>
+                          <td className="py-3.5 font-bold text-gray-800">UGX 1,349,000</td>
+                          <td className="py-3.5">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100/70 text-amber-800 shadow-[0_0_8px_rgba(251,191,36,0.25)]">
+                              Processing
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <div className="inline-flex items-center gap-1 text-gray-400">
+                              <button 
+                                onClick={() => showToast('Order details opened for Ilham Budi.')}
+                                className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
+                                title="View Details"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => showToast('Archived order row.')}
+                                className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
+                                title="Remove"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* Row 3: Mohammad Karim */}
+                        <tr className="hover:bg-amber-50/30 transition-colors">
+                          <td className="py-3.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                                S
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-700 font-medium">
+                                <span>On Shop</span>
+                                <Phone className="w-3 h-3 text-gray-400" />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3.5">
+                            <p className="font-bold text-gray-800">Mohammad Karim</p>
+                            <p className="text-[11px] text-gray-400">m_karim@yahoo.com</p>
+                          </td>
+                          <td className="py-3.5 font-bold text-gray-800">UGX 272,500</td>
+                          <td className="py-3.5">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600">
+                              Cancel
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <div className="inline-flex items-center gap-1 text-gray-400">
+                              <button 
+                                onClick={() => showToast('Order details opened for Mohammad Karim.')}
+                                className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
+                                title="View Details"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => showToast('Archived order row.')}
+                                className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
+                                title="Remove"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* Row 4: Layla Al-Mansoori / Live Orders */}
+                        {orders.length > 0 ? (
+                          orders.slice(0, 1).map((ord) => (
+                            <tr key={ord.id} className="hover:bg-amber-50/30 transition-colors">
+                              <td className="py-3.5">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                                    S
+                                  </div>
+                                  <div className="flex items-center gap-1 text-gray-700 font-medium">
+                                    <span>On Shop</span>
+                                    <Phone className="w-3 h-3 text-gray-400" />
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-3.5">
+                                <p className="font-bold text-gray-800">{ord.customer_name || 'Boutique Patron'}</p>
+                                <p className="text-[11px] text-gray-400">{ord.customer_phone || ord.customer_email || 'Direct Checkout'}</p>
+                              </td>
+                              <td className="py-3.5 font-bold text-gray-800">{formatUGX(ord.total_amount)}</td>
+                              <td className="py-3.5">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
+                                  ord.status === 'Completed' 
+                                    ? 'bg-emerald-50 text-emerald-600' 
+                                    : ord.status === 'Cancelled' 
+                                    ? 'bg-rose-50 text-rose-600' 
+                                    : 'bg-amber-100/70 text-amber-800'
+                                }`}>
+                                  {ord.status || 'Processing'}
+                                </span>
+                              </td>
+                              <td className="py-3.5 text-right">
+                                <div className="inline-flex items-center gap-1 text-gray-400">
+                                  <button 
+                                    onClick={() => setViewingOrder(ord)}
+                                    className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
+                                    title="View Details"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button 
+                                    onClick={() => showToast('Archived order row.')}
+                                    className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
+                                    title="Remove"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr className="hover:bg-amber-50/30 transition-colors">
+                            <td className="py-3.5">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                                  S
+                                </div>
+                                <div className="flex items-center gap-1 text-gray-700 font-medium">
+                                  <span>On Shop</span>
+                                  <Phone className="w-3 h-3 text-gray-400" />
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3.5">
+                              <p className="font-bold text-gray-800">Layla Al-Mansoori</p>
+                              <p className="text-[11px] text-gray-400">layla@dainty.ug</p>
+                            </td>
+                            <td className="py-3.5 font-bold text-gray-800">UGX 540,000</td>
+                            <td className="py-3.5">
+                              <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600">
+                                Completed
                               </span>
                             </td>
                             <td className="py-3.5 text-right">
-                              <button
-                                onClick={() => setViewingOrder(ord)}
-                                className="p-1.5 text-gray-400 hover:text-[#b38728] transition-colors"
-                                title="Inspect Order"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
+                              <div className="inline-flex items-center gap-1 text-gray-400">
+                                <button 
+                                  onClick={() => showToast('Order details opened for Layla Al-Mansoori.')}
+                                  className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
+                                  title="View Details"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={() => showToast('Archived order row.')}
+                                  className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
+                                  title="Remove"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={5} className="py-6 text-center text-gray-400">
-                            No orders placed yet. Orders placed via checkout will automatically appear here.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Business Growth Card (~35% / 4 cols) */}
+                <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-base font-bold text-gray-900">Business Growth</h4>
+                      <p className="text-xs text-gray-400 mt-0.5">Based on Country / Region</p>
+                    </div>
+                    <button 
+                      onClick={() => showToast('Regional telemetry updated.')}
+                      className="p-1 text-gray-400 hover:text-gray-700 transition-colors"
+                      title="More Options"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Map Container with Dark Tooltip and Zoom Buttons */}
+                  <div className="relative w-full h-44 rounded-xl bg-slate-50/70 border border-gray-100 overflow-hidden my-3 p-3 flex items-center justify-center">
+                    {/* Subtle World Map SVG Silhouette */}
+                    <svg viewBox="0 0 400 200" className="w-full h-full opacity-30 text-gray-400 fill-current">
+                      <path d="M70,40 Q90,30 110,45 T140,40 T160,60 T140,90 T100,95 T80,75 Z" />
+                      <path d="M190,40 Q220,35 250,55 T300,50 T330,80 T300,120 T240,110 T200,80 Z" />
+                      <path d="M210,100 Q240,110 250,150 T220,180 T190,150 T200,110 Z" />
+                      <path d="M100,120 Q130,130 135,170 T110,195 T90,160 Z" />
+                      <path d="M320,130 Q350,135 365,160 T340,180 T310,160 Z" />
+                    </svg>
+
+                    {/* Floating Dark Stat Tooltip (Matches five.webp floating tooltip) */}
+                    <div className="absolute right-4 top-4 bg-[#0f172a] text-white p-3 rounded-xl shadow-xl border border-slate-700/60 text-[11px] space-y-1 z-10 animate-fade-in">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-400">Revenue :</span>
+                        <span className="font-bold text-white">6.12 M</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-400">Income :</span>
+                        <span className="font-bold text-emerald-400 flex items-center gap-0.5">
+                          58% <ArrowUp className="w-2.5 h-2.5 stroke-[2.5]" />
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-gray-400">Growth :</span>
+                        <span className="font-bold text-emerald-400 flex items-center gap-0.5">
+                          30% <ArrowUp className="w-2.5 h-2.5 stroke-[2.5]" />
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Glowing Location Marker on East Africa / Uganda */}
+                    <div className="absolute left-[54%] top-[62%] -translate-x-1/2 -translate-y-1/2">
+                      <span className="relative flex h-3.5 w-3.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b38728] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#b38728] ring-2 ring-white"></span>
+                      </span>
+                    </div>
+
+                    {/* Zoom In/Out Buttons */}
+                    <div className="absolute left-3 bottom-3 flex flex-col gap-1 z-10">
+                      <button 
+                        onClick={() => showToast('Map zoom in.')}
+                        className="w-6 h-6 rounded-md bg-white border border-gray-200 shadow-2xs flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                        title="Zoom In"
+                      >
+                        <ZoomIn className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => showToast('Map zoom out.')}
+                        className="w-6 h-6 rounded-md bg-white border border-gray-200 shadow-2xs flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                        title="Zoom Out"
+                      >
+                        <ZoomOut className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Country Progress Bars */}
+                  <div className="space-y-3.5 pt-2">
+                    {/* Item 1: Uganda */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-[9px] text-white font-bold">
+                            UG
+                          </span>
+                          <div>
+                            <p className="font-bold text-gray-800 leading-tight">Uganda</p>
+                            <p className="text-[10px] text-gray-400">1,98,240 Customers</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-gray-700">58%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '58%' }}></div>
+                      </div>
+                    </div>
+
+                    {/* Item 2: Kenya */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-4 rounded-full bg-[#f97316] flex items-center justify-center text-[9px] text-white font-bold">
+                            KE
+                          </span>
+                          <div>
+                            <p className="font-bold text-gray-800 leading-tight">Kenya</p>
+                            <p className="text-[10px] text-gray-400">1,21,240 Customers</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-gray-700">16%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#f97316] h-full rounded-full" style={{ width: '16%' }}></div>
+                      </div>
+                    </div>
+
+                    {/* Item 3: UAE & Global */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-4 rounded-full bg-[#b38728] flex items-center justify-center text-[9px] text-white font-bold">
+                            GL
+                          </span>
+                          <div>
+                            <p className="font-bold text-gray-800 leading-tight">UAE &amp; Global</p>
+                            <p className="text-[10px] text-gray-400">45,100 Customers</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-gray-700">26%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full" 
+                          style={{ width: '26%', background: 'var(--gradient-gold-metallic)' }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
