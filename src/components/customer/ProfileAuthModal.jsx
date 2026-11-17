@@ -1,16 +1,20 @@
 /**
  * DAINTY STUDS & CHAINS — ProfileAuthModal Component
- * Sleek, gold-themed sign-in / sign-up modal featuring Email and True Google authentication options,
- * password reset functionality, and full interactivity leveraging src/services/auth.js.
+ * Sleek, gold-themed sign-in / sign-up modal featuring an explicit Account Chooser for returning users,
+ * Email and True Google authentication options (`prompt: 'select_account'`), password reset,
+ * and full interactivity leveraging src/services/auth.js.
  */
 
-import { useState } from 'react';
-import { X, Mail, Lock, User, Phone, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Mail, Lock, User, Phone, MapPin, CheckCircle2, ChevronRight, UserPlus } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset } from '../../services/auth';
+import { getSavedAccounts } from '../../services/authManager';
 
 export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signin', onSuccess }) {
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [savedAccounts, setSavedAccounts] = useState([]);
+  const [showAccountChooser, setShowAccountChooser] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,6 +26,29 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const passwordInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const accounts = getSavedAccounts();
+      setSavedAccounts(accounts);
+      setIsSignUp(initialMode === 'signup');
+      setShowAccountChooser(initialMode !== 'signup' && accounts.length > 0);
+      setIsForgotPassword(false);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        address: ''
+      });
+      setResetEmail('');
+      setError('');
+      setLoading(false);
+      setSuccessMsg('');
+    }
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
@@ -29,6 +56,27 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
+  };
+
+  const handleSelectSavedAccount = (account) => {
+    setError('');
+    if (account.provider === 'google') {
+      // Force Google's explicit account chooser so the user can pick/confirm any Google account
+      handleGoogleSignIn();
+      return;
+    }
+    // Pre-fill ONLY email and require explicit password entry (never auto-log in)
+    setShowAccountChooser(false);
+    setFormData({
+      name: '',
+      email: account.email,
+      phone: '',
+      password: '',
+      address: ''
+    });
+    setTimeout(() => {
+      if (passwordInputRef.current) passwordInputRef.current.focus();
+    }, 60);
   };
 
   const handleSubmit = async (e) => {
@@ -251,6 +299,34 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
           background: #faf8f5;
           transform: translateY(-1px);
         }
+        .account-chooser-list {
+          width: 100%;
+          max-width: 340px;
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+          margin: 0.75rem 0 1rem 0;
+          max-height: 220px;
+          overflow-y: auto;
+        }
+        .account-chooser-item {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.7rem 0.9rem;
+          background: #faf8f5;
+          border: 1px solid #e7e3dc;
+          border-radius: 10px;
+          cursor: pointer;
+          text-align: left;
+          transition: all 0.2s ease;
+        }
+        .account-chooser-item:hover {
+          border-color: #b38728;
+          background: #fffdf8;
+          box-shadow: 0 4px 12px rgba(179,135,40,0.12);
+        }
         @media (max-width: 768px) {
           .profile-auth-card { flex-direction: column; max-width: 440px; }
           .profile-auth-gold-side { width: 100%; padding: 2rem 1.5rem; }
@@ -329,6 +405,100 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                 </form>
               )}
             </>
+          ) : !isSignUp && showAccountChooser && savedAccounts.length > 0 ? (
+            <>
+              <h2 style={{ fontFamily: 'serif', fontSize: '1.75rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.35rem' }}>
+                Choose an Account
+              </h2>
+              <p style={{ fontSize: '0.78rem', color: '#78716c', marginBottom: '0.75rem' }}>
+                Select an account to sign in to DAINTY
+              </p>
+
+              {successMsg ? (
+                <div style={{ padding: '1.5rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.6rem', margin: '1rem 0' }}>
+                  <CheckCircle2 size={22} />
+                  <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>{successMsg}</span>
+                </div>
+              ) : (
+                <>
+                  <div className="account-chooser-list">
+                    {savedAccounts.map((acc) => (
+                      <button
+                        key={acc.email}
+                        type="button"
+                        className="account-chooser-item"
+                        onClick={() => handleSelectSavedAccount(acc)}
+                        disabled={loading}
+                      >
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #bf953f 0%, #b38728 100%)',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 800,
+                          fontSize: '0.9rem',
+                          flexShrink: 0
+                        }}>
+                          {(acc.name || acc.email)[0].toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1c1917', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {acc.name}
+                          </div>
+                          <div style={{ fontSize: '0.73rem', color: '#78716c', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {acc.email} · {acc.provider === 'google' ? 'Google' : 'Email'}
+                          </div>
+                        </div>
+                        <ChevronRight size={16} style={{ color: '#b38728', flexShrink: 0 }} />
+                      </button>
+                    ))}
+                  </div>
+
+                  {error && (
+                    <div style={{ color: '#dc2626', fontSize: '0.78rem', fontWeight: 600, margin: '0.3rem 0 0.6rem 0', maxWidth: '320px', textAlign: 'center' }}>
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="social-login-row" style={{ marginTop: '0.25rem' }}>
+                    <button
+                      type="button"
+                      className="social-login-btn"
+                      onClick={handleGoogleSignIn}
+                      disabled={loading}
+                      title="Choose a Google Account"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.18v3.15C3.17 21.32 7.23 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.18C.43 8.13 0 9.83 0 12s.43 3.87 1.18 5.39l4.09-3.15z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.23 0 3.17 2.68 1.18 6.61l4.09 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/>
+                      </svg>
+                      <span>{loading ? 'Opening Chooser…' : 'Google Account'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="social-login-btn"
+                      onClick={() => {
+                        setShowAccountChooser(false);
+                        setFormData({ name: '', email: '', phone: '', password: '', address: '' });
+                        setError('');
+                        setTimeout(() => {
+                          if (emailInputRef.current) emailInputRef.current.focus();
+                        }, 60);
+                      }}
+                    >
+                      <UserPlus size={16} style={{ color: '#b38728' }} />
+                      <span>Use Another Account</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <>
               <h2 style={{ fontFamily: 'serif', fontSize: '1.8rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.4rem' }}>
@@ -341,7 +511,8 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                   type="button"
                   className="social-login-btn"
                   onClick={handleGoogleSignIn}
-                  title="Sign in with Google"
+                  disabled={loading}
+                  title="Choose a Google Account"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
@@ -355,8 +526,7 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                   type="button"
                   className="social-login-btn"
                   onClick={() => {
-                    const emailInput = document.querySelector('input[name="email"]');
-                    if (emailInput) emailInput.focus();
+                    if (emailInputRef.current) emailInputRef.current.focus();
                   }}
                   title="Sign in with Email"
                 >
@@ -365,8 +535,8 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                 </button>
               </div>
 
-              <p style={{ fontSize: '0.78rem', color: '#78716c', marginBottom: '1.25rem' }}>
-                {isSignUp ? 'or register with your email address' : 'or sign in with your email credentials'}
+              <p style={{ fontSize: '0.78rem', color: '#78716c', marginBottom: '1.15rem' }}>
+                {isSignUp ? 'or register with your email address' : 'enter your email & password or choose Google'}
               </p>
 
               {successMsg ? (
@@ -394,6 +564,7 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                   <div className="profile-auth-input-group">
                     <Mail size={15} className="profile-auth-input-icon" />
                     <input
+                      ref={emailInputRef}
                       type="email"
                       name="email"
                       placeholder="Email Address"
@@ -421,6 +592,7 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                   <div className="profile-auth-input-group">
                     <Lock size={15} className="profile-auth-input-icon" />
                     <input
+                      ref={passwordInputRef}
                       type="password"
                       name="password"
                       placeholder="Password"
@@ -446,7 +618,16 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                   )}
 
                   {!isSignUp && (
-                    <div style={{ width: '100%', maxWidth: '320px', textAlign: 'right', marginBottom: '0.5rem' }}>
+                    <div style={{ width: '100%', maxWidth: '320px', display: 'flex', justifyContent: savedAccounts.length > 0 ? 'space-between' : 'flex-end', marginBottom: '0.5rem' }}>
+                      {savedAccounts.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => { setShowAccountChooser(true); setError(''); }}
+                          style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: '#b38728', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                        >
+                          ← Choose account
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => { setIsForgotPassword(true); setError(''); setSuccessMsg(''); }}
@@ -479,14 +660,16 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
           </h2>
           <p style={{ fontSize: '0.84rem', color: '#3e2723', lineHeight: '1.6', marginBottom: '1.75rem', maxWidth: '280px' }}>
             {isSignUp
-              ? 'To keep connected with DAINTY Studs & Chains please login with your personal account.'
-              : 'Enter your personal details and start your luxury handcrafted jewelry shopping journey with us.'}
+              ? 'To keep connected with DAINTY please choose or login with your personal account.'
+              : 'Enter your personal details and start your luxury handcrafted earrings journey with us.'}
           </p>
           <button
             type="button"
             className="profile-auth-toggle-btn"
             onClick={() => {
-              setIsSignUp(!isSignUp);
+              const nextIsSignUp = !isSignUp;
+              setIsSignUp(nextIsSignUp);
+              setShowAccountChooser(!nextIsSignUp && savedAccounts.length > 0);
               setIsForgotPassword(false);
               setError('');
               setSuccessMsg('');

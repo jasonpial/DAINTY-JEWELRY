@@ -56,7 +56,7 @@ function searchAndFilterProducts(products, query, routeParams, filters, activeSu
       const pDesc = (p.description || '').toLowerCase();
       const pTags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : '';
       if (pTarget === 'body jewelry') {
-        return p.category_id === 'body' || pField.includes('body') || pDesc.includes('body') || pTags.includes('body');
+        return pField.includes('body') || pDesc.includes('body') || pTags.includes('body');
       }
       if (pTarget.includes('helix') || pTarget.includes('cartilage')) {
         return pField.includes('helix') || pField.includes('cartilage') || pName.includes('helix') || pName.includes('cartilage') || pDesc.includes('cartilage') || pTags.includes('cartilage');
@@ -260,7 +260,7 @@ export default function ShopView({ routeParams, onAddToBag }) {
           <h1 className="dainty-page-title">{getPageTitle()}</h1>
           <div className="dainty-title-accent-line"></div>
           <p className="dainty-page-subtitle">
-            Tarnish-resistant, water-friendly 18K gold-plated studs, chains, promise rings, and bracelets.
+            Tarnish-resistant, water-friendly 18K gold-plated studs, huggies, hoops, and flat-back cartilage earrings.
           </p>
         </div>
 

@@ -6,12 +6,12 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Lock, Save, LogOut, CheckCircle2, ShoppingBag, Package, Heart, Shield, ArrowLeft } from 'lucide-react';
 import { getActiveUser, updateActiveUser, logoutUser } from '../../services/authManager';
-import { signOutUser } from '../../services/auth';
+import { signOutUser, syncProfileUpdateToFirestore } from '../../services/auth';
 import { formatUGX } from './ProductCard';
 import { getOrders } from '../../db';
 import { navigateTo } from '../../Router';
 
-export default function ProfileView({ cart = [], onLogout }) {
+export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'bag' | 'orders' | 'wishlist'
   const activeUser = getActiveUser();
   const [formData, setFormData] = useState({
@@ -50,12 +50,18 @@ export default function ProfileView({ cart = [], onLogout }) {
     setError('');
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     try {
       if (!formData.name.trim() || !formData.email.trim()) {
         throw new Error('Name and email are required.');
       }
+      await syncProfileUpdateToFirestore({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address
+      });
       updateActiveUser(formData);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -81,10 +87,19 @@ export default function ProfileView({ cart = [], onLogout }) {
           Account Sign In Required
         </h2>
         <p style={{ fontSize: '0.88rem', color: '#78716c', marginBottom: '1.75rem', lineHeight: '1.6' }}>
-          Please sign in to your DAINTY account to view your customer profile, saved bag, and order history.
+          Please choose an account or sign in to view your DAINTY profile, saved bag, and order history.
         </p>
-        <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center' }}>
-          <button className="btn-primary" onClick={() => navigateTo('home')}>
+        <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {onOpenAuth && (
+            <button type="button" className="btn-primary" onClick={onOpenAuth}>
+              Sign In / Choose Account
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => navigateTo('home')}
+            style={{ padding: '0.75rem 1.5rem', borderRadius: '30px', border: '1px solid #d6d3d1', background: '#fff', color: '#1c1917', fontWeight: 700, cursor: 'pointer' }}
+          >
             Return to Home
           </button>
         </div>
@@ -322,22 +337,24 @@ export default function ProfileView({ cart = [], onLogout }) {
                   </div>
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
-                    Secure Password
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <Lock size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
-                      required
-                    />
+                {activeUser.provider !== 'google' && (
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
+                      Secure Password
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                      <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Leave blank to keep current password"
+                        style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
                   <button

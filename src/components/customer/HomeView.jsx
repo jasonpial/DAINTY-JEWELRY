@@ -200,7 +200,7 @@ export default function HomeView({ onAddToBag }) {
               </button>
               <button
                 className="btn-secondary"
-                onClick={() => navigateTo('shop', { category: 'sets' })}
+                onClick={() => navigateTo('shop', { category: 'earrings', subcategory: 'stud_ear' })}
                 style={{ borderColor: 'rgba(255,255,255,0.4)', color: '#ffffff' }}
               >
                 Explore Ear Stacks
@@ -300,7 +300,7 @@ export default function HomeView({ onAddToBag }) {
               <Star size={16} fill="#c59b27" />
             </div>
             <p style={{ fontSize: '0.85rem', color: '#44403c', fontStyle: 'italic', lineHeight: 1.6, marginBottom: '1.2rem' }}>
-              "I wear my DAINTY paperclip necklace every single day, even in the shower, and it hasn't tarnished at all. Dispatch to Kololo was within 3 hours!"
+              "I wear my DAINTY gold hoop earrings every single day, even in the shower, and they haven't tarnished at all. Dispatch to Kololo was within 3 hours!"
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
               <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--gradient-gold-metallic)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', color: '#000000' }}>
@@ -344,7 +344,7 @@ export default function HomeView({ onAddToBag }) {
           <div>
             <h3 className="box-title">JOIN THE DAINTY CIRCLE</h3>
             <p style={{ fontSize: '0.82rem', color: '#78716c', marginBottom: '1.2rem', lineHeight: 1.5 }}>
-              Receive exclusive private sale access, ring sizing guides, and first notification on new chain drops.
+              Receive exclusive private sale access, ear styling guides, and first notification on new earring drops.
             </p>
             <form className="dainty-newsletter-form" onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing to DAINTY!'); }}>
               <input

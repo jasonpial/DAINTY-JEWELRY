@@ -90,6 +90,7 @@ export default function ProductManager() {
 
     setFormData({
       ...product,
+      category_id: 'earrings',
       price: product.price.toString(),
       sale_price: product.sale_price ? product.sale_price.toString() : '',
       images: imgs
@@ -323,7 +324,7 @@ export default function ProductManager() {
                       <span>
                         <strong style={{ display: 'block' }}>{mat}</strong>
                         <small style={{ fontSize: '0.68rem', opacity: 0.7 }}>
-                          {mat === 'Stainless Steel' ? 'Crystal flatbacks, studs & chains' : 'Rings, couples & sets'}
+                          {mat === 'Stainless Steel' ? 'Crystal flatbacks, studs & chains' : 'Huggies, studs & flat-backs'}
                         </small>
                       </span>
                       {formData.material === mat && <span style={{ marginLeft: 'auto', fontSize: '0.9rem' }}>✓</span>}

@@ -13,6 +13,7 @@ import ProfileAuthModal from './components/customer/ProfileAuthModal';
 import AccountSettingsModal from './components/customer/AccountSettingsModal';
 import ProfileView from './components/customer/ProfileView';
 import { getActiveUser } from './services/authManager';
+import { testConnection, subscribeToAuthChanges } from './services/auth';
 import {
   getCurrentShopper,
   getUserCart,
@@ -27,9 +28,16 @@ import { Mail, Phone, MapPin, Clock, ChevronLeft } from 'lucide-react';
 function App() {
   const route = useHashRoute();
   
-  // Initialize Database on mount
+  // Initialize Database & verify Firestore connectivity on mount
   useEffect(() => {
     initDB();
+    testConnection();
+    const unsubscribe = subscribeToAuthChanges((user) => {
+      setCurrentUser(user || null);
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, []);
 
   // Multi-User Isolated Shopper & Cart State
@@ -41,7 +49,11 @@ function App() {
 
   // Admin Authentication State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
-    return sessionStorage.getItem('dainty_admin_auth') === 'true';
+    try {
+      return sessionStorage.getItem('dainty_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
   });
 
   // Sync isolated cart across sessions and listen to events
@@ -260,7 +272,11 @@ function App() {
         )}
 
         {route.page === 'profile' && (
-          <ProfileView cart={cart} onLogout={() => setCurrentUser(null)} />
+          <ProfileView
+            cart={cart}
+            onLogout={() => setCurrentUser(null)}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+          />
         )}
 
         {route.page === 'contact' && (
@@ -301,7 +317,7 @@ function App() {
                   <h3 className="dainty-footer-brand-title">DAINTY</h3>
                 </div>
                 <p className="dainty-footer-brand-desc">
-                  Uganda&apos;s premier destination for 18K gold-plated studs, tarnish-resistant chains, promise rings, and luxury jewelry sets. Handcrafted with precision for everyday elegance.
+                  Uganda&apos;s premier destination for 18K gold-plated studs, huggies, hoops, and flat-back cartilage earrings. Handcrafted with precision for everyday elegance.
                 </p>
               </div>
 

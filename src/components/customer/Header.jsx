@@ -15,7 +15,7 @@ const MATERIALS = [
     id: 'Titanium',
     label: 'Titanium',
     icon: '💫',
-    sub: 'Rings, couples & sets',
+    sub: 'Huggies, studs & flat-backs',
   },
 ];
 
@@ -248,7 +248,7 @@ export default function Header({ cartCount, currentRoute, currentShopper, _onSwi
                           ✨ Full Collection
                         </a>
 
-                        {/* All 9 categories */}
+                        {/* Earrings category */}
                         {categories.map((cat) => (
                           <a
                             key={cat.id}

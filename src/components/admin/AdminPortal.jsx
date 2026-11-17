@@ -1710,7 +1710,7 @@ export default function AdminPortal({ onLogout } = {}) {
 
                               <td className="p-4">
                                 <span className="capitalize px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200/70">
-                                  {p.category_id || p.category || 'Jewelry'}
+                                  Earrings
                                 </span>
                               </td>
 
@@ -2604,7 +2604,7 @@ export default function AdminPortal({ onLogout } = {}) {
               <div className="text-xs overflow-hidden">
                 <p className="font-bold text-gray-900 truncate">{productToDelete.name}</p>
                 <p className="text-[#b38728] font-bold">{formatUGX(productToDelete.price)}</p>
-                <p className="text-gray-400 text-[10px] capitalize">Category: {productToDelete.category_id || 'Jewelry'}</p>
+                <p className="text-gray-400 text-[10px] capitalize">Category: Earrings</p>
               </div>
             </div>
 
@@ -2760,8 +2760,8 @@ function ProductFormModal({ product, onClose, onSave }) {
   const [formData, setFormData] = useState({
     id: product?.id || undefined,
     name: product?.name || '',
-    category_id: product?.category_id || product?.category || 'earrings',
-    subcategory_id: product?.subcategory_id || 'stud_ear',
+    category_id: 'earrings',
+    subcategory_id: subcategories.some(s => s.id === product?.subcategory_id) ? product.subcategory_id : 'stud_ear',
     piercing_location: product?.piercing_location || product?.piercing || 'Ear Lobe',
     price: product?.price || '',
     sale_price: product?.sale_price || '',
@@ -2827,7 +2827,7 @@ function ProductFormModal({ product, onClose, onSave }) {
       length_size: formData.length_size || 'Adjustable Fit / 45 cm standard chain length',
       gender: formData.gender || 'Women',
       occasion: formData.occasion || 'Everyday',
-      category_id: formData.category_id || 'earrings',
+      category_id: 'earrings',
       subcategory_id: formData.subcategory_id || 'stud_ear',
       piercing_location: formData.piercing_location || 'Ear Lobe',
       images: [activeImg, ...(formData.images?.slice(1) || [])].filter(Boolean)

@@ -81,7 +81,7 @@ export default function ChatWidget() {
       if (lastMsg && lastMsg.sender === 'customer') {
         let reply = "Thank you for messaging DAINTY! Our administrators have been notified. You can also contact us instantly via WhatsApp at +256 788 227027 or complete your order via Checkout.";
         if (content.toLowerCase().includes('price') || content.toLowerCase().includes('how much')) {
-          reply = "Most of our rings are between UGX 85,000 and UGX 180,000. You can check prices directly under each product or click 'Buy Now' to see delivery pricing!";
+          reply = "Most of our earrings are between UGX 85,000 and UGX 180,000. You can check prices directly under each product or click 'Buy Now' to see delivery pricing!";
         } else if (content.toLowerCase().includes('gold') || content.toLowerCase().includes('material')) {
           reply = "Our jewelry is crafted using premium 18K Gold Plated Stainless Steel and Sterling Silver, ensuring water resistance and tarnish-free durability.";
         }

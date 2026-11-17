@@ -4,12 +4,14 @@ import { navigateTo } from '../../Router';
 
 // Formatter for Ugandan Shilling (UGX)
 export function formatUGX(amount) {
-  return 'UGX ' + Math.round(amount).toLocaleString('en-US');
+  const num = Number(amount);
+  return 'UGX ' + Math.round(Number.isFinite(num) ? num : 0).toLocaleString('en-US');
 }
 
 // Formatter for US Dollars (USD) - Conversion rate: 1 USD = 3700 UGX
 export function formatUSD(amountUGX) {
-  const usd = amountUGX / 3700;
+  const num = Number(amountUGX);
+  const usd = (Number.isFinite(num) ? num : 0) / 3700;
   return '$' + usd.toFixed(2);
 }
 
@@ -40,7 +42,8 @@ export default function ProductCard({ product, onAddToBag }) {
 
   // Consistent rating and review count per product
   const rating = '4.9';
-  const reviewCount = ((id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 1500) + 850).toLocaleString('en-US');
+  const safeId = String(id || 'dainty_item');
+  const reviewCount = ((safeId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 1500) + 850).toLocaleString('en-US');
 
   const isSale = sale_price && sale_price < price;
   const activePrice = isSale ? sale_price : price;

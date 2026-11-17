@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, MapPin, Lock, Save, LogOut, CheckCircle2, ShoppingBag, Heart, Package, Shield } from 'lucide-react';
 import { getActiveUser, updateActiveUser, logoutUser } from '../../services/authManager';
+import { signOutUser, syncProfileUpdateToFirestore } from '../../services/auth';
 import { formatUGX } from './ProductCard';
 import { getOrders } from '../../db';
 
@@ -51,12 +52,18 @@ export default function AccountSettingsModal({ isOpen, onClose, cart = [], onLog
     setError('');
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     try {
       if (!formData.name.trim() || !formData.email.trim()) {
         throw new Error('Name and email are required.');
       }
+      await syncProfileUpdateToFirestore({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address
+      });
       updateActiveUser(formData);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -297,22 +304,24 @@ export default function AccountSettingsModal({ isOpen, onClose, cart = [], onLog
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#44403c', marginBottom: '0.3rem' }}>
-                  Password
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={15} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    style={{ width: '100%', padding: '0.65rem 0.75rem 0.65rem 2.4rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
-                    required
-                  />
+              {activeUser?.provider !== 'google' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#44403c', marginBottom: '0.3rem' }}>
+                    Password
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={15} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Leave blank to keep current password"
+                      style={{ width: '100%', padding: '0.65rem 0.75rem 0.65rem 2.4rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button
@@ -323,7 +332,8 @@ export default function AccountSettingsModal({ isOpen, onClose, cart = [], onLog
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
+                    await signOutUser();
                     logoutUser();
                     if (onLogout) onLogout();
                     onClose();

@@ -234,7 +234,9 @@ function getDbProducts() {
           const content = readFileSync(target, 'utf-8');
           const all = JSON.parse(content);
           if (Array.isArray(all)) {
-            return all.filter(p => p && p.id && !deletedSet.has(p.id));
+            return all
+              .filter(p => p && p.id && !deletedSet.has(p.id) && (p.category_id || 'earrings').toLowerCase() === 'earrings')
+              .map(p => ({ ...p, category_id: 'earrings' }));
           }
         }
       }
@@ -419,6 +421,9 @@ export async function handleApiRequest(req, res, customEnv = {}) {
         if (!product || (!product.name && !product.title)) {
           return send(res, 400, { error: 'Product name is required.' });
         }
+
+        // Enforce Earrings as the sole storefront product category
+        product.category_id = 'earrings';
 
         // Check if ID is in URL
         const idFromUrl = pathname.startsWith('/api/products/') ? pathname.replace('/api/products/', '').trim() : '';

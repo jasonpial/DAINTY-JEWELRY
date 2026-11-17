@@ -23,22 +23,6 @@ const slidesConfig = {
       description: 'Handpicked suites of huggies, clickers, and dainty studs.'
     }
   ],
-  rings: [
-    {
-      image: '/images/i.jpeg',
-      subtitle: '✨ MINIMALIST PIERCINGS',
-      title: 'Contour Rings & Clickers',
-      description: 'Seamless styling for helix, lobe, and cartilage.'
-    }
-  ],
-  necklaces: [
-    {
-      image: '/images/iv.jpeg',
-      subtitle: '⛓️ EARRINGS WITH CHAINS',
-      title: 'Draped Chain Earrings',
-      description: 'Suspended delicate chains and statement link piercings.'
-    }
-  ],
   earrings: [
     {
       image: '/images/vi.jpeg',
@@ -47,36 +31,12 @@ const slidesConfig = {
       description: '14K gold and implant-grade titanium threadless studs.'
     }
   ],
-  bracelets: [
-    {
-      image: '/images/iv.jpeg',
-      subtitle: '⛓️ CHAIN DRAPES & LINKS',
-      title: 'Earrings With Chains',
-      description: 'Signature chain-connected studs and huggies.'
-    }
-  ],
-  watches: [
-    {
-      image: '/images/0.jpeg',
-      subtitle: '💎 IMPLANT GRADE TITANIUM',
-      title: 'Precision Piercing Studs',
-      description: 'Surgical hypoallergenic studs for newly healed or sensitive ears.'
-    }
-  ],
   collections: [
     {
       image: '/images/viii.jpeg',
       subtitle: '💎 DAINTY CURATIONS',
       title: 'Studs & Chain Suites',
       description: 'Complete 3-pair matching ear stack sets.'
-    }
-  ],
-  accessories: [
-    {
-      image: '/images/iii.jpeg',
-      subtitle: '✨ PAVÉ CLICKERS',
-      title: 'Micro-Pavé Huggies',
-      description: 'Dainty micro-gemstone hoops for everyday glow.'
     }
   ]
 };
@@ -92,11 +52,6 @@ export default function HeroSlideshow({ category, collection }) {
   } else if (collection) {
     slides = slidesConfig.collections;
     activeKey = 'collections';
-  } else if (category === 'sets' || category === 'body') {
-    slides = slidesConfig.home;
-  } else if (category === 'accessories') {
-    slides = slidesConfig.accessories;
-    activeKey = 'accessories';
   }
 
   const [activeSlide, setActiveSlide] = useState(0);
@@ -198,7 +153,7 @@ export default function HeroSlideshow({ category, collection }) {
             <span className="promo-shop-now-link">SHOP NOW</span>
           </div>
           <img
-            src="/images/hero_rings.png"
+            src="/images/iv.jpeg"
             alt="Stainless Steel Collection"
             className="bottom-promo-img"
           />
@@ -215,7 +170,7 @@ export default function HeroSlideshow({ category, collection }) {
             <span className="promo-shop-now-link">SHOP NOW</span>
           </div>
           <img
-            src="/images/hero_home_luxury.png"
+            src="/images/vi.jpeg"
             alt="Titanium Collection"
             className="bottom-promo-img"
           />
@@ -232,7 +187,7 @@ export default function HeroSlideshow({ category, collection }) {
             <span className="promo-shop-now-link">SHOP NOW</span>
           </div>
           <img
-            src="/images/hero_home_earrings.png"
+            src="/images/vii.jpeg"
             alt="Full Collection"
             className="bottom-promo-img"
           />
