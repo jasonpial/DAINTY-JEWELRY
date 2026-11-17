@@ -5,78 +5,78 @@ import { navigateTo } from '../../Router';
 const slidesConfig = {
   home: [
     {
-      image: '/images/hero_home_luxury.png',
-      subtitle: 'Black Friday This Week',
-      title: 'Work Desk Surface Studio 2019',
-      description: 'Starting at £1599.00'
+      image: '/images/v.jpeg',
+      subtitle: 'DAINTY STUDS & CHAINS',
+      title: 'Earrings With Draped Chains',
+      description: 'Hypoallergenic 18K gold and titanium pieces crafted for sensitive ears.'
     },
     {
-      image: '/images/hero_necklaces.png',
-      subtitle: 'WEDDING COLLECTION',
-      title: 'CELEBRATE YOUR LOVE WITH ELEGANCE',
-      description: 'Gold plated chains, bracelets, and bridal accessories check-marked for absolute excellence.'
+      image: '/images/vii.jpeg',
+      subtitle: 'SIGNATURE STUDS',
+      title: 'Marquise Cluster & Flat-Backs',
+      description: 'Comfortable flat-back labrets and sparkling multi-stone studs.'
     },
     {
-      image: '/images/hero_home_earrings.png',
-      subtitle: 'EXQUISITE JEWELRY',
-      title: 'UNMATCHED QUALITY & SHINE',
-      description: 'Upgrade your ear stack with premium cubic zirconia, drop earrings, and minimal cuffs.'
+      image: '/images/viii.jpeg',
+      subtitle: 'CURATED EAR STACKS',
+      title: 'Mix, Match & Stack Your Piercings',
+      description: 'Handpicked suites of huggies, clickers, and dainty studs.'
     }
   ],
   rings: [
     {
-      image: '/images/hero_rings.png',
-      subtitle: '💍 CLASSIC BANDS & SOLITAIRES',
-      title: 'Rings of Devotion & Promises',
-      description: 'From wedding bands to engagement and promise rings.'
+      image: '/images/i.jpeg',
+      subtitle: '✨ MINIMALIST PIERCINGS',
+      title: 'Contour Rings & Clickers',
+      description: 'Seamless styling for helix, lobe, and cartilage.'
     }
   ],
   necklaces: [
     {
-      image: '/images/hero_necklaces.png',
-      subtitle: '📿 PENDANTS & CHOKERS',
-      title: 'Adorn Your Neckline With Gold',
-      description: 'Chic initial chains, layered lockets, and chokers.'
+      image: '/images/iv.jpeg',
+      subtitle: '⛓️ EARRINGS WITH CHAINS',
+      title: 'Draped Chain Earrings',
+      description: 'Suspended delicate chains and statement link piercings.'
     }
   ],
   earrings: [
     {
-      image: '/images/hero_home_earrings.png',
-      subtitle: '✨ EARRING STACKS',
-      title: 'Studs, Huggies, & Ear Cuffs',
-      description: 'Mix and match hoops, drop earrings, and cartilage cuffs.'
+      image: '/images/vi.jpeg',
+      subtitle: '✨ FLAT-BACK STUDS & LABRETS',
+      title: 'Sleep-In Comfort Piercings',
+      description: '14K gold and implant-grade titanium threadless studs.'
     }
   ],
   bracelets: [
     {
-      image: '/images/hero_bracelets.png',
-      subtitle: '⛓️ CUFFS & CHAINS',
-      title: 'Bangles & Friendship Links',
-      description: 'Complete your look with gold-plated bangles.'
+      image: '/images/iv.jpeg',
+      subtitle: '⛓️ CHAIN DRAPES & LINKS',
+      title: 'Earrings With Chains',
+      description: 'Signature chain-connected studs and huggies.'
     }
   ],
   watches: [
     {
-      image: '/images/hero_watches.png',
-      subtitle: '⌚ CLASSIC HOROLOGY',
-      title: 'Timepieces of Distinction',
-      description: 'Luxury quartz watches and chronographs.'
+      image: '/images/0.jpeg',
+      subtitle: '💎 IMPLANT GRADE TITANIUM',
+      title: 'Precision Piercing Studs',
+      description: 'Surgical hypoallergenic studs for newly healed or sensitive ears.'
     }
   ],
   collections: [
     {
-      image: '/images/hero_home_luxury.png',
-      subtitle: '💎 DAINTY SPECIAL COLLECTIONS',
-      title: 'Curated Trends & Premium Drops',
-      description: 'Find the perfect gift or treat yourself.'
+      image: '/images/viii.jpeg',
+      subtitle: '💎 DAINTY CURATIONS',
+      title: 'Studs & Chain Suites',
+      description: 'Complete 3-pair matching ear stack sets.'
     }
   ],
   accessories: [
     {
-      image: '/images/hero_accessories.png',
-      subtitle: '🎁 ACCESSORIES & CARE',
-      title: 'Store & Maintain Your Gems',
-      description: 'Luxury velvet boxes and travel organizers.'
+      image: '/images/iii.jpeg',
+      subtitle: '✨ PAVÉ CLICKERS',
+      title: 'Micro-Pavé Huggies',
+      description: 'Dainty micro-gemstone hoops for everyday glow.'
     }
   ]
 };

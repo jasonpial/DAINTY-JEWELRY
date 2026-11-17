@@ -2,16 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import {
   ShoppingBag, MessageSquareText, ShieldCheck, ArrowLeft,
   Check, HelpCircle, Loader2, CheckCircle2,
-  XCircle, AlertTriangle, Clock, RefreshCw, Info, Smartphone
+  XCircle, AlertTriangle, Clock, RefreshCw, Info, Smartphone,
+  Trash2, Plus, Minus, Users, X
 } from 'lucide-react';
 import { formatUGX, formatUSD } from './ProductCard';
 import { navigateTo } from '../../Router';
 import { saveOrder } from '../../db';
+import { getSavedShoppers, createNewShopper, getUserCart } from '../../services/cartManager';
 import {
   processFullPayment,
   detectMobileNetwork,
   generateOrderReference,
-  isRelworxConfigured,
+  getRelworxStatus,
   getMerchantNumber,
 } from '../../services/relworxPayments';
 
@@ -22,7 +24,7 @@ const AIRTEL_LOGO = '/airtel_logo.png';
 // ─────────────────────────────────────────────────────────────
 // Payment Status Modal
 // ─────────────────────────────────────────────────────────────
-function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, onClose, onRetry }) {
+function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, errorMessage, onClose, onRetry, onWhatsAppCheckout }) {
   const progressPct = status === 'polling' ? Math.min(100, (pollAttempt / maxPolls) * 100) : 100;
   const isMTN = network === 'MTN';
 
@@ -30,32 +32,34 @@ function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, onC
     polling: {
       icon: <Loader2 size={34} style={{ color: '#c59b27', animation: 'spin 1.2s linear infinite' }} />,
       title: 'Waiting for Payment…',
-      subtitle: `A USSD prompt was sent to ${phone}. Check your phone and approve the payment.`,
+      subtitle: `A USSD prompt was sent to ${phone}. Check your phone screen and enter your Mobile Money PIN to approve.`,
       color: '#c59b27', bg: 'rgba(197,155,39,0.08)',
     },
     successful: {
       icon: <CheckCircle2 size={34} style={{ color: '#16a34a' }} />,
       title: 'Payment Confirmed! 🎉',
-      subtitle: 'Your mobile money payment was received. Your order is now being processed.',
+      subtitle: 'Your mobile money payment was received successfully. Your order is now confirmed.',
       color: '#16a34a', bg: 'rgba(22,163,74,0.08)',
     },
     failed: {
       icon: <XCircle size={34} style={{ color: '#dc2626' }} />,
       title: 'Payment Failed',
-      subtitle: 'The payment could not be processed. Check your balance and try again.',
+      subtitle: errorMessage
+        ? `${errorMessage} The request has ended. No further prompts will be sent to your phone unless you try again.`
+        : 'The payment was not completed (declined, cancelled, or insufficient balance). No further prompts will be sent to your phone unless you try again.',
       color: '#dc2626', bg: 'rgba(220,38,38,0.08)',
     },
     timeout: {
       icon: <Clock size={34} style={{ color: '#d97706' }} />,
       title: 'Payment Timed Out',
-      subtitle: 'No approval received within 60 seconds. You may retry or checkout via WhatsApp.',
+      subtitle: 'No PIN authorization received within 60 seconds. You may retry or checkout instantly via WhatsApp.',
       color: '#d97706', bg: 'rgba(217,119,6,0.08)',
     },
     not_configured: {
-      icon: <AlertTriangle size={34} style={{ color: '#7c3aed' }} />,
-      title: 'Relworx Not Configured',
-      subtitle: 'Add your Relworx API key and Account Number to the .env file to enable live payments.',
-      color: '#7c3aed', bg: 'rgba(124,58,237,0.08)',
+      icon: <AlertTriangle size={34} style={{ color: '#b38728' }} />,
+      title: 'Relworx Gateway Setup Required',
+      subtitle: errorMessage || 'Relworx payment credentials need to be configured in the Admin Portal under Settings or in your Hostinger server environment.',
+      color: '#b38728', bg: 'rgba(197,155,39,0.12)',
     },
   };
 
@@ -96,7 +100,47 @@ function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, onC
           {c.icon}
         </div>
         <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.6rem' }}>{c.title}</h3>
-        <p style={{ fontSize: '0.84rem', color: '#78716c', lineHeight: '1.65', marginBottom: '1.4rem' }}>{c.subtitle}</p>
+        <p style={{ fontSize: '0.84rem', color: '#78716c', lineHeight: '1.65', marginBottom: '1.2rem' }}>{c.subtitle}</p>
+
+        {/* Actionable guidance if API key is not mapped to the business account in Relworx */}
+        {errorMessage && errorMessage.toLowerCase().includes('authorized to access this business account') && (
+          <div style={{
+            background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px',
+            padding: '0.85rem 1rem', textAlign: 'left', marginBottom: '1.3rem',
+            fontSize: '0.78rem', color: '#92400e', lineHeight: '1.55'
+          }}>
+            <strong style={{ display: 'block', marginBottom: '0.35rem', color: '#78350f', fontSize: '0.82rem' }}>
+              How to fix this in Relworx:
+            </strong>
+            <ol style={{ paddingLeft: '1.2rem', margin: 0 }}>
+              <li>Log into <strong>payments.relworx.com</strong></li>
+              <li>Go to <strong>Organizations</strong> &rarr; Click <strong>View</strong> on DAINTY STUDS AND CHAINS</li>
+              <li>Click <strong>API Keys</strong> &rarr; Click <strong>Edit</strong> on your API key</li>
+              <li>Under <strong>Business account</strong>, select/check <strong>REL11AE925B85</strong></li>
+              <li>Click <strong>Update</strong> to save, then try again</li>
+            </ol>
+          </div>
+        )}
+
+        {/* Actionable guidance if server IP is not whitelisted in Relworx */}
+        {errorMessage && errorMessage.toLowerCase().includes('authorized ip access') && (
+          <div style={{
+            background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px',
+            padding: '0.85rem 1rem', textAlign: 'left', marginBottom: '1.3rem',
+            fontSize: '0.78rem', color: '#1e40af', lineHeight: '1.55'
+          }}>
+            <strong style={{ display: 'block', marginBottom: '0.35rem', color: '#1e3a8a', fontSize: '0.82rem' }}>
+              How to fix "No Authorized IP Access" in Relworx:
+            </strong>
+            <ol style={{ paddingLeft: '1.2rem', margin: 0 }}>
+              <li>Log into <strong>payments.relworx.com</strong></li>
+              <li>Go to <strong>Organizations &rarr; Business Accounts &rarr; REL11AE925B85</strong></li>
+              <li>Click <strong>Edit Business Account</strong></li>
+              <li>In the <strong>API Authorized IPs</strong> field, enter: <code style={{ background: '#fff', padding: '1px 5px', borderRadius: '4px', border: '1px solid #bfdbfe', fontWeight: 700 }}>151.106.96.51</code></li>
+              <li>Click <strong>Update</strong> to save, then click Try Again</li>
+            </ol>
+          </div>
+        )}
 
         {/* Progress bar during polling */}
         {status === 'polling' && (
@@ -116,7 +160,7 @@ function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, onC
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          {(status === 'failed' || status === 'timeout') && onRetry && (
+          {(status === 'failed' || status === 'timeout' || status === 'not_configured') && onRetry && (
             <button onClick={onRetry} style={{
               background: 'linear-gradient(135deg,#1c1917,#3c3530)', color: '#fff',
               border: 'none', borderRadius: '10px', padding: '0.75rem 1.5rem',
@@ -126,24 +170,24 @@ function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, onC
               <RefreshCw size={15} /> Try Again
             </button>
           )}
+          {status !== 'polling' && onWhatsAppCheckout && (
+            <button onClick={onWhatsAppCheckout} style={{
+              background: '#25D366', color: '#fff', border: 'none',
+              borderRadius: '10px', padding: '0.75rem 1.5rem', cursor: 'pointer',
+              fontSize: '0.85rem', fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            }}>
+              <MessageSquareText size={16} /> Complete Order via WhatsApp
+            </button>
+          )}
           {status !== 'polling' && onClose && (
             <button onClick={onClose} style={{
               background: '#f7f5f2', color: '#44403c', border: '1px solid #e7e5e0',
               borderRadius: '10px', padding: '0.7rem 1.5rem', cursor: 'pointer',
               fontSize: '0.82rem', fontWeight: 600,
             }}>
-              {status === 'successful' ? 'View My Order' : 'Close'}
+              {status === 'successful' ? 'View My Order' : 'Cancel'}
             </button>
-          )}
-          {status === 'not_configured' && (
-            <a href="https://payments.relworx.com/users/sign_up" target="_blank" rel="noopener noreferrer"
-              style={{
-                background: 'linear-gradient(135deg,#c59b27,#ddb340)', color: '#000',
-                borderRadius: '10px', padding: '0.75rem 1.5rem', textDecoration: 'none',
-                fontSize: '0.85rem', fontWeight: 700, display: 'block',
-              }}>
-              Set Up Relworx Account →
-            </a>
           )}
         </div>
       </div>
@@ -154,21 +198,65 @@ function PaymentStatusModal({ status, pollAttempt, maxPolls, phone, network, onC
 // ─────────────────────────────────────────────────────────────
 // Main CartView Component
 // ─────────────────────────────────────────────────────────────
-export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCart }) {
+export default function CartView({
+  cart = [],
+  onUpdateQty,
+  onRemoveItem,
+  onClearCart,
+  currentShopper,
+  onSwitchShopper,
+  onIdentifyShopper
+}) {
   // Selected network: null | 'MTN' | 'AIRTEL'
   const [selectedNetwork, setSelectedNetwork] = useState(null);
 
-  const [checkoutData, setCheckoutData] = useState({ name: '', phone: '', email: '', address: '', notes: '' });
-  const [momoPhone, setMomoPhone]       = useState('');
+  const [checkoutData, setCheckoutData] = useState({
+    name: currentShopper?.name && !currentShopper?.isGuest ? currentShopper.name : '',
+    phone: currentShopper?.phone || '',
+    email: currentShopper?.email || '',
+    address: '',
+    notes: ''
+  });
+  const [momoPhone, setMomoPhone]       = useState(currentShopper?.phone || '');
   const [couponCode, setCouponCode]     = useState('');
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState(null);
+  const [paymentError, setPaymentError]   = useState('');
+  const [relworxServerConfigured, setRelworxServerConfigured] = useState(true);
   const [pollAttempt, setPollAttempt]     = useState(0);
   const [loading, setLoading]             = useState(false);
   const [orderPlaced, setOrderPlaced]     = useState(null);
   const [secureSave, setSecureSave]       = useState(true);
+  const [showShopperModal, setShowShopperModal] = useState(false);
+  const [newShopperName, setNewShopperName]     = useState('');
+  const [newShopperPhone, setNewShopperPhone]   = useState('');
+  const savedShoppers = getSavedShoppers();
   const MAX_POLLS = 12;
   const abortRef  = useRef(false);
+  const isSubmittingRef = useRef(false);
+  const activeAbortControllerRef = useRef(null);
+
+  // Keep billing phone and name updated if currentShopper changes
+  useEffect(() => {
+    if (currentShopper?.phone && !checkoutData.phone) {
+      setCheckoutData(prev => ({
+        ...prev,
+        phone: currentShopper.phone,
+        name: prev.name || (currentShopper.name && !currentShopper.isGuest ? currentShopper.name : '')
+      }));
+      setMomoPhone(currentShopper.phone);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentShopper]);
+
+  // Check Relworx configuration on mount
+  useEffect(() => {
+    getRelworxStatus().then(status => {
+      if (status && status.configured !== undefined) {
+        setRelworxServerConfigured(status.configured);
+      }
+    }).catch(() => {});
+  }, []);
 
   // When billing phone is filled, pre-fill the momo phone
   useEffect(() => {
@@ -188,10 +276,25 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCheckoutData(prev => ({ ...prev, [name]: value }));
+    if (name === 'phone' && value.trim().length >= 10 && onIdentifyShopper) {
+      onIdentifyShopper(value.trim(), checkoutData.name, checkoutData.email);
+    }
   };
 
   const handleApplyCoupon = (code, pct) => { setCouponCode(code); setDiscountPercentage(pct); };
-  const resetModal = () => { setPaymentStatus(null); setPollAttempt(0); setLoading(false); abortRef.current = false; };
+  
+  const resetModal = () => {
+    if (activeAbortControllerRef.current) {
+      activeAbortControllerRef.current.abort();
+      activeAbortControllerRef.current = null;
+    }
+    abortRef.current = true;
+    isSubmittingRef.current = false;
+    setPaymentStatus(null);
+    setPaymentError('');
+    setPollAttempt(0);
+    setLoading(false);
+  };
 
   // ── WhatsApp fallback ────────────────────────────────────
   const handleWhatsAppCheckout = () => {
@@ -212,8 +315,14 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
 
   // ── Relworx MoMo Submit ──────────────────────────────────
   const handleMobileMoneyCheckout = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (cart.length === 0) return;
+    
+    // Strict Guard: Prevent double-click or multiple simultaneous prompts
+    if (isSubmittingRef.current || loading) {
+      return;
+    }
+
     if (!selectedNetwork) { alert('Please select a payment network — MTN or Airtel.'); return; }
 
     const phoneToUse = momoPhone || checkoutData.phone;
@@ -226,11 +335,18 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
       return;
     }
 
-    if (!isRelworxConfigured()) { setPaymentStatus('not_configured'); return; }
+    // Cancel any active previous session
+    if (activeAbortControllerRef.current) {
+      activeAbortControllerRef.current.abort();
+    }
+    const abortCtrl = new AbortController();
+    activeAbortControllerRef.current = abortCtrl;
 
+    isSubmittingRef.current = true;
     abortRef.current = false;
     setLoading(true);
     setPaymentStatus('polling');
+    setPaymentError('');
     setPollAttempt(0);
 
     const orderRef = generateOrderReference();
@@ -238,14 +354,21 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
     try {
       const result = await processFullPayment(
         { msisdn, amount: Math.round(cartTotal), reference: orderRef, description: `DAINTY Order – ${checkoutData.name}` },
-        (status, attempt) => {
-          if (abortRef.current) return;
+        (status, attempt, reason) => {
+          if (abortRef.current || abortCtrl.signal.aborted) return;
           setPollAttempt(attempt);
-          if (['successful', 'failed', 'timeout'].includes(status)) setPaymentStatus(status);
-        }
+          if (status === 'failed') {
+            abortCtrl.abort();
+            setPaymentStatus('failed');
+            if (reason) setPaymentError(reason);
+          } else if (status === 'successful' || status === 'timeout') {
+            setPaymentStatus(status);
+          }
+        },
+        abortCtrl.signal
       );
 
-      if (abortRef.current) return;
+      if (abortRef.current || abortCtrl.signal.aborted) return;
       setPaymentStatus(result.status);
 
       if (result.status === 'successful') {
@@ -267,14 +390,185 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
         });
         onClearCart();
         setOrderPlaced(newOrder);
+      } else if (result.status === 'failed') {
+        setPaymentError(result.message || 'Payment was declined, cancelled, or has insufficient balance.');
       }
     } catch (err) {
-      if (abortRef.current) return;
+      if (abortRef.current || abortCtrl.signal.aborted) return;
       console.error('[Relworx]', err);
-      setPaymentStatus(err.message?.includes('not configured') ? 'not_configured' : 'failed');
+      const msg = err.message || 'Payment initiation failed.';
+      setPaymentError(msg);
+      const isConfigIssue = msg.toLowerCase().includes('not configured') || msg.toLowerCase().includes('credentials') || msg.toLowerCase().includes('api key');
+      setPaymentStatus(isConfigIssue ? 'not_configured' : 'failed');
     } finally {
-      if (!abortRef.current) setLoading(false);
+      isSubmittingRef.current = false;
+      setLoading(false);
     }
+  };
+
+  // ── Shopper Modal Renderer ───────────────────────────────
+  const renderShopperModal = () => {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+        style={{ position: 'fixed', inset: 0, zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setShowShopperModal(false);
+        }}
+      >
+        <div
+          className="bg-white rounded-xl shadow-2xl border border-stone-200 relative max-h-[90vh] overflow-y-auto"
+          style={{ width: '100%', maxWidth: '500px', background: '#ffffff', borderRadius: '12px', padding: '1.75rem', position: 'relative', textAlign: 'left', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowShopperModal(false)}
+            style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', background: 'none', border: 'none', color: '#78716c', cursor: 'pointer', padding: '0.25rem' }}
+            title="Close modal"
+          >
+            <X size={20} />
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#fcebc5', color: '#7a5009', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+              <Users size={20} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#1c1917', fontFamily: 'serif' }}>Separate Shopping Bags</h3>
+              <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: '#78716c' }}>
+                Each shopper can curate, manage, and checkout their own private bag separately.
+              </p>
+            </div>
+          </div>
+
+          {/* Current Active Bag */}
+          <div style={{ background: '#faf8f5', border: '1px solid #e8e2d7', borderRadius: '8px', padding: '0.85rem 1rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1c1917' }}>
+                {currentShopper?.name || 'Active Bag'}
+              </span>
+              <span style={{ background: '#1c1917', color: '#ffffff', fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '10px' }}>
+                Active Now
+              </span>
+            </div>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#78716c' }}>
+              {currentShopper?.phone ? `Phone: ${currentShopper.phone} • ` : ''}
+              {cartCount} {cartCount === 1 ? 'item' : 'items'} in this bag
+            </p>
+          </div>
+
+          {/* Switch to another saved shopper bag */}
+          {savedShoppers.filter(s => s.id !== currentShopper?.id).length > 0 && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#44403c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                Switch to Another Bag on this Device
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto' }}>
+                {savedShoppers.filter(s => s.id !== currentShopper?.id).map(shopper => {
+                  const bagItems = getUserCart(shopper.id);
+                  const count = bagItems.reduce((sum, i) => sum + (i.quantity || 1), 0);
+                  return (
+                    <div
+                      key={shopper.id}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.85rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>{shopper.name || 'Shopper'}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                          {shopper.phone || 'Guest'} • {count} {count === 1 ? 'item' : 'items'}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onSwitchShopper) onSwitchShopper(shopper);
+                          setShowShopperModal(false);
+                        }}
+                        style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.3rem 0.65rem', fontSize: '0.75rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}
+                      >
+                        Open Bag
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Load / Create Separate Bag by Phone or Name */}
+          <div style={{ borderTop: '1px solid #eae6e1', paddingTop: '1.25rem' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#44403c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
+              Load or Create a Separate Bag
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 600, color: '#44403c', marginBottom: '0.25rem' }}>
+                  Customer / Shopper Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. David Pius, Sarah, Brenda"
+                  value={newShopperName}
+                  onChange={(e) => setNewShopperName(e.target.value)}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', fontSize: '0.8rem', border: '1px solid #d6d3d1', borderRadius: '6px', outline: 'none' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 600, color: '#44403c', marginBottom: '0.25rem' }}>
+                  Mobile Money Phone Number (Uganda)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="e.g. 0740979898 or 0788227027"
+                  value={newShopperPhone}
+                  onChange={(e) => setNewShopperPhone(e.target.value)}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', fontSize: '0.8rem', border: '1px solid #d6d3d1', borderRadius: '6px', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const phone = newShopperPhone.trim();
+                    const name = newShopperName.trim();
+                    if (phone && onIdentifyShopper) {
+                      onIdentifyShopper(phone, name, '');
+                      setShowShopperModal(false);
+                      setNewShopperName('');
+                      setNewShopperPhone('');
+                    } else if (name) {
+                      const created = createNewShopper(name, phone, '');
+                      if (onSwitchShopper) onSwitchShopper(created);
+                      setShowShopperModal(false);
+                      setNewShopperName('');
+                      setNewShopperPhone('');
+                    } else {
+                      alert('Please provide a name or phone number for the new bag.');
+                    }
+                  }}
+                  style={{ flex: 1, padding: '0.6rem 1rem', background: '#1c1917', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Load / Create Bag
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const fresh = createNewShopper('Guest Patron', '', '');
+                    if (onSwitchShopper) onSwitchShopper(fresh);
+                    setShowShopperModal(false);
+                  }}
+                  style={{ padding: '0.6rem 0.85rem', background: '#f5f5f4', color: '#44403c', border: '1px solid #d6d3d1', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Start Blank Bag
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // ── Order Success ────────────────────────────────────────
@@ -316,16 +610,32 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
   if (cart.length === 0) {
     return (
       <div className="animate-fade-in" style={{
-        maxWidth: '560px', margin: '6rem auto', padding: '4rem 2rem',
+        maxWidth: '560px', margin: '5rem auto', padding: '3.5rem 2rem',
         textAlign: 'center', background: '#ffffff',
         border: '1px solid #eae6e1', borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
       }}>
-        <ShoppingBag size={48} style={{ color: 'var(--color-gold-primary)', marginBottom: '1.5rem' }} />
-        <h3 style={{ fontSize: '1.4rem', color: '#1c1917', marginBottom: '0.5rem', fontWeight: 700 }}>Your Bag is Empty</h3>
-        <p style={{ fontSize: '0.9rem', color: '#78716c', marginBottom: '2rem' }}>
-          You haven't added any jewelry yet. Explore our signature collection.
-        </p>
-        <button className="btn-primary" onClick={() => navigateTo('shop')}>Start Exploring Shop</button>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+          padding: '0.4rem 0.85rem', background: '#faf8f5',
+          border: '1px solid #e8e2d7', borderRadius: '20px',
+          fontSize: '0.78rem', color: '#78716c', marginBottom: '1.5rem'
+        }}>
+          <Users size={14} style={{ color: '#b38728' }} />
+          <span>Shopping Bag for: <strong style={{ color: '#1c1917' }}>{currentShopper?.name || 'Guest Client'}</strong></span>
+        </div>
+
+        <div>
+          <ShoppingBag size={48} style={{ color: 'var(--color-gold-primary)', margin: '0 auto 1.25rem auto' }} />
+          <h3 style={{ fontSize: '1.4rem', color: '#1c1917', marginBottom: '0.5rem', fontWeight: 700 }}>Your Bag is Empty</h3>
+          <p style={{ fontSize: '0.9rem', color: '#78716c', marginBottom: '2rem' }}>
+            No jewelry currently in this bag. You can explore our collection or switch to another shopper's bag.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn-primary" onClick={() => navigateTo('shop')}>Start Exploring Shop</button>
+        </div>
       </div>
     );
   }
@@ -470,8 +780,10 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
           maxPolls={MAX_POLLS}
           phone={momoPhone || checkoutData.phone}
           network={selectedNetwork}
+          errorMessage={paymentError}
           onClose={() => { abortRef.current = true; resetModal(); }}
           onRetry={resetModal}
+          onWhatsAppCheckout={handleWhatsAppCheckout}
         />
       )}
 
@@ -485,6 +797,26 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
             <ArrowLeft size={15} /> Back to shop
           </a>
 
+          {/* Shopper / Bag Identity Banner */}
+          <div className="shopper-bag-header-banner">
+            <div className="shopper-bag-info">
+              <div className="shopper-bag-avatar">
+                {(currentShopper?.name || 'G')[0].toUpperCase()}
+              </div>
+              <div>
+                <h4 className="shopper-bag-title">
+                  <span>Shopping Bag: {currentShopper?.name || 'Guest Client'}</span>
+                  <span className="shopper-bag-badge">
+                    {currentShopper?.phone ? currentShopper.phone : 'Personal Bag'}
+                  </span>
+                </h4>
+                <p className="shopper-bag-subtitle">
+                  Isolated, private bag · {cartCount} {cartCount === 1 ? 'item' : 'items'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="product-review-card">
             <div className="product-review-header">
               <h3>Product Review</h3>
@@ -494,25 +826,88 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
               </span>
             </div>
 
-            {/* Items */}
+            {/* Interactive Items List */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {cart.map(item => {
                 const activePrice = item.sale_price || item.price;
+                const lineTotal = activePrice * item.quantity;
                 return (
                   <div key={`${item.id}_${item.selectedColor}`} className="checkout-product-item">
                     <img src={item.images[0]} alt={item.name} className="checkout-prod-img" />
+                    
                     <div className="checkout-prod-details">
                       <h4 className="checkout-prod-name">{item.name}</h4>
-                      <div className="checkout-prod-meta">Color: {item.selectedColor} | SKU: {item.sku}</div>
+                      <div className="checkout-prod-meta">
+                        Color: <strong style={{ color: '#1c1917' }}>{item.selectedColor}</strong> | SKU: {item.sku}
+                      </div>
+                      <div className="checkout-prod-unit-price">
+                        {formatUGX(activePrice)}
+                        {item.quantity > 1 && <span className="unit-label">({formatUGX(activePrice)} each)</span>}
+                      </div>
                     </div>
-                    <div className="checkout-prod-price-box">
-                      <div className="checkout-prod-price">{formatUGX(activePrice)}</div>
-                      <div className="checkout-prod-qty">Qty: {item.quantity}</div>
+
+                    <div className="checkout-prod-actions-box">
+                      {/* Quantity Stepper */}
+                      <div className="checkout-qty-stepper" role="group" aria-label="Item quantity controls">
+                        <button
+                          type="button"
+                          className="checkout-qty-btn minus"
+                          onClick={() => onUpdateQty && onUpdateQty(item.id, item.selectedColor, item.quantity - 1)}
+                          title={item.quantity === 1 ? "Remove item from bag on second thought" : "Decrease quantity"}
+                          aria-label="Decrease quantity"
+                        >
+                          {item.quantity === 1 ? <Trash2 size={13} style={{ color: '#dc2626' }} /> : <Minus size={13} />}
+                        </button>
+                        <span className="checkout-qty-val" aria-live="polite">{item.quantity}</span>
+                        <button
+                          type="button"
+                          className="checkout-qty-btn plus"
+                          onClick={() => onUpdateQty && onUpdateQty(item.id, item.selectedColor, item.quantity + 1)}
+                          title="Increase quantity"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus size={13} />
+                        </button>
+                      </div>
+
+                      {/* Total Item Price */}
+                      <div className="checkout-prod-total-price">
+                        {formatUGX(lineTotal)}
+                      </div>
+
+                      {/* Explicit Remove / Delete Button */}
+                      <button
+                        type="button"
+                        className="checkout-item-delete-btn"
+                        onClick={() => onRemoveItem && onRemoveItem(item.id, item.selectedColor)}
+                        title="Remove piece from bag on second thought"
+                        aria-label={`Remove ${item.name} from bag`}
+                      >
+                        <Trash2 size={14} />
+                        <span>Remove</span>
+                      </button>
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            {/* Clear Entire Bag Option if multiple items */}
+            {cart.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px dashed #eae6e1' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Remove all items from this shopping bag?')) {
+                      if (onClearCart) onClearCart();
+                    }
+                  }}
+                  style={{ background: 'none', border: 'none', color: '#b91c1c', fontSize: '0.74rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.2rem 0.5rem' }}
+                >
+                  <Trash2 size={12} /> Clear all items from this bag
+                </button>
+              </div>
+            )}
 
             {/* Coupon */}
             <div style={{ marginTop: '1.8rem', borderTop: '1px solid #eae6e1', paddingTop: '1.5rem' }}>
@@ -807,24 +1202,18 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
                   </label>
                 </div>
 
-                {/* Not-configured warning */}
-                {!isRelworxConfigured() && (
+                {/* Server configuration notice if credentials are not detected */}
+                {!relworxServerConfigured && (
                   <div style={{
-                    marginTop: '1.2rem', padding: '0.8rem 1rem',
-                    background: 'rgba(124,58,237,0.06)', border: '1.5px solid rgba(124,58,237,0.25)',
-                    borderRadius: '10px', fontSize: '0.78rem', color: '#5b21b6',
+                    marginTop: '1.2rem', padding: '0.85rem 1rem',
+                    background: 'rgba(197,155,39,0.08)', border: '1.5px solid rgba(197,155,39,0.3)',
+                    borderRadius: '10px', fontSize: '0.78rem', color: '#7a5a00',
                     display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
                   }}>
-                    <AlertTriangle size={15} style={{ flexShrink: 0, marginTop: '0.1rem' }} />
+                    <AlertTriangle size={15} style={{ flexShrink: 0, marginTop: '0.1rem', color: '#b38728' }} />
                     <div>
-                      <strong>Relworx API not configured.</strong>{' '}
-                      Add your{' '}
-                      <code style={{ background: 'rgba(124,58,237,0.1)', padding: '1px 4px', borderRadius: '3px' }}>VITE_RELWORX_API_KEY</code>{' '}
-                      and{' '}
-                      <code style={{ background: 'rgba(124,58,237,0.1)', padding: '1px 4px', borderRadius: '3px' }}>VITE_RELWORX_ACCOUNT_NO</code>{' '}
-                      to <code>.env</code>.{' '}
-                      <a href="https://payments.relworx.com/users/sign_up" target="_blank" rel="noopener noreferrer"
-                        style={{ color: '#7c3aed', fontWeight: 700 }}>Sign up at Relworx →</a>
+                      <strong>Relworx Payment Setup:</strong>{' '}
+                      Relworx gateway credentials can be set in the Admin Dashboard under Settings or in your Hostinger environment. You can also complete transactions directly via WhatsApp below.
                     </div>
                   </div>
                 )}
@@ -881,6 +1270,9 @@ export default function CartView({ cart, _onUpdateQty, _onRemoveItem, onClearCar
 
         </div>
       </div>
+
+      {/* Shopper / Multi-User Bag Switcher Modal */}
+      {showShopperModal && renderShopperModal()}
     </div>
   );
 }

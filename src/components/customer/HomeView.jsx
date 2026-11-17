@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from 'react';
 import HeroSlideshow from './HeroSlideshow';
 import ProductCard from './ProductCard';
 import CollectionCard from './CollectionCard';
@@ -15,77 +16,112 @@ import {
 } from 'lucide-react';
 
 export default function HomeView({ onAddToBag }) {
-  const allProducts = getProducts();
+  const [allProducts, setAllProducts] = useState(() => getProducts());
 
-  // Curated collections matching the attached photo
+  // Listen for real-time product database updates (add, edit, delete, server sync)
+  useEffect(() => {
+    const handleProductsChange = () => {
+      setAllProducts(getProducts());
+    };
+    window.addEventListener('storage', handleProductsChange);
+    window.addEventListener('dainty_products_changed', handleProductsChange);
+    return () => {
+      window.removeEventListener('storage', handleProductsChange);
+      window.removeEventListener('dainty_products_changed', handleProductsChange);
+    };
+  }, []);
+
+  // Sort products with most recently added creations first
+  const sortedProducts = useMemo(() => {
+    return [...allProducts].sort((a, b) => {
+      const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [allProducts]);
+
+  // Curated collections focusing exclusively on Dainty Studs & Chains (earrings, piercings, chain earrings)
   const featuredCollections = [
     {
-      id: 'rings',
-      title: 'Antique & Rings',
-      subtitle: 'Handcrafted',
-      image: '/images/hero_rings.png',
-      categoryId: 'rings'
-    },
-    {
-      id: 'bracelets',
-      title: 'Bangles & Cuffs',
-      subtitle: '18K Plated',
-      image: '/images/hero_bracelets.png',
-      categoryId: 'bracelets'
-    },
-    {
-      id: 'best_sellers',
-      title: 'Best Seller Series',
-      subtitle: 'Popular',
-      image: '/images/hero_home_chains.png',
-      collectionId: 'best_sellers'
-    },
-    {
-      id: 'necklaces',
-      title: 'Chains & Pendants',
-      subtitle: 'Tarnish-Free',
-      image: '/images/hero_necklaces.png',
-      categoryId: 'necklaces'
-    },
-    {
-      id: 'bridal',
-      title: 'Bridal Jewellery',
-      subtitle: 'Wedding',
-      image: '/images/hero_home_luxury.png',
-      occasion: 'Wedding'
-    },
-    {
-      id: 'earrings',
-      title: 'Studs & Hoops',
-      subtitle: 'Hypoallergenic',
-      image: '/images/hero_home_earrings.png',
+      id: 'earrings_with_chains',
+      title: 'Earrings With Chains',
+      subtitle: 'Draped Links',
+      image: '/images/iv.jpeg',
       categoryId: 'earrings'
     },
     {
-      id: 'watches',
-      title: 'Luxury Watches',
-      subtitle: 'Quartz Movement',
-      image: '/images/hero_watches.png',
-      categoryId: 'watches'
+      id: 'chain_draped_piercings',
+      title: 'Chain Draped Piercings',
+      subtitle: 'Helix & Cartilage',
+      image: '/images/v.jpeg',
+      categoryId: 'earrings'
     },
     {
-      id: 'sets',
-      title: 'Complete Sets',
-      subtitle: 'Gift Ready',
-      image: '/images/hero_accessories.png',
-      categoryId: 'sets'
-    }
+      id: 'flatback_studs',
+      title: 'Flat-Back Comfort Studs',
+      subtitle: '14K Gold Sleep-In',
+      image: '/images/vi.jpeg',
+      categoryId: 'earrings'
+    },
+    {
+      id: 'titanium_piercings',
+      title: 'Titanium Piercing Studs',
+      subtitle: 'Implant-Grade',
+      image: '/images/0.jpeg',
+      categoryId: 'earrings'
+    },
+    {
+      id: 'marquise_studs',
+      title: 'Marquise Cluster Studs',
+      subtitle: 'Multi-Stone Brilliance',
+      image: '/images/vii.jpeg',
+      categoryId: 'earrings'
+    },
+    {
+      id: 'pave_clickers',
+      title: 'Pavé Huggie Clickers',
+      subtitle: 'Seamless Sparkle',
+      image: '/images/iii.jpeg',
+      categoryId: 'earrings'
+    },
+    {
+      id: 'eternity_piercings',
+      title: 'Eternity Micro-Piercings',
+      subtitle: 'Lobe & Tragus',
+      image: '/images/ii.jpeg',
+      categoryId: 'earrings'
+    },
+    {
+      id: 'minimalist_rings',
+      title: 'Minimalist Piercing Rings',
+      subtitle: '18K Gold Plated',
+      image: '/images/i.jpeg',
+      categoryId: 'earrings'
+    },
+    
   ];
 
-  // New arrivals (first 4 items for 4-column desktop / 2-column mobile layout)
-  const newArrivals = allProducts
-    .filter(p => p.new_arrival)
-    .slice(0, 4);
+  // New arrivals: prioritizing newly created products (first 4 items for 4-column layout)
+  const newArrivals = useMemo(() => {
+    const arrivals = sortedProducts.filter(p => p.new_arrival);
+    if (arrivals.length < 4) {
+      const arrivalIds = new Set(arrivals.map(a => a.id));
+      const remaining = sortedProducts.filter(p => !arrivalIds.has(p.id));
+      return [...arrivals, ...remaining].slice(0, 4);
+    }
+    return arrivals.slice(0, 4);
+  }, [sortedProducts]);
 
-  // Best sellers (8 items for 4-column desktop x 2 rows / 2-column mobile x 4 rows)
-  const bestSellers = allProducts
-    .filter(p => p.best_seller)
-    .slice(0, 8);
+  // Best sellers: prioritizing high-demand pieces and recent creations (first 8 items)
+  const bestSellers = useMemo(() => {
+    const sellers = sortedProducts.filter(p => p.best_seller);
+    if (sellers.length < 8) {
+      const sellerIds = new Set(sellers.map(s => s.id));
+      const remaining = sortedProducts.filter(p => !sellerIds.has(p.id));
+      return [...sellers, ...remaining].slice(0, 8);
+    }
+    return sellers.slice(0, 8);
+  }, [sortedProducts]);
 
   return (
     <div className="dainty-home-container">
@@ -102,7 +138,7 @@ export default function HomeView({ onAddToBag }) {
           <h2 className="dainty-page-title">COLLECTIONS</h2>
           <div className="dainty-title-accent-line"></div>
           <p className="dainty-page-subtitle">
-            Explore our signature 18K gold-plated studs, tarnish-resistant chains, promise rings, and luxury jewelry sets.
+            Explore our signature 18K gold-plated studs, delicate ear chains, flat-back cartilage piercings, and curated ear stacks.
           </p>
         </div>
 
@@ -151,30 +187,30 @@ export default function HomeView({ onAddToBag }) {
         <div className="dainty-feature-strip-inner">
           <div className="dainty-feature-strip-content">
             <span className="strip-tag">LIMITED EXCLUSIVE OFFER</span>
-            <h3 className="strip-title">Pair Any Chain with a Matching Bracelet &amp; Save 10%</h3>
+            <h3 className="strip-title">Pair Any Stud with a Draped Piercing Chain &amp; Save 10%</h3>
             <p className="strip-desc">
-              Every piece is crafted with hypoallergenic stainless steel &amp; titanium cores, finished with 18K gold plating designed for Kampala’s climate.
+              Every piece is crafted with hypoallergenic titanium &amp; stainless steel cores, finished with 18K gold plating designed for effortless everyday wear and sensitive ears.
             </p>
             <div className="strip-actions">
               <button
                 className="btn-primary"
-                onClick={() => navigateTo('shop', { collection: 'sale' })}
+                onClick={() => navigateTo('shop', { category: 'earrings' })}
               >
-                Shop The Set Offer
+                Shop Studs &amp; Chains
               </button>
               <button
                 className="btn-secondary"
                 onClick={() => navigateTo('shop', { category: 'sets' })}
                 style={{ borderColor: 'rgba(255,255,255,0.4)', color: '#ffffff' }}
               >
-                Explore Sets
+                Explore Ear Stacks
               </button>
             </div>
           </div>
           <div className="dainty-feature-strip-image">
             <img
-              src="/images/hero_home_luxury.png"
-              alt="Luxury jewelry set"
+              src="/images/v.jpeg"
+              alt="Draped chain piercing"
               className="strip-img"
             />
           </div>
@@ -283,16 +319,16 @@ export default function HomeView({ onAddToBag }) {
           <h3 className="box-title">FOLLOW @DAINTY.JEWELRY</h3>
           <div className="dainty-ig-grid">
             <div className="dainty-ig-item">
-              <img src="/images/hero_rings.png" alt="Rings collection" />
+              <img src="/images/iv.jpeg" alt="Earrings with chains" />
             </div>
             <div className="dainty-ig-item">
-              <img src="/images/hero_necklaces.png" alt="Chains collection" />
+              <img src="/images/v.jpeg" alt="Draped chain piercing" />
             </div>
             <div className="dainty-ig-item">
-              <img src="/images/hero_bracelets.png" alt="Bracelets collection" />
+              <img src="/images/vii.jpeg" alt="Marquise cluster stud" />
             </div>
             <div className="dainty-ig-item">
-              <img src="/images/hero_watches.png" alt="Watches collection" />
+              <img src="/images/viii.jpeg" alt="Curated earring stack" />
             </div>
           </div>
           <button

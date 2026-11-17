@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getChats, saveMessage } from '../../db';
-import { MessageSquare, Send, RefreshCw, User, Calendar } from 'lucide-react';
+import { MessageSquare, Send, RefreshCw, User } from 'lucide-react';
 
 export default function ChatManager() {
   const [chats, setChats] = useState([]);
@@ -46,9 +46,6 @@ export default function ChatManager() {
 
   // Find customer name from first customer message or generic fallback
   const getCustomerName = (chat) => {
-    const welcomeIndex = chat.messages.findIndex(m => m.id === 'msg_welcome');
-    // If it's the admin welcome, it might mention their name. Let's look for customer messages
-    const custMsg = chat.messages.find(m => m.sender === 'customer');
     if (chat.chatId === 'admin_demo_chat') return 'Demo Customer';
     
     // Check if the chat welcome message contains "Hello [Name]!"

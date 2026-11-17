@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, ChevronDown, ChevronRight, ChevronLeft, Heart, Lock, X } from 'lucide-react';
+import { ShoppingBag, ChevronDown, ChevronRight, ChevronLeft, Heart, Lock, User } from 'lucide-react';
 import { navigateTo, goBack } from '../../Router';
 import { categories } from '../../db';
 
@@ -19,7 +19,7 @@ const MATERIALS = [
   },
 ];
 
-export default function Header({ cartCount, currentRoute }) {
+export default function Header({ cartCount, currentRoute, currentShopper, _onSwitchShopper, currentUser, onOpenAuth, _onOpenAccount }) {
   const [activeDropdown, setActiveDropdown] = useState(null); // 'shop_by' | null
   const [expandedMaterial, setExpandedMaterial] = useState(null); // 'Stainless Steel' | 'Titanium' | null
   const headerRef = useRef(null);
@@ -74,7 +74,7 @@ export default function Header({ cartCount, currentRoute }) {
 
   const shopByActive =
     activePage === 'shop' &&
-    (currentRoute.params.material || currentRoute.params.gender || currentRoute.params.occasion);
+    (currentRoute.params.material || currentRoute.params.gender || currentRoute.params.occasion || currentRoute.params.piercing);
 
   return (
     <header className="site-header-container" ref={headerRef}>
@@ -82,7 +82,7 @@ export default function Header({ cartCount, currentRoute }) {
       <div className="dainty-top-announcement-bar">
         <span className="announcement-arrow">‹</span>
         <span className="announcement-text">
-          Free Delivery in Kampala On Orders Over UGX 150,000 · Cash on Delivery &amp; Mobile Money
+          Delivery Across Kampala · Cash on Delivery &amp; Mobile Money
         </span>
         <span className="announcement-arrow">›</span>
       </div>
@@ -132,10 +132,31 @@ export default function Header({ cartCount, currentRoute }) {
 
         {/* Actions */}
         <div className="header-middle-right-actions">
+          <button
+            className="middle-wishlist-btn"
+            onClick={() => {
+              if (currentUser) {
+                navigateTo('profile');
+              } else {
+                if (onOpenAuth) onOpenAuth();
+              }
+            }}
+            title={currentUser ? `Account: ${currentUser.name}` : 'Sign In / Sign Up'}
+            style={{ position: 'relative' }}
+          >
+            <User size={20} />
+            {currentUser && (
+              <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', background: '#15803d', borderRadius: '50%', border: '1px solid #fff' }}></span>
+            )}
+          </button>
           <button className="middle-wishlist-btn" onClick={() => navigateTo('shop', { collection: 'best_sellers' })} title="Wishlist">
             <Heart size={20} />
           </button>
-          <button className="middle-cart-btn cart-gold-btn" onClick={() => navigateTo('cart')} title="Shopping Bag">
+          <button
+            className="middle-cart-btn cart-gold-btn"
+            onClick={() => navigateTo('cart')}
+            title={`Shopping Bag for ${currentShopper?.name || 'Guest Client'} (${cartCount} items)`}
+          >
             <ShoppingBag size={20} />
             {cartCount > 0 && <span className="cart-badge-gold">{cartCount}</span>}
           </button>
@@ -251,13 +272,18 @@ export default function Header({ cartCount, currentRoute }) {
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('gender', 'Men'); }}>Men</a>
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('gender', 'Unisex'); }}>Unisex</a>
 
-                {/* ═══ BY OCCASION ═══ */}
-                <div className="dropdown-section-label" style={{ marginTop: '0.4rem' }}>BY OCCASION</div>
-                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('occasion', 'Wedding'); }}>Wedding</a>
-                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('occasion', 'Engagement'); }}>Engagement</a>
-                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('occasion', 'Birthday'); }}>Birthday</a>
-                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('occasion', 'Gift'); }}>Gifts &amp; Hampers</a>
-                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('occasion', "Valentine's"); }}>Valentine's</a>
+                {/* ═══ SHOP BY PIERCING ═══ */}
+                <div className="dropdown-section-label" style={{ marginTop: '0.4rem' }}>Shop by Piercing</div>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Ear Lobe'); }}>Ear Lobe</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Helix/Cartilage'); }}>Helix/Cartilage</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Conch'); }}>Conch</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Tragus'); }}>Tragus</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Rook'); }}>Rook</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Daith'); }}>Daith</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Industrials'); }}>Industrials</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Nostril'); }}>Nostril</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Septum'); }}>Septum</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Body Jewelry'); }}>Body Jewelry</a>
               </div>
             </div>
 
@@ -273,10 +299,31 @@ export default function Header({ cartCount, currentRoute }) {
 
           {/* Desktop Right Actions */}
           <div className="nav-links-right-gold">
+            <button
+              className="gold-nav-icon-btn"
+              onClick={() => {
+                if (currentUser) {
+                  navigateTo('profile');
+                } else {
+                  if (onOpenAuth) onOpenAuth();
+                }
+              }}
+              title={currentUser ? `Account: ${currentUser.name}` : 'Sign In / Sign Up'}
+              style={{ position: 'relative' }}
+            >
+              <User size={20} />
+              {currentUser && (
+                <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', background: '#15803d', borderRadius: '50%', border: '1px solid #fff' }}></span>
+              )}
+            </button>
             <button className="gold-nav-icon-btn" onClick={() => navigateTo('shop', { collection: 'best_sellers' })} title="Wishlist">
               <Heart size={20} />
             </button>
-            <button className="gold-nav-icon-btn cart-gold-btn" onClick={() => navigateTo('cart')} title="Shopping Bag">
+            <button
+              className="gold-nav-icon-btn cart-gold-btn"
+              onClick={() => navigateTo('cart')}
+              title={`Shopping Bag for ${currentShopper?.name || 'Guest Client'} (${cartCount} items)`}
+            >
               <ShoppingBag size={20} />
               {cartCount > 0 && <span className="cart-badge-gold">{cartCount}</span>}
             </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, AlertTriangle, Upload } from 'lucide-react';
-import { getProducts, saveProduct, deleteProduct, categories, subcategories } from '../../db';
+import { Plus, Edit2, Trash2, X, Upload } from 'lucide-react';
+import { getProducts, saveProduct, deleteProduct, subcategories } from '../../db';
 import { formatUGX } from '../customer/ProductCard';
 
 export default function ProductManager() {
@@ -14,10 +14,13 @@ export default function ProductManager() {
     description: '',
     price: '',
     sale_price: '',
-    category_id: 'rings',
-    subcategory_id: '',
-    material: 'Stainless Steel',
+    category_id: 'earrings',
+    subcategory_id: 'stud_ear',
+    piercing_location: 'Ear Lobe',
+    material: '14K Gold-Plated',
+    finish: 'Tarnish-Resistant Finish',
     color: 'Gold',
+    length_size: 'Adjustable Fit / 45 cm standard chain length',
     gender: 'Women',
     occasion: 'Everyday',
     stock_quantity: 10,
@@ -30,12 +33,12 @@ export default function ProductManager() {
     clearance: false
   });
 
-  // Primary materials — the two major categories
-  const primaryMaterials = ['Stainless Steel', 'Titanium'];
-  const secondaryMaterials = ['Gold-Plated', 'Gold', 'Sterling Silver', 'Rose Gold', 'Silver'];
+  // Primary materials — studs and chains
+  const primaryMaterials = ['Stainless Steel & Titanium', 'Stainless Steel', 'Titanium'];
+  const secondaryMaterials = ['18K Gold-Plated', 'Gold', 'Sterling Silver', 'Rose Gold', 'Silver'];
 
   // Whether a primary material has been chosen (gates category selection)
-  const materialChosen = primaryMaterials.includes(formData.material);
+  const materialChosen = true;
 
   const reloadProducts = () => {
     setProducts(getProducts());
@@ -52,19 +55,22 @@ export default function ProductManager() {
       description: '',
       price: '',
       sale_price: '',
-      category_id: 'rings',
-      subcategory_id: 'eng_rings',
-      material: 'Stainless Steel',
+      category_id: 'earrings',
+      subcategory_id: 'stud_ear',
+      piercing_location: 'Ear Lobe',
+      material: '14K Gold-Plated',
+      finish: 'Tarnish-Resistant Finish',
       color: 'Gold',
+      length_size: 'Adjustable Fit / 45 cm standard chain length',
       gender: 'Women',
       occasion: 'Everyday',
-      stock_quantity: 10,
-      sku: 'DSC-RG-' + Math.floor(Math.random() * 900 + 100),
+      stock_quantity: 15,
+      sku: 'DSC-ST-' + Math.floor(Math.random() * 900 + 100),
       images: [
-        'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1543294001-f7cbfe92237e?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1598560917505-59a3ad559071?w=800&auto=format&fit=crop&q=80'
+        '/images/vi.jpeg',
+        '/images/vii.jpeg',
+        '/images/iv.jpeg',
+        '/images/v.jpeg'
       ],
       featured: false,
       new_arrival: true,
@@ -91,9 +97,10 @@ export default function ProductManager() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you absolutely sure you want to delete this jewelry product from your store catalog?')) {
-      deleteProduct(id);
+      setProducts(prev => prev.filter(p => p.id !== id));
+      await deleteProduct(id);
       reloadProducts();
     }
   };
@@ -381,9 +388,7 @@ export default function ProductManager() {
                         }}
                         className="form-input"
                       >
-                        {categories.map(c => (
-                          <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
-                        ))}
+                        <option value="earrings">✨ Earrings</option>
                       </select>
                     </div>
                     <div className="form-group">

@@ -1,0 +1,33 @@
+# ==============================================================================
+# DAINTY STUDS & CHAINS - Hostinger Web Server Configuration
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Route API requests to PHP handler
+  RewriteRule ^api/products/([a-zA-Z0-9_\-]+)/?$ api/index.php?endpoint=products&id=$1 [QSA,L]
+  RewriteRule ^api/products/reset/?$ api/index.php?endpoint=reset [QSA,L]
+  RewriteRule ^api/products/?$ api/index.php?endpoint=products [QSA,L]
+  RewriteRule ^api/database/config/?$ api/index.php?endpoint=db_config [QSA,L]
+  RewriteRule ^api/database/status/?$ api/index.php?endpoint=db_status [QSA,L]
+  RewriteRule ^api/relworx/(.*)$ api/index.php?endpoint=relworx/$1 [QSA,L]
+  RewriteRule ^api/(.*)$ api/index.php?endpoint=$1 [QSA,L]
+
+  # 2. Existing files and directories: serve directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 3. All other NON-API routes: serve index.html for React SPA Router
+  RewriteCond %{REQUEST_URI} !^/api
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Enable CORS headers for cross-device API requests
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS, PUT"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>

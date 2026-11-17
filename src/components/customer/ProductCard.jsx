@@ -21,13 +21,19 @@ export default function ProductCard({ product, onAddToBag }) {
     sale_price,
     stock_quantity,
     images = [],
+    image,
     material
   } = product;
 
-  // Filter out empty strings or invalid images
-  const validImages = (images && images.length > 0)
-    ? images.filter(img => img && img.trim() !== '')
-    : ['/images/hero_necklaces.png'];
+  // Filter out empty strings or invalid images, supporting both image string and images array
+  const rawImages = (Array.isArray(images) && images.length > 0) 
+    ? images 
+    : (image ? [image] : ['/images/vi.jpeg']);
+  const validImages = rawImages
+    .filter(img => img && typeof img === 'string' && img.trim() !== '');
+  if (validImages.length === 0) {
+    validImages.push('/images/vi.jpeg');
+  }
 
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
@@ -105,7 +111,7 @@ export default function ProductCard({ product, onAddToBag }) {
           loading="lazy"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = '/images/hero_rings.png';
+            e.currentTarget.src = '/images/vi.jpeg';
           }}
         />
 

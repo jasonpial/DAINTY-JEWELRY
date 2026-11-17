@@ -9,6 +9,19 @@ import ProductDetailView from './components/customer/ProductDetailView';
 import CartView from './components/customer/CartView';
 import ContactView from './components/customer/ContactView';
 import AdminPortal from './components/admin/AdminPortal';
+import ProfileAuthModal from './components/customer/ProfileAuthModal';
+import AccountSettingsModal from './components/customer/AccountSettingsModal';
+import ProfileView from './components/customer/ProfileView';
+import { getActiveUser } from './services/authManager';
+import {
+  getCurrentShopper,
+  getUserCart,
+  saveUserCart,
+  clearUserCart,
+  switchShopper,
+  identifyShopperByPhone,
+  syncUserCartFromServer
+} from './services/cartManager';
 import { Mail, Phone, MapPin, Clock, ChevronLeft } from 'lucide-react';
 
 function App() {
@@ -19,24 +32,91 @@ function App() {
     initDB();
   }, []);
 
-  // Global Cart/Shopping Bag State
-  const [cart, setCart] = useState(() => {
-    try {
-      const saved = localStorage.getItem('dainty_cart');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Multi-User Isolated Shopper & Cart State
+  const [currentShopper, setCurrentShopper] = useState(() => getCurrentShopper());
+  const [cart, setCart] = useState(() => getUserCart(getCurrentShopper().id));
+  const [currentUser, setCurrentUser] = useState(() => getActiveUser());
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
   // Admin Authentication State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     return sessionStorage.getItem('dainty_admin_auth') === 'true';
   });
 
+  // Sync isolated cart across sessions and listen to events
+  useEffect(() => {
+    if (currentShopper?.id) {
+      syncUserCartFromServer(currentShopper.id).then(serverCart => {
+        if (serverCart && Array.isArray(serverCart)) {
+          setCart(serverCart);
+        }
+      });
+    }
+
+    const handleShopperChange = (e) => {
+      const shopper = e.detail?.shopper || getCurrentShopper();
+      setCurrentShopper(shopper);
+      setCart(getUserCart(shopper.id));
+    };
+
+    const handleCartChange = (e) => {
+      const active = getCurrentShopper();
+      if (!e.detail?.shopperId || e.detail.shopperId === active.id) {
+        setCart(getUserCart(active.id));
+      }
+    };
+
+    const handleUserChange = (e) => {
+      setCurrentUser(e.detail?.user || getActiveUser());
+    };
+
+    window.addEventListener('dainty_shopper_changed', handleShopperChange);
+    window.addEventListener('dainty_cart_changed', handleCartChange);
+    window.addEventListener('dainty_user_changed', handleUserChange);
+    return () => {
+      window.removeEventListener('dainty_shopper_changed', handleShopperChange);
+      window.removeEventListener('dainty_cart_changed', handleCartChange);
+      window.removeEventListener('dainty_user_changed', handleUserChange);
+    };
+  }, [currentShopper?.id]);
+
   const saveCart = (newCart) => {
     setCart(newCart);
-    localStorage.setItem('dainty_cart', JSON.stringify(newCart));
+    saveUserCart(currentShopper.id, newCart, currentShopper);
+  };
+
+  const showCartToast = (message, isAdd = false) => {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      background: ${isAdd ? 'var(--gradient-gold-metallic)' : '#1c1917'};
+      color: ${isAdd ? '#000000' : '#ffffff'};
+      border: 1px solid ${isAdd ? 'var(--color-gold-light)' : '#44403c'};
+      padding: 0.85rem 1.35rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      z-index: 10000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    `;
+    const icon = isAdd
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
+      : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+    toast.innerHTML = `${icon} ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(12px)';
+      toast.style.transition = 'all 0.4s ease';
+      setTimeout(() => toast.remove(), 400);
+    }, 2800);
   };
 
   const handleAddToBag = (product) => {
@@ -59,34 +139,7 @@ function App() {
     }
     
     saveCart(newCart);
-    
-    // Success Toast Popup
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed;
-      bottom: 2rem;
-      left: 2rem;
-      background: var(--gradient-gold-metallic);
-      color: #000000;
-      border: 1px solid var(--color-gold-light);
-      padding: 1rem 1.5rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      z-index: 10000;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    `;
-    toast.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Added ${qty}x ${product.name} to bag!`;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(15px)';
-      toast.style.transition = 'all 0.5s ease';
-      setTimeout(() => toast.remove(), 500);
-    }, 3000);
+    showCartToast(`Added ${qty}x ${product.name} to bag!`, true);
   };
 
   const handleUpdateQty = (productId, color, newQty) => {
@@ -94,21 +147,39 @@ function App() {
     const idx = newCart.findIndex(item => item.id === productId && item.selectedColor === color);
     if (idx !== -1) {
       if (newQty <= 0) {
+        const itemToRemove = newCart[idx];
         newCart.splice(idx, 1);
+        saveCart(newCart);
+        showCartToast(`Removed ${itemToRemove.name} from bag.`);
       } else {
         newCart[idx].quantity = newQty;
+        saveCart(newCart);
       }
-      saveCart(newCart);
     }
   };
 
   const handleRemoveItem = (productId, color) => {
+    const itemToRemove = cart.find(item => item.id === productId && item.selectedColor === color);
     const newCart = cart.filter(item => !(item.id === productId && item.selectedColor === color));
     saveCart(newCart);
+    if (itemToRemove) {
+      showCartToast(`Removed ${itemToRemove.name} from bag.`);
+    }
   };
 
   const handleClearCart = () => {
-    saveCart([]);
+    clearUserCart(currentShopper.id);
+    setCart([]);
+  };
+
+  const handleSwitchShopper = (shopper) => {
+    switchShopper(shopper);
+  };
+
+  const handleIdentifyShopper = (phone, name, email) => {
+    const identified = identifyShopperByPhone(phone, name, email);
+    setCurrentShopper(identified);
+    setCart(getUserCart(identified.id));
   };
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -119,7 +190,15 @@ function App() {
       {/* 1. Header (Hides in admin dashboard to preserve clean fullscreen panel feel) */}
       {!isAdminView && (
         <>
-          <Header cartCount={cartCount} currentRoute={route} />
+          <Header
+            cartCount={cartCount}
+            currentRoute={route}
+            currentShopper={currentShopper}
+            onSwitchShopper={handleSwitchShopper}
+            currentUser={currentUser}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onOpenAccount={() => setIsAccountModalOpen(true)}
+          />
           {/* Universal Back Navigation Bar across every customer view */}
           <div className="universal-back-nav-bar">
             <button
@@ -174,7 +253,14 @@ function App() {
             onUpdateQty={handleUpdateQty} 
             onRemoveItem={handleRemoveItem} 
             onClearCart={handleClearCart} 
+            currentShopper={currentShopper}
+            onSwitchShopper={handleSwitchShopper}
+            onIdentifyShopper={handleIdentifyShopper}
           />
+        )}
+
+        {route.page === 'profile' && (
+          <ProfileView cart={cart} onLogout={() => setCurrentUser(null)} />
         )}
 
         {route.page === 'contact' && (
@@ -304,7 +390,7 @@ function App() {
           <div className="dainty-footer-bottom-bar">
             <div className="dainty-footer-bottom-inner">
               <span className="bottom-copyright">
-                © {new Date().getFullYear()} DAINTY STUDS &amp; CHAINS. All Rights Reserved. Handcrafted in Kampala.
+                © 2026 DAINTY STUDS &amp; CHAINS. All Rights Reserved. Handcrafted in Kampala.
               </span>
               <div className="bottom-shortcuts">
                 <a
@@ -330,6 +416,19 @@ function App() {
           </div>
         </footer>
       )}
+
+      {/* Profile Auth Modal (Sign In / Sign Up) */}
+      <ProfileAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* Account Settings & Profile Modal */}
+      <AccountSettingsModal
+        isOpen={isAccountModalOpen}
+        onClose={() => setIsAccountModalOpen(false)}
+        cart={cart}
+      />
     </div>
   );
 }

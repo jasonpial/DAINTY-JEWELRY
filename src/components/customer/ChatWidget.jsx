@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, X, Shield, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, X, Sparkles } from 'lucide-react';
 import { getMessages, saveMessage } from '../../db';
 
 export default function ChatWidget() {
@@ -10,7 +10,7 @@ export default function ChatWidget() {
   const [nameInput, setNameInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
-  const [chatId, setChatId] = useState(() => {
+  const [chatId, _setChatId] = useState(() => {
     let id = sessionStorage.getItem('dainty_chat_id');
     if (!id) {
       id = 'chat_' + Math.random().toString(36).substr(2, 9);

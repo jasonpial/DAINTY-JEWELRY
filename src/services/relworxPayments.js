@@ -64,24 +64,33 @@ export function detectMobileNetwork(phone) {
 // Core Fetch Wrapper
 // ────────────────────────────────────────────────────────────
 async function relworxFetch(path, options = {}) {
-  const res = await fetch(`/api/relworx${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-  });
+  let res;
+  try {
+    res = await fetch(`/api/relworx${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+    });
+  } catch (networkErr) {
+    throw new Error(`Payment server could not be reached: ${networkErr.message}`);
+  }
 
+  const rawText = await res.text();
   let data;
   try {
-    data = await res.json();
+    data = JSON.parse(rawText);
   } catch {
-    throw new Error(`Relworx returned an invalid response (HTTP ${res.status})`);
+    if (rawText.trim().startsWith('<!DOCTYPE') || rawText.includes('<html')) {
+      throw new Error(`Payment API route not reached (HTTP ${res.status}): Server returned an HTML web page instead of JSON. Ensure your server.js or api/index.php is running on your host.`);
+    }
+    throw new Error(`Relworx API returned an invalid response (HTTP ${res.status}): ${rawText.slice(0, 100)}`);
   }
 
   if (!res.ok) {
-    const message = data?.message || data?.error || `HTTP ${res.status}`;
-    throw new Error(`Relworx API error: ${message}`);
+    const message = data?.error || data?.message || `HTTP ${res.status}`;
+    throw new Error(message);
   }
 
   return data;
@@ -158,11 +167,11 @@ export async function validateMobileNumber(msisdn) {
  * @param {Function} [onStatusUpdate]- Callback(status, attempt) on each poll
  * @returns {Promise<{ status: 'successful'|'failed'|'timeout', reference: string, internal_reference: string }>}
  */
-export async function processFullPayment(params, onStatusUpdate) {
+export async function processFullPayment(params, onStatusUpdate, abortSignal) {
   const POLL_INTERVAL_MS = 5000;
   const MAX_POLLS        = 12;
 
-  // Step 1 — Initiate payment (push USSD to customer)
+  // Step 1 — Initiate payment (push USSD to customer exactly once)
   const initResponse = await requestMobileMoneyPayment(params);
 
   if (!initResponse.success) {
@@ -171,9 +180,17 @@ export async function processFullPayment(params, onStatusUpdate) {
 
   const internalRef = initResponse.internal_reference;
 
-  // Step 2 — Poll for confirmation
+  // Step 2 — Poll for confirmation until terminal status (success/failed) or abort
   for (let attempt = 1; attempt <= MAX_POLLS; attempt++) {
+    if (abortSignal && abortSignal.aborted) {
+      return { status: 'cancelled', reference: params.reference, internal_reference: internalRef };
+    }
+
     await delay(POLL_INTERVAL_MS);
+
+    if (abortSignal && abortSignal.aborted) {
+      return { status: 'cancelled', reference: params.reference, internal_reference: internalRef };
+    }
 
     let statusResponse;
     try {
@@ -184,16 +201,32 @@ export async function processFullPayment(params, onStatusUpdate) {
       continue;
     }
 
-    const status = (statusResponse.status || '').toLowerCase();
-    if (onStatusUpdate) onStatusUpdate(status, attempt);
+    const rawStatus = (statusResponse.status || statusResponse.request_status || '').toLowerCase();
+    const isSuccess = rawStatus === 'successful' || rawStatus === 'success';
+    const isFailed = (
+      rawStatus === 'failed' ||
+      rawStatus === 'declined' ||
+      rawStatus === 'cancelled' ||
+      rawStatus === 'canceled' ||
+      rawStatus === 'rejected' ||
+      rawStatus === 'expired' ||
+      rawStatus === 'insufficient_funds' ||
+      rawStatus === 'insufficient_balance' ||
+      statusResponse.success === false
+    );
 
-    if (status === 'successful') {
+    if (isSuccess) {
+      if (onStatusUpdate) onStatusUpdate('successful', attempt);
       return { status: 'successful', reference: params.reference, internal_reference: internalRef };
     }
-    if (status === 'failed') {
-      return { status: 'failed', reference: params.reference, internal_reference: internalRef, message: statusResponse.message };
+
+    if (isFailed) {
+      const failReason = statusResponse.message || statusResponse.error || 'Payment was declined or cancelled on your handset.';
+      if (onStatusUpdate) onStatusUpdate('failed', attempt, failReason);
+      return { status: 'failed', reference: params.reference, internal_reference: internalRef, message: failReason };
     }
-    // 'pending' → keep polling
+
+    if (onStatusUpdate) onStatusUpdate('polling', attempt);
   }
 
   // Timeout after 60 seconds
@@ -223,6 +256,47 @@ function delay(ms) {
  */
 export function isRelworxConfigured() {
   return true; // Server reports a clear configuration error when credentials are absent.
+}
+
+/**
+ * Checks server-side Relworx gateway configuration status.
+ */
+export async function getRelworxStatus() {
+  try {
+    const res = await fetch('/api/relworx/status');
+    if (!res.ok) return { configured: false };
+    return await res.json();
+  } catch {
+    return { configured: false };
+  }
+}
+
+/**
+ * Saves Relworx credentials to server persistent storage.
+ */
+export async function saveRelworxConfig(config) {
+  const res = await fetch('/api/relworx/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(config),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.message || `HTTP ${res.status}`);
+  return data;
+}
+
+/**
+ * Tests connectivity and authentication with Relworx servers.
+ */
+export async function testRelworxConnection(config) {
+  const res = await fetch('/api/relworx/test-connection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(config || {}),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.message || `HTTP ${res.status}`);
+  return data;
 }
 
 /**

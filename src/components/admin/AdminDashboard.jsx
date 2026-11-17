@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getOrders, getProducts } from '../../db';
 import { formatUGX } from '../customer/ProductCard';
-import { DollarSign, ShoppingBag, ShieldAlert, Award, Package2 } from 'lucide-react';
-import { navigateTo } from '../../Router';
+import { DollarSign, ShoppingBag, ShieldAlert, Package2 } from 'lucide-react';
 
 export default function AdminDashboard({ onSelectTab }) {
   const [orders, setOrders] = useState([]);

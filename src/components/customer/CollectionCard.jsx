@@ -42,7 +42,7 @@ export default function CollectionCard({ title, subtitle, image, categoryId, col
             loading="lazy"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = '/images/hero_necklaces.png';
+              e.currentTarget.src = '/images/vi.jpeg';
             }}
           />
         </div>

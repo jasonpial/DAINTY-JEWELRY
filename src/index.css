@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 :root {
   --color-bg-primary: #ffffff;
@@ -6263,6 +6262,182 @@ div[style*="background: rgba"] span,
   border-color: #b38728;
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 12px 28px rgba(179, 135, 40, 0.35);
+}
+
+/* ── Checkout Item Actions & Quantity Stepper ── */
+.checkout-prod-unit-price {
+  font-size: 0.78rem;
+  color: #78716c;
+  margin-top: 0.25rem;
+}
+.checkout-prod-unit-price .unit-label {
+  font-size: 0.7rem;
+  color: #a8a29e;
+  margin-left: 0.2rem;
+}
+.checkout-prod-actions-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-left: auto;
+  text-align: right;
+  flex-shrink: 0;
+}
+.checkout-qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: #fbfaf8;
+  border: 1px solid #e7e3dc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.checkout-qty-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.38rem 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #44403c;
+  transition: all 0.15s ease;
+}
+.checkout-qty-btn:hover {
+  background: #ebe7de;
+  color: #1c1917;
+}
+.checkout-qty-val {
+  min-width: 1.85rem;
+  text-align: center;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+.checkout-prod-total-price {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #1c1917;
+  min-width: 85px;
+  text-align: right;
+}
+.checkout-item-delete-btn {
+  background: #fff;
+  border: 1px solid #fee2e2;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0.38rem 0.65rem;
+  color: #dc2626;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition: all 0.18s ease;
+}
+.checkout-item-delete-btn:hover {
+  background: #ef4444;
+  color: #ffffff !important;
+  border-color: #ef4444;
+}
+.checkout-item-delete-btn svg {
+  stroke-width: 2.2;
+}
+
+/* ── Shopper Profile / Separate Bag Banner ── */
+.shopper-bag-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #faf8f5;
+  border: 1px solid #e8e2d7;
+  border-radius: 10px;
+  padding: 0.85rem 1.15rem;
+  margin-bottom: 1.35rem;
+}
+.shopper-bag-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.shopper-bag-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fcebc5 0%, #e2b963 100%);
+  color: #7a5009;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(179, 135, 40, 0.4);
+}
+.shopper-bag-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1c1917;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.shopper-bag-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: #e7e5e4;
+  color: #44403c;
+}
+.shopper-bag-subtitle {
+  font-size: 0.72rem;
+  color: #78716c;
+  margin: 0.15rem 0 0 0;
+}
+.shopper-bag-switch-btn {
+  background: #ffffff;
+  border: 1.5px solid #d6cebf;
+  color: #1c1917;
+  border-radius: 6px;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.shopper-bag-switch-btn:hover {
+  background: #1c1917;
+  color: #ffffff !important;
+  border-color: #1c1917;
+}
+
+@media (max-width: 640px) {
+  .checkout-product-item {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .checkout-prod-actions-box {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed #eae6e1;
+  }
+  .shopper-bag-header-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .shopper-bag-switch-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 

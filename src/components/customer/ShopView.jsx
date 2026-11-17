@@ -46,18 +46,37 @@ function searchAndFilterProducts(products, query, routeParams, filters, activeSu
     list = list.filter(p => p.occasion === routeParams.occasion);
   }
   if (routeParams.material) {
-    list = list.filter(p => p.material.toLowerCase().includes(routeParams.material.toLowerCase()));
+    list = list.filter(p => p.material && p.material.toLowerCase().includes(routeParams.material.toLowerCase()));
+  }
+  if (routeParams.piercing) {
+    const pTarget = routeParams.piercing.toLowerCase();
+    list = list.filter(p => {
+      const pField = (p.piercing_location || p.piercing || p.subcategory_id || '').toLowerCase();
+      const pName = (p.name || '').toLowerCase();
+      const pDesc = (p.description || '').toLowerCase();
+      const pTags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : '';
+      if (pTarget === 'body jewelry') {
+        return p.category_id === 'body' || pField.includes('body') || pDesc.includes('body') || pTags.includes('body');
+      }
+      if (pTarget.includes('helix') || pTarget.includes('cartilage')) {
+        return pField.includes('helix') || pField.includes('cartilage') || pName.includes('helix') || pName.includes('cartilage') || pDesc.includes('cartilage') || pTags.includes('cartilage');
+      }
+      if (pTarget.includes('lobe')) {
+        return pField.includes('lobe') || pName.includes('lobe') || pDesc.includes('lobe') || pTags.includes('lobe') || p.category_id === 'earrings';
+      }
+      return pField.includes(pTarget) || pName.includes(pTarget) || pDesc.includes(pTarget) || pTags.includes(pTarget);
+    });
   }
 
   // 5. Multi-select Filters
   if (filters.material && filters.material.length > 0) {
-    list = list.filter(p => filters.material.includes(p.material));
+    list = list.filter(p => p.material && filters.material.includes(p.material));
   }
   if (filters.gender && filters.gender.length > 0) {
-    list = list.filter(p => filters.gender.includes(p.gender));
+    list = list.filter(p => p.gender && filters.gender.includes(p.gender));
   }
   if (filters.occasion && filters.occasion.length > 0) {
-    list = list.filter(p => filters.occasion.includes(p.occasion));
+    list = list.filter(p => p.occasion && filters.occasion.includes(p.occasion));
   }
 
   // Custom Price Input Ranges
@@ -111,20 +130,25 @@ function searchAndFilterProducts(products, query, routeParams, filters, activeSu
       const words = cleanQ.split(/\s+/).filter(w => w.length > 0);
       return words.every(word => {
         return (
-          product.name.toLowerCase().includes(word) ||
-          product.description.toLowerCase().includes(word) ||
-          product.category_id.toLowerCase().includes(word) ||
-          product.subcategory_id.toLowerCase().includes(word) ||
-          product.material.toLowerCase().includes(word) ||
-          product.color.toLowerCase().includes(word) ||
-          product.gender.toLowerCase().includes(word) ||
-          product.occasion.toLowerCase().includes(word)
+          (product.name && product.name.toLowerCase().includes(word)) ||
+          (product.description && product.description.toLowerCase().includes(word)) ||
+          (product.category_id && product.category_id.toLowerCase().includes(word)) ||
+          (product.subcategory_id && product.subcategory_id.toLowerCase().includes(word)) ||
+          (product.material && product.material.toLowerCase().includes(word)) ||
+          (product.color && product.color.toLowerCase().includes(word)) ||
+          (product.gender && product.gender.toLowerCase().includes(word)) ||
+          (product.occasion && product.occasion.toLowerCase().includes(word))
         );
       });
     });
   }
 
-  return list;
+  // Ensure newest creations appear first
+  return list.sort((a, b) => {
+    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return timeB - timeA;
+  });
 }
 
 export default function ShopView({ routeParams, onAddToBag }) {
@@ -143,11 +167,21 @@ export default function ShopView({ routeParams, onAddToBag }) {
     customPriceMax: ''
   });
 
-  // Load products list
+  // Load products list and subscribe to real-time database changes
   useEffect(() => {
-    const data = getProducts();
-    setProducts(data);
+    const loadData = () => {
+      const data = getProducts();
+      setProducts(data);
+    };
+    loadData();
     setActiveSubcat(null);
+
+    window.addEventListener('storage', loadData);
+    window.addEventListener('dainty_products_changed', loadData);
+    return () => {
+      window.removeEventListener('storage', loadData);
+      window.removeEventListener('dainty_products_changed', loadData);
+    };
   }, [routeParams.category, routeParams.collection, routeParams.gender, routeParams.occasion, routeParams.material]);
 
   // Sync filtered list
@@ -205,6 +239,7 @@ export default function ShopView({ routeParams, onAddToBag }) {
       };
       return map[routeParams.collection] || 'Collection';
     }
+    if (routeParams.piercing) return `${routeParams.piercing} Piercing Jewelry`;
     if (routeParams.gender) return `${routeParams.gender}'s Jewelry`;
     if (routeParams.occasion) return `${routeParams.occasion} Collection`;
     if (routeParams.material) return `${routeParams.material} Series`;

@@ -87,6 +87,20 @@ export const subcategories = [
   { id: 'care_prod', categoryId: 'accessories', name: 'Jewelry Care Products' }
 ];
 
+// Piercing Location Categorization (Shop by Piercing)
+export const piercingLocations = [
+  'Ear Lobe',
+  'Helix/Cartilage',
+  'Conch',
+  'Tragus',
+  'Rook',
+  'Daith',
+  'Industrials',
+  'Nostril',
+  'Septum',
+  'Body Jewelry'
+];
+
 // Seed Products
 const defaultProducts = [
   {
@@ -378,11 +392,222 @@ const defaultProducts = [
       'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop&q=80'
     ],
     tags: ['box', 'organizer', 'velvet', 'storage']
+  },
+  {
+    id: 'prod_11',
+    name: 'DAINTY 14K Gold Marquise Cluster Stud Earring',
+    description: 'Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.',
+    price: 95000,
+    sale_price: 85000,
+    category_id: 'earrings',
+    subcategory_id: 'stud_ear',
+    material: '14K Gold-Plated',
+    color: 'Gold',
+    gender: 'Women',
+    occasion: 'Everyday',
+    stock_quantity: 35,
+    sku: 'DSC-ST-MRQ-11',
+    featured: true,
+    new_arrival: true,
+    best_seller: true,
+    limited_edition: false,
+    clearance: false,
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    images: [
+      '/images/stud_vii_marquise_cluster_stud.jpeg',
+      '/images/vii.jpeg',
+      '/images/hero_home_earrings.png'
+    ],
+    tags: ['stud', 'marquise', 'dainty studs', 'piercing', 'gold']
+  },
+  {
+    id: 'prod_12',
+    name: 'DAINTY 18K Gold Draped Chain Piercing Ring',
+    description: 'An architectural statement hoop featuring a delicate suspended cascade chain connecting the front clasp to a gentle drape. Designed for septum, helix, or conch styling.',
+    price: 85000,
+    sale_price: null,
+    category_id: 'earrings',
+    subcategory_id: 'dang_ear',
+    material: '18K Gold-Plated',
+    color: 'Gold',
+    gender: 'Unisex',
+    occasion: 'Everyday',
+    stock_quantity: 28,
+    sku: 'DSC-CH-DRP-12',
+    featured: true,
+    new_arrival: true,
+    best_seller: true,
+    limited_edition: false,
+    clearance: false,
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    images: [
+      '/images/stud_v_gold_draped_chain_ring.jpeg',
+      '/images/v.jpeg',
+      '/images/stud_iv_gold_chain_ring.jpeg'
+    ],
+    tags: ['chain', 'chains', 'drape', 'piercing', 'septum']
+  },
+  {
+    id: 'prod_13',
+    name: 'DAINTY Diamond Pavé Eternity Clicker Hoop',
+    description: 'Seamless hinged clicker ring paved with radiant pavé micro-gemstones. Effortless click-to-close mechanism offering continuous sparkle for tragus, helix, and lobe piercings.',
+    price: 78000,
+    sale_price: 69000,
+    category_id: 'earrings',
+    subcategory_id: 'hugg_ear',
+    material: 'Gold-Plated',
+    color: 'Gold',
+    gender: 'Women',
+    occasion: 'Everyday',
+    stock_quantity: 42,
+    sku: 'DSC-ER-PVH-13',
+    featured: true,
+    new_arrival: true,
+    best_seller: true,
+    limited_edition: false,
+    clearance: false,
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    images: [
+      '/images/stud_iii_gold_pave_clicker.jpeg',
+      '/images/iii.jpeg',
+      '/images/stud_ii_diamond_eternity_ring.jpeg'
+    ],
+    tags: ['pave', 'clicker', 'hoop', 'dainty studs', 'gold']
+  },
+  {
+    id: 'prod_14',
+    name: 'DAINTY Curated 3-Pair Earring & Stud Suite',
+    description: 'The ultimate ear stack in a single presentation: includes micro-pavé huggies, classic mirror-polished hoops, and round brilliant solitary studs. Made for mix-and-match stacking.',
+    price: 145000,
+    sale_price: 125000,
+    category_id: 'sets',
+    subcategory_id: 'stud_ear',
+    material: 'Gold-Plated',
+    color: 'Gold',
+    gender: 'Women',
+    occasion: 'Gift',
+    stock_quantity: 20,
+    sku: 'DSC-SET-CUR-14',
+    featured: true,
+    new_arrival: true,
+    best_seller: true,
+    limited_edition: true,
+    clearance: false,
+    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    images: [
+      '/images/stud_viii_luxury_earring_curation_set.jpeg',
+      '/images/viii.jpeg',
+      '/images/hero_home_luxury.png'
+    ],
+    tags: ['ear stack', 'curation set', 'gift set', 'studs']
+  },
+  {
+    id: 'prod_15',
+    name: 'DAINTY Threadless Gold Flat-Back Labret Stud',
+    description: 'Implant-grade flat back comfort stud featuring a mirror-finish 18K PVD gold front pin. Built for sleeping and active days without poking behind the ear.',
+    price: 55000,
+    sale_price: null,
+    category_id: 'earrings',
+    subcategory_id: 'stud_ear',
+    material: 'Titanium & Gold PVD',
+    color: 'Gold',
+    gender: 'Unisex',
+    occasion: 'Everyday',
+    stock_quantity: 50,
+    sku: 'DSC-LB-GLD-15',
+    featured: true,
+    new_arrival: true,
+    best_seller: false,
+    limited_edition: false,
+    clearance: false,
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    images: [
+      '/images/stud_vi_gold_flatback_labret.jpeg',
+      '/images/vi.jpeg',
+      '/images/stud_0_silver_flatback.jpeg'
+    ],
+    tags: ['flat back', 'labret', 'stud', 'dainty studs', 'piercing']
+  },
+  {
+    id: 'prod_16',
+    name: 'DAINTY Minimalist Open Ring Piercing Clicker',
+    description: 'Ultra-refined minimalist open piercing contour with safety post ball. Designed for high fashion curated styling on nose or cartilage.',
+    price: 45000,
+    sale_price: 39000,
+    category_id: 'earrings',
+    subcategory_id: 'hugg_ear',
+    material: '18K Gold-Plated',
+    color: 'Gold',
+    gender: 'Unisex',
+    occasion: 'Everyday',
+    stock_quantity: 30,
+    sku: 'DSC-RN-OPN-16',
+    featured: false,
+    new_arrival: true,
+    best_seller: false,
+    limited_edition: false,
+    clearance: false,
+    created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    images: [
+      '/images/stud_i_gold_open_ring.jpeg',
+      '/images/i.jpeg'
+    ],
+    tags: ['open ring', 'minimalist', 'cartilage', 'septum']
   }
 ];
 
 // Helper functions
 const STORAGE_PREFIX = 'dainty_ecommerce_';
+
+// Client-side image compression utility
+// Resizes and compresses uploaded images to compact WebP/JPEG data URLs
+// preventing localStorage quota blowout and network bloat
+export async function compressImage(file, maxWidth = 1000, maxHeight = 1000, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      resolve('/images/vi.jpeg');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          try {
+            const compressed = canvas.toDataURL('image/webp', quality);
+            resolve(compressed);
+            return;
+          } catch {
+            const compressedJpg = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedJpg);
+            return;
+          }
+        }
+        resolve(e.target.result);
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve('/images/vi.jpeg');
+    reader.readAsDataURL(file);
+  });
+}
 
 function getStorageItem(key, defaultValue) {
   try {
@@ -399,15 +624,90 @@ function setStorageItem(key, value) {
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
     // Trigger storage event manually for same-page listeners
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('dainty_products_changed', { detail: { key, count: value?.length } }));
   } catch (error) {
     console.error('LocalStorage write error:', error);
   }
 }
 
+// Blacklist tracking for permanently deleted products
+export function getDeletedProductIds() {
+  const list = getStorageItem('deleted_product_ids', []);
+  return new Set(Array.isArray(list) ? list : []);
+}
+
+export function addDeletedProductId(productId) {
+  if (!productId) return;
+  const list = getStorageItem('deleted_product_ids', []);
+  const safeList = Array.isArray(list) ? list : [];
+  if (!safeList.includes(productId)) {
+    setStorageItem('deleted_product_ids', [...safeList, productId]);
+  }
+}
+
+export function removeDeletedProductId(productId) {
+  if (!productId) return;
+  const list = getStorageItem('deleted_product_ids', []);
+  const safeList = Array.isArray(list) ? list : [];
+  if (safeList.includes(productId)) {
+    setStorageItem('deleted_product_ids', safeList.filter(id => id !== productId));
+  }
+}
+
+// Background sync with /api/products database
+let isServerSyncStarted = false;
+let lastSyncHash = '';
+
+export async function syncProductsWithServer() {
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) {
+      console.warn('Server database sync responded with status:', res.status);
+      return;
+    }
+
+    const serverProducts = await res.json();
+    if (Array.isArray(serverProducts)) {
+      const deletedSet = getDeletedProductIds();
+      
+      // Filter out any locally deleted products
+      const cleanServer = serverProducts.filter(p => p && p.id && !deletedSet.has(p.id));
+      
+      // Keep only newly drafted local items that are waiting for initial sync
+      const localProds = getStorageItem('products', []);
+      const safeLocal = Array.isArray(localProds) ? localProds : [];
+      const pendingLocal = safeLocal.filter(p => p && p.id && p._pendingSync === true && !deletedSet.has(p.id));
+
+      // Merge pending local items on top of authoritative server items
+      const serverIdSet = new Set(cleanServer.map(p => p.id));
+      const combined = [
+        ...pendingLocal.filter(p => !serverIdSet.has(p.id)),
+        ...cleanServer
+      ];
+
+      // Compare with previous state to avoid redundant renders
+      const currentJson = JSON.stringify(combined);
+      if (currentJson !== lastSyncHash) {
+        lastSyncHash = currentJson;
+        setStorageItem('products', combined);
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('dainty_products_changed', { 
+          detail: { action: 'sync', count: combined.length } 
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn('Server database sync idle:', err.message);
+  }
+}
+
 // Initialization
 export function initDB() {
-  if (!localStorage.getItem(STORAGE_PREFIX + 'products')) {
-    setStorageItem('products', defaultProducts);
+  const deletedSet = getDeletedProductIds();
+  const existingProds = getStorageItem('products', null);
+  if (!existingProds) {
+    const initialList = defaultProducts.filter(p => !deletedSet.has(p.id));
+    setStorageItem('products', initialList);
   }
   if (!localStorage.getItem(STORAGE_PREFIX + 'orders')) {
     setStorageItem('orders', []);
@@ -423,36 +723,126 @@ export function initDB() {
       }
     ]);
   }
+
+  // Trigger background server sync once on load and on tab focus
+  if (!isServerSyncStarted && typeof window !== 'undefined') {
+    isServerSyncStarted = true;
+    syncProductsWithServer();
+
+    // Re-sync when switching back to this tab/window
+    window.addEventListener('focus', () => syncProductsWithServer());
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) syncProductsWithServer();
+    });
+
+    // Background poll every 15 seconds to sync deletions/additions from other devices
+    setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        syncProductsWithServer();
+      }
+    }, 15000);
+  }
 }
 
 // Products API
 export function getProducts() {
   initDB();
-  return getStorageItem('products', []);
+  const deletedSet = getDeletedProductIds();
+  const prods = getStorageItem('products', null);
+  const base = Array.isArray(prods) ? prods : defaultProducts;
+  return base.filter(p => p && p.id && !deletedSet.has(p.id));
 }
 
-export function saveProduct(product) {
-  const products = getProducts();
-  if (product.id) {
-    const idx = products.findIndex(p => p.id === product.id);
-    if (idx !== -1) {
-      products[idx] = { ...products[idx], ...product };
-    } else {
-      products.push(product);
-    }
+export async function saveProduct(product) {
+  const cleanProduct = { ...product };
+
+  // If this product ID was previously in deleted blacklist, clear it
+  if (cleanProduct.id) {
+    removeDeletedProductId(cleanProduct.id);
   } else {
-    product.id = 'prod_' + Math.random().toString(36).substr(2, 9);
-    product.created_at = new Date().toISOString();
-    products.push(product);
+    cleanProduct.id = 'prod_' + Math.random().toString(36).substr(2, 9);
+    cleanProduct.created_at = new Date().toISOString();
   }
+
+  // Ensure default metadata for storefront filtering
+  if (!cleanProduct.gender) cleanProduct.gender = 'Women';
+  if (!cleanProduct.occasion) cleanProduct.occasion = 'Everyday';
+  if (!cleanProduct.category_id && cleanProduct.category) cleanProduct.category_id = cleanProduct.category;
+  if (!cleanProduct.category_id) cleanProduct.category_id = 'earrings';
+  if (cleanProduct.new_arrival === undefined) cleanProduct.new_arrival = true;
+  if (!cleanProduct.created_at) cleanProduct.created_at = new Date().toISOString();
+
+  // Normalize images
+  if (!Array.isArray(cleanProduct.images) || cleanProduct.images.length === 0) {
+    cleanProduct.images = [cleanProduct.image || '/images/vi.jpeg'];
+  }
+
+  cleanProduct._pendingSync = true;
+
+  const products = [...getProducts()];
+  const idx = products.findIndex(p => p.id === cleanProduct.id);
+  if (idx !== -1) {
+    products[idx] = { ...products[idx], ...cleanProduct };
+  } else {
+    products.unshift(cleanProduct); // Prepend to top so it's immediately visible
+  }
+
+  // Persist locally
   setStorageItem('products', products);
-  return product;
+  window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new CustomEvent('dainty_products_changed', { detail: { action: 'save', id: cleanProduct.id } }));
+
+  // Persist to server database asynchronously
+  try {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cleanProduct)
+    });
+    if (res.ok) {
+      cleanProduct._pendingSync = false;
+      const current = getStorageItem('products', []);
+      const cIdx = current.findIndex(p => p.id === cleanProduct.id);
+      if (cIdx !== -1) {
+        current[cIdx]._pendingSync = false;
+        setStorageItem('products', current);
+      }
+      await syncProductsWithServer();
+    }
+  } catch (err) {
+    console.warn('Failed to persist product to server database:', err);
+  }
+
+  return cleanProduct;
 }
 
-export function deleteProduct(productId) {
-  const products = getProducts();
-  const filtered = products.filter(p => p.id !== productId);
+export async function deleteProduct(productId) {
+  if (!productId) return;
+
+  // 1. Permanently register in deleted blacklist so it NEVER resurrects
+  addDeletedProductId(productId);
+
+  // 2. Immediately remove from local products array
+  const currentProds = getStorageItem('products', defaultProducts);
+  const safeCurrent = Array.isArray(currentProds) ? currentProds : defaultProducts;
+  const filtered = safeCurrent.filter(p => p && p.id !== productId);
   setStorageItem('products', filtered);
+
+  // 3. Immediately emit change events across components and tabs
+  window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new CustomEvent('dainty_products_changed', { detail: { action: 'delete', id: productId } }));
+
+  // 4. Persist deletion to server database and trigger re-sync
+  try {
+    const res = await fetch(`/api/products/${productId}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      await syncProductsWithServer();
+    }
+  } catch (err) {
+    console.warn('Failed to delete product from server database:', err);
+  }
 }
 
 export function updateProductPrice(productId, newPrice, newSalePrice = null) {
@@ -462,6 +852,11 @@ export function updateProductPrice(productId, newPrice, newSalePrice = null) {
     products[idx].price = Number(newPrice);
     products[idx].sale_price = newSalePrice ? Number(newSalePrice) : null;
     setStorageItem('products', products);
+    fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(products[idx])
+    }).catch(() => {});
     return products[idx];
   }
   return null;
@@ -556,10 +951,17 @@ export function getChats() {
 // Reset Database Utility
 export function resetDatabase() {
   localStorage.removeItem(STORAGE_PREFIX + 'products');
+  localStorage.removeItem(STORAGE_PREFIX + 'deleted_product_ids');
   localStorage.removeItem(STORAGE_PREFIX + 'orders');
   localStorage.removeItem(STORAGE_PREFIX + 'messages');
-  initDB();
+  setStorageItem('products', defaultProducts);
+  fetch('/api/products/reset', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(defaultProducts)
+  }).catch(() => {});
   window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new CustomEvent('dainty_products_changed', { detail: { action: 'reset' } }));
 }
 
 // Admin Authentication & Credentials API

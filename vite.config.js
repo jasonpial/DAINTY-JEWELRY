@@ -16,7 +16,14 @@ export default defineConfig(({ mode }) => {
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
             if (req.url && req.url.startsWith('/api')) {
-              await handleApiRequest(req, res, env);
+              try {
+                await handleApiRequest(req, res, env);
+              } catch (err) {
+                if (!res.headersSent) {
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: err.message || 'API internal error' }));
+                }
+              }
               return;
             }
             next();
@@ -25,7 +32,14 @@ export default defineConfig(({ mode }) => {
         configurePreviewServer(server) {
           server.middlewares.use(async (req, res, next) => {
             if (req.url && req.url.startsWith('/api')) {
-              await handleApiRequest(req, res, env);
+              try {
+                await handleApiRequest(req, res, env);
+              } catch (err) {
+                if (!res.headersSent) {
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: err.message || 'API internal error' }));
+                }
+              }
               return;
             }
             next();

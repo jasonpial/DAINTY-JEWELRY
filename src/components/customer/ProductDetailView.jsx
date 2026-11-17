@@ -10,19 +10,34 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
 
-  // Load product details
+  // Load product details and listen for real-time changes
   useEffect(() => {
-    const products = getProducts();
-    const found = products.find(p => p.id === routeParams.id);
-    if (found) {
-      setProduct(found);
-      setSelectedImageIdx(0);
-      setSelectedColor(found.color || 'Gold');
-    }
+    const loadProduct = () => {
+      const products = getProducts();
+      const found = products.find(p => p.id === routeParams.id);
+      if (found) {
+        setProduct(found);
+        setSelectedColor(found.color || 'Gold');
+      } else {
+        setProduct(null);
+      }
+    };
+
+    loadProduct();
+    setSelectedImageIdx(0);
+
+    window.addEventListener('storage', loadProduct);
+    window.addEventListener('dainty_products_changed', loadProduct);
+    return () => {
+      window.removeEventListener('storage', loadProduct);
+      window.removeEventListener('dainty_products_changed', loadProduct);
+    };
   }, [routeParams.id]);
 
-  // Capped Images list (exactly up to 4 images)
-  const activeImages = product && product.images ? product.images.slice(0, 4) : [];
+  // Capped Images list (up to 4 images with robust fallback)
+  const activeImages = (product && Array.isArray(product.images) && product.images.length > 0)
+    ? product.images.filter(Boolean).slice(0, 4)
+    : (product?.image ? [product.image] : ['/images/vi.jpeg']);
 
   // Automatic slideshow effect
   useEffect(() => {
@@ -288,11 +303,11 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid #eae6e1', paddingTop: '1.5rem', marginTop: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: '#44403c' }}>
               <Truck size={16} style={{ color: 'var(--color-gold-dark)' }} />
-              <span>Standard delivery within 24-48 hours across Uganda.</span>
+              <span>Delivery across Kampala.</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: '#44403c' }}>
               <Award size={16} style={{ color: 'var(--color-gold-dark)' }} />
-              <span>Handcrafted from tarnish-resistant copper-like gold plating and sterling silver.</span>
+              <span>Best Quality</span>
             </div>
           </div>
 
@@ -302,27 +317,27 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
             <tbody>
               <tr>
                 <th style={{ color: '#1c1917' }}>Material</th>
-                <td style={{ color: '#44403c' }}>{material}</td>
+                <td style={{ color: '#44403c' }}>{product?.material || material || '14K Gold-Plated'}</td>
               </tr>
               <tr>
                 <th style={{ color: '#1c1917' }}>Finish</th>
-                <td style={{ color: '#44403c' }}>Tarnish-Resistant Finish</td>
+                <td style={{ color: '#44403c' }}>{product?.finish || 'Tarnish-Resistant Finish'}</td>
               </tr>
               <tr>
                 <th style={{ color: '#1c1917' }}>Color</th>
-                <td style={{ color: '#44403c' }}>{selectedColor}</td>
+                <td style={{ color: '#44403c' }}>{selectedColor || product?.color || 'Gold'}</td>
               </tr>
               <tr>
                 <th style={{ color: '#1c1917' }}>Length/Size</th>
-                <td style={{ color: '#44403c' }}>Adjustable Fit / 45 cm standard chain length</td>
+                <td style={{ color: '#44403c' }}>{product?.length_size || product?.size || 'Adjustable Fit / 45 cm standard chain length'}</td>
               </tr>
               <tr>
                 <th style={{ color: '#1c1917' }}>Gender</th>
-                <td style={{ color: '#44403c' }}>{gender}</td>
+                <td style={{ color: '#44403c' }}>{product?.gender || gender || 'Women'}</td>
               </tr>
               <tr>
                 <th style={{ color: '#1c1917' }}>Occasion</th>
-                <td style={{ color: '#44403c' }}>{occasion}</td>
+                <td style={{ color: '#44403c' }}>{product?.occasion || occasion || 'Everyday'}</td>
               </tr>
             </tbody>
           </table>

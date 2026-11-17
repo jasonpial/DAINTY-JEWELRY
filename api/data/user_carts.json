@@ -1,0 +1,81 @@
+{
+  "shopper_cvggrta6qo": {
+    "cart": [
+      {
+        "id": "prod_3",
+        "name": "Classic Gold Hoop Earrings",
+        "description": "Every wardrobe needs a pair of standard gold hoops. These 18K Gold Plated hoops are lightweight, hollow, and feature a secure latch closure for comfortable, all-day everyday wear.",
+        "price": 48000,
+        "sale_price": 39000,
+        "category_id": "earrings",
+        "subcategory_id": "hoop_ear",
+        "material": "Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 45,
+        "sku": "DSC-ER-HOP-03",
+        "featured": false,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-10-27T12:00:00.000Z",
+        "images": [
+          "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1635767798638-3e25273a8236?w=800&auto=format&fit=crop&q=80"
+        ],
+        "tags": [
+          "hoops",
+          "everyday",
+          "gold",
+          "minimalist"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      },
+      {
+        "id": "prod_5",
+        "name": "Premium Minimalist Gold Chronograph Watch",
+        "description": "An architectural marvel on the wrist, featuring a solid 316L Stainless Steel case finished with a premium gold-plated brush. Classic white dials, sapphire crystal face, and reliable Japanese Quartz movement.",
+        "price": 490000,
+        "sale_price": 450000,
+        "category_id": "watches",
+        "subcategory_id": "lux_watch",
+        "material": "Stainless Steel",
+        "color": "Gold",
+        "gender": "Men",
+        "occasion": "Anniversary",
+        "stock_quantity": 6,
+        "sku": "DSC-WT-LUX-05",
+        "featured": true,
+        "new_arrival": false,
+        "best_seller": true,
+        "limited_edition": true,
+        "clearance": false,
+        "created_at": "2026-10-12T12:00:00.000Z",
+        "images": [
+          "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800&auto=format&fit=crop&q=80"
+        ],
+        "tags": [
+          "watch",
+          "luxury",
+          "men watch",
+          "chronograph"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      }
+    ],
+    "shopper": {
+      "id": "shopper_cvggrta6qo",
+      "name": "Guest Client",
+      "phone": "",
+      "email": "",
+      "isGuest": true,
+      "createdAt": "2026-11-12T14:02:12.000Z"
+    },
+    "updatedAt": "2026-11-12T14:05:18.497Z"
+  }
+}

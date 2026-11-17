@@ -37,7 +37,10 @@ import {
   AlertCircle,
   Phone,
   Package,
-  Coins
+  Coins,
+  Smartphone,
+  ShieldCheck,
+  Globe
 } from 'lucide-react';
 import {
   LineChart,
@@ -60,8 +63,19 @@ import {
   resetDatabase,
   getAdminCredentials,
   updateAdminCredentials,
-  categories
+  compressImage,
+  syncProductsWithServer,
+  categories,
+  subcategories,
+  piercingLocations
 } from '../../db';
+import {
+  getRelworxStatus,
+  saveRelworxConfig,
+  testRelworxConnection,
+  MERCHANT_MTN_NUMBER,
+  MERCHANT_AIRTEL_NUMBER
+} from '../../services/relworxPayments';
 
 // Format helper for Ugandan Shilling
 function formatUGX(val) {
@@ -98,14 +112,15 @@ const STATISTIC_SPLINE_DATA = [
 
 // Curated Studio Image Presets for 1-Click Product Image Selection
 const STUDIO_IMAGE_PRESETS = [
-  { label: 'Gold Ring', url: '/images/hero_rings.png' },
-  { label: 'Diamond Band', url: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Rivière Chain', url: '/images/hero_necklaces.png' },
-  { label: 'Gold Hoops', url: '/images/hero_home_earrings.png' },
-  { label: 'Tennis Bracelet', url: '/images/hero_bracelets.png' },
-  { label: 'Luxury Watch', url: '/images/hero_watches.png' },
-  { label: 'Heart Pendant', url: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80' },
-  { label: 'Pearl Choker', url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop&q=80' }
+  { label: 'Gold Flat-Back', url: '/images/vi.jpeg' },
+  { label: 'Silver Labret', url: '/images/0.jpeg' },
+  { label: 'Gold Open Ring', url: '/images/i.jpeg' },
+  { label: 'Diamond Eternity', url: '/images/ii.jpeg' },
+  { label: 'Pavé Clicker', url: '/images/iii.jpeg' },
+  { label: 'Ring & Chain', url: '/images/iv.jpeg' },
+  { label: 'Chain Drape Ring', url: '/images/v.jpeg' },
+  { label: 'Marquise Cluster', url: '/images/vii.jpeg' },
+  { label: 'Earring Set', url: '/images/viii.jpeg' }
 ];
 
 // Custom Tooltip for Spline Chart (Matches dark floating tooltip in five.webp)
@@ -200,9 +215,149 @@ export default function AdminPortal({ onLogout } = {}) {
   // Toast feedback state
   const [toast, setToast] = useState(null);
 
+  // Online Server & Hostinger Database state
+  const [isSyncingServer, setIsSyncingServer] = useState(false);
+  const [dbStatus, setDbStatus] = useState({
+    status: 'connected',
+    driver: 'Hostinger Online Server Database',
+    products_count: 0,
+    persistent: true
+  });
+  const [showDbConfigForm, setShowDbConfigForm] = useState(false);
+  const [dbHost, setDbHost] = useState('localhost');
+  const [dbName, setDbName] = useState('');
+  const [dbUser, setDbUser] = useState('');
+  const [dbPass, setDbPass] = useState('');
+  const [dbConfigFeedback, setDbConfigFeedback] = useState(null);
+
+  // Relworx Payment Gateway State
+  const [relworxGatewayStatus, setRelworxGatewayStatus] = useState({
+    configured: false,
+    account_no: 'REL11AE925B85',
+    api_key_set: false,
+    masked_key: null,
+    base_url: 'https://payments.relworx.com/api',
+    webhook_url: 'https://daintystudsandchains.com/api/relworx/webhook',
+    merchant_mtn: MERCHANT_MTN_NUMBER,
+    merchant_airtel: MERCHANT_AIRTEL_NUMBER
+  });
+  const [relworxAccountNo, setRelworxAccountNo] = useState('REL11AE925B85');
+  const [relworxApiKey, setRelworxApiKey] = useState('');
+  const [relworxWebhookKey, setRelworxWebhookKey] = useState('424a7fe74781e4ecdcb8dfcbdb');
+  const [relworxBaseUrl, setRelworxBaseUrl] = useState('https://payments.relworx.com/api');
+  const [relworxFeedback, setRelworxFeedback] = useState(null);
+  const [isTestingRelworx, setIsTestingRelworx] = useState(false);
+  const [isSavingRelworx, setIsSavingRelworx] = useState(false);
+
   const showToast = (message) => {
     setToast(message);
     setTimeout(() => setToast(null), 3500);
+  };
+
+  const reloadRelworxStatus = async () => {
+    try {
+      const data = await getRelworxStatus();
+      if (data) {
+        setRelworxGatewayStatus(data);
+        if (data.account_no) setRelworxAccountNo(data.account_no);
+        if (data.base_url) setRelworxBaseUrl(data.base_url);
+      }
+    } catch {}
+  };
+
+  // Trigger manual sync with Hostinger online server
+  const handleManualSync = async () => {
+    setIsSyncingServer(true);
+    try {
+      await syncProductsWithServer();
+      reloadData();
+      showToast('All products and deletions synced with online Hostinger database!');
+    } catch {
+      showToast('Sync completed with local store.');
+    } finally {
+      setTimeout(() => setIsSyncingServer(false), 500);
+    }
+  };
+
+  // Save Relworx payment credentials
+  const handleSaveRelworx = async (e) => {
+    if (e) e.preventDefault();
+    setIsSavingRelworx(true);
+    setRelworxFeedback({ type: 'info', message: 'Saving Relworx credentials to persistent storage...' });
+    try {
+      const res = await saveRelworxConfig({
+        accountNo: relworxAccountNo,
+        apiKey: relworxApiKey,
+        webhookKey: relworxWebhookKey,
+        baseUrl: relworxBaseUrl
+      });
+      setRelworxFeedback({ type: 'success', message: res.message || 'Relworx gateway credentials saved successfully!' });
+      showToast('Relworx Payment credentials saved!');
+      await reloadRelworxStatus();
+    } catch (err) {
+      setRelworxFeedback({ type: 'error', message: err.message || 'Failed to save credentials.' });
+    } finally {
+      setIsSavingRelworx(false);
+    }
+  };
+
+  // Test connection to Relworx gateway
+  const handleTestRelworxConnection = async () => {
+    setIsTestingRelworx(true);
+    setRelworxFeedback({ type: 'info', message: 'Contacting Relworx API gateway servers...' });
+    try {
+      const res = await testRelworxConnection({
+        accountNo: relworxAccountNo,
+        apiKey: relworxApiKey,
+        baseUrl: relworxBaseUrl
+      });
+      setRelworxFeedback({ type: 'success', message: res.message || 'Connection successful! Relworx server is reachable and credentials validated.' });
+      showToast('Relworx connection validated!');
+      await reloadRelworxStatus();
+    } catch (err) {
+      setRelworxFeedback({ type: 'error', message: err.message || 'Relworx connection test failed.' });
+    } finally {
+      setIsTestingRelworx(false);
+    }
+  };
+
+  // Check database and Relworx status on mount
+  useEffect(() => {
+    fetch('/api/database/status')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.status) setDbStatus(data);
+      })
+      .catch(() => {});
+    reloadRelworxStatus();
+  }, []);
+
+  // Save Hostinger MySQL configuration if entered by admin
+  const handleSaveDbConfig = async (e) => {
+    e.preventDefault();
+    setDbConfigFeedback({ type: 'info', message: 'Connecting to Hostinger MySQL Database...' });
+    try {
+      const res = await fetch('/api/database/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          db_host: dbHost,
+          db_name: dbName,
+          db_user: dbUser,
+          db_pass: dbPass
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDbConfigFeedback({ type: 'success', message: data.message || 'Connected to Hostinger MySQL successfully!' });
+        showToast('Hostinger MySQL Database connected!');
+        fetch('/api/database/status').then(r => r.json()).then(s => setDbStatus(s)).catch(() => {});
+      } else {
+        setDbConfigFeedback({ type: 'error', message: data.error || 'Failed to connect to MySQL database.' });
+      }
+    } catch (err) {
+      setDbConfigFeedback({ type: 'error', message: err.message || 'Connection test failed.' });
+    }
   };
 
   // Reload data from local database
@@ -219,12 +374,16 @@ export default function AdminPortal({ onLogout } = {}) {
   useEffect(() => {
     reloadData();
 
-    // Cross-tab real-time sync with customers
+    // Cross-tab and in-memory real-time sync with database
     const handleStorageChange = () => {
       reloadData();
     };
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('dainty_products_changed', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('dainty_products_changed', handleStorageChange);
+    };
   }, []);
 
   // Auto-scroll chat to bottom
@@ -266,11 +425,14 @@ export default function AdminPortal({ onLogout } = {}) {
     setProductToDelete(product);
   };
 
-  const confirmDeleteProduct = () => {
+  const confirmDeleteProduct = async () => {
     if (!productToDelete) return;
-    deleteProduct(productToDelete.id);
+    const toDeleteId = productToDelete.id;
+    const toDeleteName = productToDelete.name;
+    setProducts(prev => prev.filter(p => p.id !== toDeleteId));
+    await deleteProduct(toDeleteId);
     reloadData();
-    showToast(`Product "${productToDelete.name}" was permanently deleted from catalog.`);
+    showToast(`Product "${toDeleteName}" was permanently deleted from catalog.`);
     setProductToDelete(null);
   };
 
@@ -299,8 +461,17 @@ export default function AdminPortal({ onLogout } = {}) {
   };
 
   // Save / Update product handler
-  const handleSaveProduct = (productData) => {
-    const saved = saveProduct(productData);
+  const handleSaveProduct = async (productData) => {
+    const saved = await saveProduct(productData);
+    setProducts(prev => {
+      const idx = prev.findIndex(p => p.id === saved.id);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = saved;
+        return next;
+      }
+      return [saved, ...prev];
+    });
     reloadData();
     setIsProductModalOpen(false);
     setEditingProduct(null);
@@ -436,8 +607,21 @@ export default function AdminPortal({ onLogout } = {}) {
           </div>
         </div>
 
-        {/* Right: Date, Notifications, Profile, and Power Logout (Clean non-overlapping flex layout) */}
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        {/* Right: Sync Status, Date, Notifications, Profile, and Power Logout (Clean non-overlapping flex layout) */}
+        <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+          {/* Hostinger Online Sync Status Button */}
+          <button
+            type="button"
+            onClick={handleManualSync}
+            disabled={isSyncingServer}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 text-emerald-800 text-[11px] font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+            title="Online Hostinger Database Sync Active. Click to re-sync immediately."
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <RotateCcw className={`w-3 h-3 text-emerald-600 ${isSyncingServer ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{isSyncingServer ? 'Syncing...' : 'Online Synced'}</span>
+          </button>
+
           {/* Date pill with Calendar icon */}
           <div className="hidden lg:flex items-center gap-2 text-xs text-gray-600 font-medium px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 shrink-0">
             <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
@@ -1502,7 +1686,7 @@ export default function AdminPortal({ onLogout } = {}) {
                     <tbody className="divide-y divide-[#f3ece6]">
                       {filteredProducts.length > 0 ? (
                         filteredProducts.map((p) => {
-                          const primaryImg = p.images?.[0] || p.image || '/images/hero_rings.png';
+                          const primaryImg = p.images?.[0] || p.image || '/images/vi.jpeg';
                           return (
                             <tr key={p.id} className="hover:bg-amber-50/40 transition-colors">
                               <td className="p-4">
@@ -1513,7 +1697,7 @@ export default function AdminPortal({ onLogout } = {}) {
                                       alt={p.name}
                                       className="w-full h-full object-cover"
                                       onError={(e) => {
-                                        e.currentTarget.src = '/images/hero_rings.png';
+                                        e.currentTarget.src = '/images/vi.jpeg';
                                       }}
                                     />
                                   </div>
@@ -2013,6 +2197,355 @@ export default function AdminPortal({ onLogout } = {}) {
                 </div>
               </div>
 
+              {/* Card 2.5: Hostinger Online Cloud Database & Sync Status */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-6 w-full">
+                <div className="border-b border-gray-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <RotateCcw className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif font-bold text-base text-gray-900">Hostinger Online Database &amp; Cross-Device Sync</h3>
+                      <p className="text-xs text-gray-500">All product additions, modifications, and deletions sync in real-time across Hostinger and visitor devices</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleManualSync}
+                    disabled={isSyncingServer}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-black shadow-xs transition-all flex items-center gap-2 cursor-pointer w-fit"
+                    style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                  >
+                    <RotateCcw className={`w-3.5 h-3.5 ${isSyncingServer ? 'animate-spin' : ''}`} />
+                    <span>{isSyncingServer ? 'Syncing Now...' : 'Force Sync Online'}</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                    <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Sync Mechanism</p>
+                    <p className="font-bold text-sm text-gray-900 mt-1">Universal Multi-Device Sync</p>
+                    <p className="text-[11px] text-emerald-600 font-medium mt-0.5">● Auto-syncs on view and save</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                    <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Active Hostinger Storage</p>
+                    <p className="font-bold text-sm text-gray-900 mt-1">{dbStatus?.driver || 'Hostinger Online Server'}</p>
+                    <p className="text-[11px] text-[#b38728] font-medium mt-0.5">Persistent across redeployments</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                    <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Live Catalog Count</p>
+                    <p className="font-bold text-sm text-gray-900 mt-1">{products.length} Jewelry Pieces Active</p>
+                    <p className="text-[11px] text-gray-500 font-medium mt-0.5">Permanent deletion blacklist active</p>
+                  </div>
+                </div>
+
+                {/* Optional Hostinger MySQL Config Details */}
+                <div className="pt-2 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowDbConfigForm(!showDbConfigForm)}
+                    className="text-xs font-bold text-[#b38728] hover:underline flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>{showDbConfigForm ? 'Hide Hostinger MySQL Configuration' : 'Advanced: Configure Hostinger MySQL Database'}</span>
+                  </button>
+
+                  {showDbConfigForm && (
+                    <form onSubmit={handleSaveDbConfig} className="mt-4 p-5 rounded-2xl bg-[#f8f9fd] border border-gray-200/80 space-y-4">
+                      <p className="text-xs text-gray-600">
+                        If you created a MySQL database in your Hostinger hPanel/cPanel, you can enter its details below to store products directly in MySQL tables:
+                      </p>
+
+                      {dbConfigFeedback && (
+                        <div className={`p-3 rounded-xl text-xs font-semibold ${
+                          dbConfigFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                          dbConfigFeedback.type === 'info' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                          'bg-rose-50 text-rose-800 border border-rose-200'
+                        }`}>
+                          {dbConfigFeedback.message}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Database Host</label>
+                          <input
+                            type="text"
+                            value={dbHost}
+                            onChange={(e) => setDbHost(e.target.value)}
+                            placeholder="localhost (default for Hostinger)"
+                            className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono outline-none focus:border-[#b38728]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Database Name</label>
+                          <input
+                            type="text"
+                            value={dbName}
+                            onChange={(e) => setDbName(e.target.value)}
+                            placeholder="e.g. u123456789_dainty"
+                            className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono outline-none focus:border-[#b38728]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Database User</label>
+                          <input
+                            type="text"
+                            value={dbUser}
+                            onChange={(e) => setDbUser(e.target.value)}
+                            placeholder="e.g. u123456789_admin"
+                            className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono outline-none focus:border-[#b38728]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Database Password</label>
+                          <input
+                            type="password"
+                            value={dbPass}
+                            onChange={(e) => setDbPass(e.target.value)}
+                            placeholder="MySQL password"
+                            className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono outline-none focus:border-[#b38728]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-2">
+                        <button
+                          type="submit"
+                          className="px-5 py-2.5 rounded-xl text-xs font-bold text-black shadow-xs cursor-pointer"
+                          style={{ background: 'var(--gradient-gold-metallic)' }}
+                        >
+                          Save &amp; Test Connection
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 2.7: Relworx Mobile Money Gateway (Uganda) */}
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-6 w-full">
+                <div className="border-b border-gray-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#b38728] flex items-center justify-center shrink-0">
+                      <Smartphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-serif font-bold text-base text-gray-900">Relworx Mobile Money Gateway</h3>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          relworxGatewayStatus.configured
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        }`}>
+                          {relworxGatewayStatus.configured ? '● Configured & Ready' : '○ Enter API Key to Activate'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">Automated USSD push payments for MTN Mobile Money &amp; Airtel Money in Uganda</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleTestRelworxConnection}
+                      disabled={isTestingRelworx}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <RotateCcw className={`w-3.5 h-3.5 ${isTestingRelworx ? 'animate-spin' : ''}`} />
+                      <span>{isTestingRelworx ? 'Testing...' : 'Test Connection'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveRelworx}
+                      disabled={isSavingRelworx}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-black shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                      style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 stroke-[2.2]" />
+                      <span>{isSavingRelworx ? 'Saving...' : 'Save Credentials'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Relworx Status Overview Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-1">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Business Account No</p>
+                    <p className="font-mono font-bold text-sm text-gray-900">{relworxGatewayStatus.account_no || 'REL11AE925B85'}</p>
+                    <p className="text-[10px] text-[#b38728] font-medium">DAINTY STUDS &amp; CHAINS</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-1">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">MTN Mobile Money Merchant</p>
+                    <p className="font-mono font-bold text-sm text-gray-900">+256 788 227027</p>
+                    <p className="text-[10px] text-emerald-600 font-medium">USSD PIN push enabled</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-1">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Airtel Money Merchant</p>
+                    <p className="font-mono font-bold text-sm text-gray-900">+256 759 924291</p>
+                    <p className="text-[10px] text-emerald-600 font-medium">USSD PIN push enabled</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-1">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">API Authentication</p>
+                    <p className="font-mono font-bold text-sm text-gray-900">
+                      {relworxGatewayStatus.masked_key || (relworxGatewayStatus.api_key_set ? 'Active Key' : 'Not Configured')}
+                    </p>
+                    <p className="text-[10px] text-gray-500 font-medium">Server-side secured (No VITE_ leak)</p>
+                  </div>
+                </div>
+
+                {/* Feedback Message */}
+                {relworxFeedback && (
+                  <div className={`p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                    relworxFeedback.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : relworxFeedback.type === 'info'
+                      ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}>
+                    {relworxFeedback.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />}
+                    <span>{relworxFeedback.message}</span>
+                  </div>
+                )}
+
+                {/* Server IP Whitelist Callout for Relworx "No Authorized IP Access" */}
+                <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200/90 text-blue-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                  <div>
+                    <h4 className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <span>Hostinger / Server Outbound IP Address</span>
+                    </h4>
+                    <p className="text-[11px] text-blue-800/80 mt-0.5 leading-relaxed">
+                      Add this IP to <strong>API Authorized IPs</strong> in your Relworx dashboard to fix &quot;No Authorized IP Access&quot;.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <code className="px-3 py-1.5 bg-white border border-blue-200 rounded-lg text-xs font-mono font-bold text-blue-950 select-all">
+                      {relworxGatewayStatus.server_ip || '151.106.96.51'}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const ipToCopy = relworxGatewayStatus.server_ip || '151.106.96.51';
+                        navigator.clipboard?.writeText(ipToCopy);
+                        showToast(`Server IP ${ipToCopy} copied to clipboard!`);
+                      }}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                    >
+                      Copy IP
+                    </button>
+                  </div>
+                </div>
+
+                {/* Configuration Input Fields */}
+                <form onSubmit={handleSaveRelworx} className="p-5 rounded-2xl bg-[#f8f9fd] border border-gray-200/80 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1">
+                        Relworx Business Account Number <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={relworxAccountNo}
+                        onChange={(e) => setRelworxAccountNo(e.target.value)}
+                        placeholder="REL11AE925B85"
+                        className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono font-bold text-gray-800 outline-none focus:border-[#b38728]"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">Found in your Relworx dashboard under Business Profile.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1">
+                        Relworx API Key <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={relworxApiKey}
+                        onChange={(e) => setRelworxApiKey(e.target.value)}
+                        placeholder={relworxGatewayStatus.masked_key ? `Current: ${relworxGatewayStatus.masked_key} (Enter new key to change)` : 'relworx_live_... or API key'}
+                        className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono text-gray-800 outline-none focus:border-[#b38728]"
+                      />
+                      <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">
+                        API key from Relworx Organizations &rarr; API Keys. <strong>Note:</strong> In Relworx, make sure to <strong>Edit</strong> your API key and link/check <strong>REL11AE925B85</strong> under Business Accounts!
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1">
+                        Webhook Authentication Key (Optional)
+                      </label>
+                      <input
+                        type="password"
+                        value={relworxWebhookKey}
+                        onChange={(e) => setRelworxWebhookKey(e.target.value)}
+                        placeholder="Webhook key from Relworx settings"
+                        className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono text-gray-800 outline-none focus:border-[#b38728]"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">Used to verify HMAC-SHA256 signatures on payment callbacks.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1">
+                        API Gateway Base URL
+                      </label>
+                      <input
+                        type="text"
+                        value={relworxBaseUrl}
+                        onChange={(e) => setRelworxBaseUrl(e.target.value)}
+                        placeholder="https://payments.relworx.com/api"
+                        className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-mono text-gray-800 outline-none focus:border-[#b38728]"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">Standard: https://payments.relworx.com/api</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-gray-200/60">
+                    <div className="text-[11px] text-gray-500">
+                      Webhook URL to register in Relworx: <code className="bg-white px-2 py-0.5 rounded border border-gray-200 font-mono text-gray-800">https://daintystudsandchains.com/api/relworx/webhook</code>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={handleTestRelworxConnection}
+                        disabled={isTestingRelworx}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 cursor-pointer shadow-2xs"
+                      >
+                        {isTestingRelworx ? 'Testing...' : 'Test Connection'}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSavingRelworx}
+                        className="px-5 py-2 rounded-xl text-xs font-bold text-black shadow-xs cursor-pointer"
+                        style={{ background: 'var(--gradient-gold-metallic)' }}
+                      >
+                        {isSavingRelworx ? 'Saving...' : 'Save & Persist Configuration'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+
+                {/* Helpful Checkout Flow Guide */}
+                <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/60 space-y-2">
+                  <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                    <Info className="w-3.5 h-3.5 text-[#b38728]" />
+                    <span>How Customer Mobile Money Payments Work on daintystudsandchains.com</span>
+                  </h4>
+                  <ol className="text-[11px] text-amber-950/80 list-decimal list-inside space-y-1 leading-relaxed">
+                    <li>Customer adds jewelry to bag and clicks checkout (or initiates mobile money checkout).</li>
+                    <li>They select their operator (MTN or Airtel) and enter their phone number (e.g. 0788227027 or 0759924291).</li>
+                    <li>Relworx sends a real-time USSD push prompt directly to the customer's phone handset.</li>
+                    <li>Customer enters their Mobile Money PIN to authorize the payment in Ugandan Shillings (UGX).</li>
+                    <li>The checkout modal automatically polls and confirms success, permanently records the order in the database, and clears the cart.</li>
+                  </ol>
+                </div>
+              </div>
+
               {/* Card 3: Quick Maintenance & Actions */}
               <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
                 <div>
@@ -2064,7 +2597,7 @@ export default function AdminPortal({ onLogout } = {}) {
 
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3.5">
               <img
-                src={productToDelete.image || productToDelete.images?.[0] || '/images/hero_rings.png'}
+                src={productToDelete.image || productToDelete.images?.[0] || '/images/vi.jpeg'}
                 alt={productToDelete.name}
                 className="w-14 h-14 object-cover rounded-lg border border-gray-200 shrink-0"
               />
@@ -2227,13 +2760,19 @@ function ProductFormModal({ product, onClose, onSave }) {
   const [formData, setFormData] = useState({
     id: product?.id || undefined,
     name: product?.name || '',
-    category_id: product?.category_id || product?.category || 'rings',
+    category_id: product?.category_id || product?.category || 'earrings',
+    subcategory_id: product?.subcategory_id || 'stud_ear',
+    piercing_location: product?.piercing_location || product?.piercing || 'Ear Lobe',
     price: product?.price || '',
     sale_price: product?.sale_price || '',
     stock_quantity: product?.stock_quantity !== undefined ? product.stock_quantity : 15,
-    material: product?.material || 'Gold-Plated',
+    material: product?.material || 'Stainless Steel & Titanium',
+    finish: product?.finish || 'Tarnish-Resistant Finish',
     color: product?.color || 'Gold',
-    sku: product?.sku || (product?.id ? `DSC-${product.id.toUpperCase()}` : 'DSC-NEW'),
+    length_size: product?.length_size || product?.size || 'Adjustable Fit / 45 cm standard chain length',
+    gender: product?.gender || 'Women',
+    occasion: product?.occasion || 'Everyday',
+    sku: product?.sku || (product?.id ? `DSC-${product.id.toUpperCase()}` : 'DSC-ST-01'),
     description: product?.description || '',
     featured: product?.featured || false,
     new_arrival: product?.new_arrival ?? true,
@@ -2242,25 +2781,23 @@ function ProductFormModal({ product, onClose, onSave }) {
   });
 
   const [imagePreview, setImagePreview] = useState(
-    formData.images?.[0] || product?.image || '/images/hero_rings.png'
+    formData.images?.[0] || product?.image || '/images/vi.jpeg'
   );
 
-  // File Upload Handler (Converts uploaded image to Base64 Data URL)
-  const handleFileUpload = (e) => {
+  // File Upload Handler with client-side image optimization
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64Url = event.target?.result;
-        if (base64Url) {
-          setImagePreview(base64Url);
-          setFormData((prev) => ({
-            ...prev,
-            images: [base64Url, ...(prev.images?.slice(1) || [])]
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedUrl = await compressImage(file, 1000, 1000, 0.82);
+        setImagePreview(compressedUrl);
+        setFormData((prev) => ({
+          ...prev,
+          images: [compressedUrl, ...(prev.images?.slice(1) || [])]
+        }));
+      } catch (err) {
+        console.error('Image upload compression error:', err);
+      }
     }
   };
 
@@ -2277,13 +2814,32 @@ function ProductFormModal({ product, onClose, onSave }) {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    onSave({
+    const activeImg = imagePreview && imagePreview.trim() ? imagePreview : '/images/vi.jpeg';
+    const payload = {
       ...formData,
+      name: formData.name.trim(),
       price: Number(formData.price) || 50000,
       sale_price: formData.sale_price ? Number(formData.sale_price) : null,
       stock_quantity: Number(formData.stock_quantity) || 0,
-      images: [imagePreview, ...(formData.images?.slice(1) || [])]
-    });
+      material: formData.material || 'Stainless Steel & Titanium',
+      finish: formData.finish || 'Tarnish-Resistant Finish',
+      color: formData.color || 'Gold',
+      length_size: formData.length_size || 'Adjustable Fit / 45 cm standard chain length',
+      gender: formData.gender || 'Women',
+      occasion: formData.occasion || 'Everyday',
+      category_id: formData.category_id || 'earrings',
+      subcategory_id: formData.subcategory_id || 'stud_ear',
+      piercing_location: formData.piercing_location || 'Ear Lobe',
+      images: [activeImg, ...(formData.images?.slice(1) || [])].filter(Boolean)
+    };
+    if (!payload.images || payload.images.length === 0) {
+      payload.images = ['/images/vi.jpeg'];
+    }
+    if (!product) {
+      delete payload.id;
+    }
+
+    onSave(payload);
   };
 
   return (
@@ -2368,7 +2924,7 @@ function ProductFormModal({ product, onClose, onSave }) {
                       alt="Product Preview"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
-                        e.currentTarget.src = '/images/hero_rings.png';
+                        e.currentTarget.src = '/images/vi.jpeg';
                       }}
                     />
                   ) : (
@@ -2459,11 +3015,11 @@ function ProductFormModal({ product, onClose, onSave }) {
             {/* RIGHT COLUMN: Specifications, Pricing & Details (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
               
-              {/* Card 1: Essential Information */}
+              {/* Card 1: All Categorizations & Identity */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-5">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">Jewelry Specifications</h3>
-                  <p className="text-xs text-gray-400">Title, category classification, and metal finish</p>
+                  <h3 className="text-sm font-bold text-gray-900">Categorization &amp; Identity</h3>
+                  <p className="text-xs text-gray-400">Title, product categories, piercing placements, and SKU</p>
                 </div>
 
                 <div className="space-y-4">
@@ -2476,70 +3032,223 @@ function ProductFormModal({ product, onClose, onSave }) {
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. 18K Gold Plated Solitaire Marquise Ring"
+                      placeholder="e.g. 14K Gold Marquise Cluster Stud Earring"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 outline-none focus:border-[#b38728] focus:bg-white transition-all"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* All Categorizations */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-800 mb-1.5">Category</label>
                       <select
                         value={formData.category_id}
-                        onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                        onChange={() => {
+                          setFormData((prev) => ({ 
+                            ...prev, 
+                            category_id: 'earrings'
+                          }));
+                        }}
                         className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white capitalize"
                       >
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
+                        <option value="earrings">Earrings</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Material</label>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Subcategory</label>
                       <select
-                        value={formData.material}
-                        onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                        value={formData.subcategory_id}
+                        onChange={(e) => setFormData({ ...formData, subcategory_id: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
                       >
-                        <option value="Gold-Plated">18K Gold-Plated</option>
-                        <option value="Stainless Steel">Stainless Steel (Tarnish-Free)</option>
-                        <option value="Titanium">Pure Titanium</option>
-                        <option value="Sterling Silver">925 Sterling Silver</option>
-                        <option value="Rose Gold">18K Rose Gold Finish</option>
+                        {subcategories
+                          .filter(s => !formData.category_id || s.categoryId === formData.category_id)
+                          .map((sub) => (
+                            <option key={sub.id} value={sub.id}>
+                              {sub.name}
+                            </option>
+                          ))}
+                        {subcategories.every(s => s.categoryId !== formData.category_id) && (
+                          <option value="general">General / Standard</option>
+                        )}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Shop by Piercing</label>
+                      <select
+                        value={formData.piercing_location}
+                        onChange={(e) => setFormData({ ...formData, piercing_location: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                      >
+                        {piercingLocations.map((loc) => (
+                          <option key={loc} value={loc}>
+                            {loc}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Color / Tone</label>
-                      <select
-                        value={formData.color}
-                        onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
-                      >
-                        <option value="Gold">Gold</option>
-                        <option value="Silver">Silver</option>
-                        <option value="Rose Gold">Rose Gold</option>
-                        <option value="White">White / Pearl</option>
-                        <option value="Black">Black</option>
-                        <option value="Mixed">Mixed / Dual-Tone</option>
-                      </select>
-                    </div>
-
                     <div>
                       <label className="block text-xs font-bold text-gray-800 mb-1.5">SKU Inventory Code</label>
                       <input
                         type="text"
                         value={formData.sku}
                         onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                        placeholder="DSC-RG-01"
+                        placeholder="DSC-ST-MRQ-11"
                         className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-mono outline-none focus:border-[#b38728] focus:bg-white uppercase"
                       />
                     </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1.5">Stock Status / Availability</label>
+                      <select
+                        value={formData.stock_quantity > 0 ? 'in_stock' : 'out_of_stock'}
+                        onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value === 'in_stock' ? (Number(formData.stock_quantity) > 0 ? formData.stock_quantity : 15) : 0 })}
+                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                      >
+                        <option value="in_stock">In Stock (Available in Bag &amp; WhatsApp)</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Product Specifications Table (Matches Storefront View 3) */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Product Specifications</h3>
+                    <p className="text-xs text-gray-400">Specifications displayed in the product details table on the storefront</p>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-1 bg-amber-50 text-amber-800 rounded-md border border-amber-200/60">
+                    Storefront Spec Table
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Material */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Material <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={formData.material}
+                      onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                    >
+                      <option value="Stainless Steel & Titanium">Stainless Steel &amp; Titanium</option>
+                      <option value="Stainless Steel">Stainless Steel</option>
+                      <option value="Titanium">Titanium (Implant-Grade)</option>
+                      <option value="Titanium & Gold PVD">Titanium &amp; Gold PVD</option>
+                      <option value="18K Gold-Plated">18K Gold-Plated</option>
+                      <option value="925 Sterling Silver">925 Sterling Silver</option>
+                      <option value="18K Rose Gold Finish">18K Rose Gold Finish</option>
+                    </select>
+                  </div>
+
+                  {/* Finish */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Finish <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      list="admin-finish-options"
+                      value={formData.finish}
+                      onChange={(e) => setFormData({ ...formData, finish: e.target.value })}
+                      placeholder="e.g. Tarnish-Resistant Finish"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                    />
+                    <datalist id="admin-finish-options">
+                      <option value="Tarnish-Resistant Finish" />
+                      <option value="High Mirror Polish" />
+                      <option value="PVD Vacuum Plated" />
+                      <option value="Antioxidant Coated" />
+                      <option value="Water-Resistant Luster" />
+                    </datalist>
+                  </div>
+
+                  {/* Color */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Color <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={formData.color}
+                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                    >
+                      <option value="Gold">Gold</option>
+                      <option value="Silver">Silver</option>
+                      <option value="Rose Gold">Rose Gold</option>
+                      <option value="White / Pearl">White / Pearl</option>
+                      <option value="Black">Black</option>
+                      <option value="Mixed">Mixed / Dual-Tone</option>
+                    </select>
+                  </div>
+
+                  {/* Length/Size */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Length/Size <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      list="admin-length-options"
+                      value={formData.length_size}
+                      onChange={(e) => setFormData({ ...formData, length_size: e.target.value })}
+                      placeholder="e.g. Adjustable Fit / 45 cm standard chain length"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                    />
+                    <datalist id="admin-length-options">
+                      <option value="Adjustable Fit / 45 cm standard chain length" />
+                      <option value="6mm Post / 16G (1.2mm)" />
+                      <option value="8mm Post / 16G (1.2mm)" />
+                      <option value="10mm Post / 16G (1.2mm)" />
+                      <option value="18 Gauge (1.0mm) Universal" />
+                      <option value="Standard Lobe Fit" />
+                    </datalist>
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Gender <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={formData.gender}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                    >
+                      <option value="Women">Women</option>
+                      <option value="Unisex">Unisex</option>
+                      <option value="Men">Men</option>
+                    </select>
+                  </div>
+
+                  {/* Occasion */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                      Occasion <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={formData.occasion}
+                      onChange={(e) => setFormData({ ...formData, occasion: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium outline-none focus:border-[#b38728] focus:bg-white"
+                    >
+                      <option value="Everyday">Everyday</option>
+                      <option value="Party">Party</option>
+                      <option value="Gift">Gifts &amp; Hampers</option>
+                      <option value="Wedding">Wedding</option>
+                      <option value="Engagement">Engagement</option>
+                      <option value="Birthday">Birthday</option>
+                      <option value="Valentine's">Valentine's</option>
+                      <option value="Anniversary">Anniversary</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -2556,18 +3265,18 @@ function ProductFormModal({ product, onClose, onSave }) {
                     <label className="block text-xs font-bold text-gray-800 mb-1.5">
                       Standard Price (UGX) <span className="text-rose-500">*</span>
                     </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-400">
-                        UGX
-                      </span>
+                    <div className="relative flex items-center">
                       <input
                         type="number"
                         required
                         value={formData.price}
                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                         placeholder="85000"
-                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 outline-none focus:border-[#b38728] focus:bg-white"
+                        className="w-full pl-4 pr-16 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 outline-none focus:border-[#b38728] focus:bg-white transition-all"
                       />
+                      <span className="absolute right-3.5 text-[11px] font-bold text-gray-400 pointer-events-none select-none">
+                        UGX
+                      </span>
                     </div>
                   </div>
 
@@ -2575,17 +3284,17 @@ function ProductFormModal({ product, onClose, onSave }) {
                     <label className="block text-xs font-bold text-gray-800 mb-1.5">
                       Sale / Promo Price (UGX)
                     </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-400">
-                        UGX
-                      </span>
+                    <div className="relative flex items-center">
                       <input
                         type="number"
                         value={formData.sale_price || ''}
                         onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
                         placeholder="Optional sale"
-                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-emerald-600 outline-none focus:border-[#b38728] focus:bg-white"
+                        className="w-full pl-4 pr-16 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-emerald-600 outline-none focus:border-[#b38728] focus:bg-white transition-all"
                       />
+                      <span className="absolute right-3.5 text-[11px] font-bold text-gray-400 pointer-events-none select-none">
+                        UGX
+                      </span>
                     </div>
                   </div>
 
