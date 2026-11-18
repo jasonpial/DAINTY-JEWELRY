@@ -35,7 +35,7 @@ export default function OrderManager() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: selectedOrder ? '1.1fr 0.9fr' : '1fr', gap: '2rem' }} className="animate-fade-in">
+    <div className={selectedOrder ? 'admin-orders-split split animate-fade-in' : 'admin-orders-split animate-fade-in'}>
       
       {/* Orders List Card */}
       <div className="admin-card">
@@ -127,7 +127,7 @@ export default function OrderManager() {
             </button>
           </div>
 
-          <div style={{ padding: '2rem' }}>
+          <div className="admin-order-detail-body">
             {/* Customer Details */}
             <div style={{ borderBottom: '1px solid var(--color-border-light)', paddingBottom: '1.2rem', marginBottom: '1.2rem' }}>
               <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)', marginBottom: '0.6rem' }}>Customer Profile</h4>

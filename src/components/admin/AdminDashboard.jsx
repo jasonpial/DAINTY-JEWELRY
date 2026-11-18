@@ -76,7 +76,7 @@ export default function AdminDashboard({ onSelectTab }) {
       </div>
 
       {/* Grid: Low Stock Alert and Recent Orders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+      <div className="admin-dashboard-two-col">
         
         {/* Recent Orders table */}
         <div className="admin-card">

@@ -8,9 +8,79 @@ const STORAGE_ACTIVE_SHOPPER_KEY = 'dainty_active_shopper';
 const STORAGE_SAVED_SHOPPERS_KEY  = 'dainty_saved_shoppers';
 const LEGACY_CART_KEY             = 'dainty_cart';
 
+// Track local mutations & in-flight writes per shopper so stale GET /api/cart responses never wipe local items
+const localCartVersions = new Map();
+const pendingCartWrites = new Map();
+
+function bumpLocalCartVersion(shopperId) {
+  const next = (localCartVersions.get(shopperId) || 0) + 1;
+  localCartVersions.set(shopperId, next);
+  return next;
+}
+
+function getLocalCartVersion(shopperId) {
+  return localCartVersions.get(shopperId) || 0;
+}
+
+function incrementPendingWrite(shopperId) {
+  pendingCartWrites.set(shopperId, (pendingCartWrites.get(shopperId) || 0) + 1);
+}
+
+function decrementPendingWrite(shopperId) {
+  const current = pendingCartWrites.get(shopperId) || 0;
+  if (current <= 1) {
+    pendingCartWrites.delete(shopperId);
+  } else {
+    pendingCartWrites.set(shopperId, current - 1);
+  }
+}
+
 function sanitizePhone(phone) {
   if (!phone) return '';
   return phone.replace(/[^0-9+]/g, '').trim();
+}
+
+function readStoredCartOnly(shopperId) {
+  if (!shopperId) return null;
+  const key = `dainty_cart_${shopperId}`;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return null;
+}
+
+function mergeCartItems(primaryCart = [], secondaryCart = []) {
+  const merged = [];
+  const indexMap = new Map();
+
+  const addItem = (item) => {
+    if (!item || !item.id) return;
+    const color = item.selectedColor || item.color || 'Gold';
+    const sig = `${item.id}::${color}`;
+    if (indexMap.has(sig)) {
+      const idx = indexMap.get(sig);
+      const existing = merged[idx];
+      merged[idx] = {
+        ...existing,
+        quantity: Math.max(Number(existing.quantity) || 1, Number(item.quantity) || 1)
+      };
+    } else {
+      indexMap.set(sig, merged.length);
+      merged.push({
+        ...item,
+        selectedColor: color,
+        quantity: Number(item.quantity) || 1
+      });
+    }
+  };
+
+  primaryCart.forEach(addItem);
+  secondaryCart.forEach(addItem);
+  return merged;
 }
 
 /**
@@ -123,17 +193,18 @@ export function createNewShopper(name = '', phone = '', email = '') {
 }
 
 /**
- * Identify / Bind the current cart to a customer's phone number or name
- * If a bag already exists for this phone, seamlessly load it; otherwise attach current bag to this phone
+ * Identify / Bind the current cart to a customer's phone number or name.
+ * Always preserves and merges any items currently in the active bag so checkout never loses items.
  */
 export function identifyShopperByPhone(phone, name = '', email = '') {
   const cleanPhone = sanitizePhone(phone);
-  if (!cleanPhone) return getCurrentShopper();
+  const digitsOnly = cleanPhone.replace(/\D/g, '');
+  if (!cleanPhone || digitsOnly.length < 9) return getCurrentShopper();
 
   const targetId = 'shopper_ph_' + cleanPhone.replace(/\+/g, 'p');
   const current = getCurrentShopper();
 
-  // If already active with this phone ID, update details
+  // If already active with this phone ID, update details without disturbing the bag
   if (current.id === targetId) {
     const updated = {
       ...current,
@@ -142,12 +213,13 @@ export function identifyShopperByPhone(phone, name = '', email = '') {
       email: email.trim() || current.email,
       isGuest: false
     };
-    switchShopper(updated);
+    localStorage.setItem(STORAGE_ACTIVE_SHOPPER_KEY, JSON.stringify(updated));
+    addOrUpdateSavedShopper(updated);
     return updated;
   }
 
-  // Check if target shopper already has an existing saved bag
-  const existingTargetCart = getUserCart(targetId);
+  // Read both carts cleanly (without triggering legacy fallback on targetId)
+  const existingTargetCart = readStoredCartOnly(targetId) || [];
   const currentCart = getUserCart(current.id);
 
   const updated = {
@@ -159,11 +231,12 @@ export function identifyShopperByPhone(phone, name = '', email = '') {
     createdAt: new Date().toISOString()
   };
 
-  // If target cart already had items, keep it; if empty and current had items, migrate current
-  if (existingTargetCart.length === 0 && currentCart.length > 0) {
-    saveUserCart(targetId, currentCart, updated);
-  }
+  // Merge active bag items with any saved items for targetId so nothing added before checkout is lost
+  const mergedCart = currentCart.length > 0
+    ? mergeCartItems(currentCart, existingTargetCart)
+    : existingTargetCart;
 
+  saveUserCart(targetId, mergedCart, updated);
   switchShopper(updated);
   return updated;
 }
@@ -180,19 +253,18 @@ export function getUserCart(shopperId) {
   const key = `dainty_cart_${shopperId}`;
   try {
     const raw = localStorage.getItem(key);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
 
-  // Check legacy migration fallback if this is the first session
+  // Check legacy migration fallback only when the shopper key has never been initialized
   try {
     const legacyRaw = localStorage.getItem(LEGACY_CART_KEY);
     if (legacyRaw) {
       const legacyParsed = JSON.parse(legacyRaw);
       if (Array.isArray(legacyParsed) && legacyParsed.length > 0) {
-        // Save into this shopper's isolated key
         localStorage.setItem(key, JSON.stringify(legacyParsed));
         return legacyParsed;
       }
@@ -215,6 +287,8 @@ export function saveUserCart(shopperId, cart, shopperInfo = null) {
   const key = `dainty_cart_${shopperId}`;
   const cleanCart = Array.isArray(cart) ? cart : [];
 
+  bumpLocalCartVersion(shopperId);
+
   try {
     localStorage.setItem(key, JSON.stringify(cleanCart));
     // Keep legacy in sync with active shopper for backward compatibility
@@ -225,10 +299,11 @@ export function saveUserCart(shopperId, cart, shopperInfo = null) {
 
   // Notify listeners across components
   window.dispatchEvent(new CustomEvent('dainty_cart_changed', {
-    detail: { shopperId, count: cleanCart.reduce((sum, i) => sum + (i.quantity || 1), 0) }
+    detail: { shopperId, cart: cleanCart, count: cleanCart.reduce((sum, i) => sum + (i.quantity || 1), 0) }
   }));
 
-  // Sync to server backend asynchronously
+  // Sync to server backend asynchronously while guarding against stale GET overwrites
+  incrementPendingWrite(shopperId);
   fetch('/api/cart', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -238,9 +313,13 @@ export function saveUserCart(shopperId, cart, shopperInfo = null) {
       shopper: shopperInfo || getCurrentShopper(),
       updatedAt: new Date().toISOString()
     })
-  }).catch(() => {
-    // Silent fail if offline or host server is unreachable
-  });
+  })
+    .catch(() => {
+      // Silent fail if offline or host server is unreachable
+    })
+    .finally(() => {
+      decrementPendingWrite(shopperId);
+    });
 
   return cleanCart;
 }
@@ -255,24 +334,32 @@ export function clearUserCart(shopperId) {
   }
 
   const key = `dainty_cart_${shopperId}`;
+  bumpLocalCartVersion(shopperId);
+
   try {
-    localStorage.removeItem(key);
+    localStorage.setItem(key, JSON.stringify([]));
     localStorage.setItem(LEGACY_CART_KEY, JSON.stringify([]));
   } catch {}
 
   window.dispatchEvent(new CustomEvent('dainty_cart_changed', {
-    detail: { shopperId, count: 0 }
+    detail: { shopperId, cart: [], count: 0 }
   }));
 
+  incrementPendingWrite(shopperId);
   fetch(`/api/cart?userId=${encodeURIComponent(shopperId)}`, {
     method: 'DELETE'
-  }).catch(() => {});
+  })
+    .catch(() => {})
+    .finally(() => {
+      decrementPendingWrite(shopperId);
+    });
 
   return [];
 }
 
 /**
- * Fetch and synchronize the shopper's cart with the backend server
+ * Fetch and synchronize the shopper's cart with the backend server.
+ * Never overwrites non-empty local bag items with an empty or stale server response.
  */
 export async function syncUserCartFromServer(shopperId) {
   if (!shopperId) {
@@ -280,20 +367,50 @@ export async function syncUserCartFromServer(shopperId) {
     shopperId = active.id;
   }
 
+  const startVersion = getLocalCartVersion(shopperId);
+  const localCartBefore = getUserCart(shopperId);
+
+  if ((pendingCartWrites.get(shopperId) || 0) > 0) {
+    return localCartBefore;
+  }
+
   try {
     const res = await fetch(`/api/cart?userId=${encodeURIComponent(shopperId)}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.cart)) {
-        // If server has cart, save locally
-        const key = `dainty_cart_${shopperId}`;
-        localStorage.setItem(key, JSON.stringify(data.cart));
-        window.dispatchEvent(new CustomEvent('dainty_cart_changed', {
-          detail: { shopperId, count: data.cart.reduce((sum, i) => sum + (i.quantity || 1), 0) }
-        }));
-        return data.cart;
-      }
+    if (!res.ok) {
+      return getUserCart(shopperId);
     }
+
+    const data = await res.json();
+
+    // If a local cart write occurred while the request was in flight, local state wins
+    if (getLocalCartVersion(shopperId) !== startVersion || (pendingCartWrites.get(shopperId) || 0) > 0) {
+      return getUserCart(shopperId);
+    }
+
+    const localCartNow = getUserCart(shopperId);
+    const serverCart = data && Array.isArray(data.cart) ? data.cart : [];
+
+    // Never wipe a non-empty local bag when the server has no record or an empty cart
+    if (serverCart.length === 0) {
+      if (localCartNow.length > 0) {
+        saveUserCart(shopperId, localCartNow);
+      }
+      return localCartNow;
+    }
+
+    // Hydrate from server only if local bag is empty (e.g. fresh device/cleared localStorage)
+    if (localCartNow.length === 0) {
+      const key = `dainty_cart_${shopperId}`;
+      localStorage.setItem(key, JSON.stringify(serverCart));
+      localStorage.setItem(LEGACY_CART_KEY, JSON.stringify(serverCart));
+      window.dispatchEvent(new CustomEvent('dainty_cart_changed', {
+        detail: { shopperId, cart: serverCart, count: serverCart.reduce((sum, i) => sum + (i.quantity || 1), 0) }
+      }));
+      return serverCart;
+    }
+
+    return localCartNow;
   } catch {}
+
   return getUserCart(shopperId);
 }

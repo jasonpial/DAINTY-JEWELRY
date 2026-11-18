@@ -60,8 +60,8 @@ function App() {
   useEffect(() => {
     if (currentShopper?.id) {
       syncUserCartFromServer(currentShopper.id).then(serverCart => {
-        if (serverCart && Array.isArray(serverCart)) {
-          setCart(serverCart);
+        if (Array.isArray(serverCart)) {
+          setCart(prev => (prev.length > 0 && serverCart.length === 0 ? prev : serverCart));
         }
       });
     }
@@ -75,7 +75,8 @@ function App() {
     const handleCartChange = (e) => {
       const active = getCurrentShopper();
       if (!e.detail?.shopperId || e.detail.shopperId === active.id) {
-        setCart(getUserCart(active.id));
+        const nextCart = Array.isArray(e.detail?.cart) ? e.detail.cart : getUserCart(active.id);
+        setCart(nextCart);
       }
     };
 
@@ -93,30 +94,26 @@ function App() {
     };
   }, [currentShopper?.id]);
 
-  const saveCart = (newCart) => {
-    setCart(newCart);
-    saveUserCart(currentShopper.id, newCart, currentShopper);
-  };
-
   const showCartToast = (message, isAdd = false) => {
     const toast = document.createElement('div');
     toast.style.cssText = `
       position: fixed;
-      bottom: 2rem;
-      left: 2rem;
+      bottom: 1rem;
+      left: 1rem;
+      max-width: min(380px, calc(100vw - 2rem));
       background: ${isAdd ? 'var(--gradient-gold-metallic)' : '#1c1917'};
       color: ${isAdd ? '#000000' : '#ffffff'};
       border: 1px solid ${isAdd ? 'var(--color-gold-light)' : '#44403c'};
-      padding: 0.85rem 1.35rem;
+      padding: 0.75rem 1.1rem;
       border-radius: 8px;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       font-weight: 600;
       z-index: 10000;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
     `;
     const icon = isAdd
       ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
@@ -134,53 +131,79 @@ function App() {
   const handleAddToBag = (product) => {
     const qty = product.quantity || 1;
     const colorSelection = product.selectedColor || product.color || 'Gold';
-    
-    const existingIdx = cart.findIndex(
-      item => item.id === product.id && item.selectedColor === colorSelection
-    );
-    let newCart = [...cart];
-    
-    if (existingIdx !== -1) {
-      newCart[existingIdx].quantity += qty;
-    } else {
-      newCart.push({
-        ...product,
-        selectedColor: colorSelection,
-        quantity: qty
-      });
-    }
-    
-    saveCart(newCart);
+
+    setCart(prevCart => {
+      const existingIdx = prevCart.findIndex(
+        item => item.id === product.id && item.selectedColor === colorSelection
+      );
+      const newCart = [...prevCart];
+
+      if (existingIdx !== -1) {
+        newCart[existingIdx] = {
+          ...newCart[existingIdx],
+          quantity: newCart[existingIdx].quantity + qty
+        };
+      } else {
+        newCart.push({
+          ...product,
+          selectedColor: colorSelection,
+          quantity: qty
+        });
+      }
+
+      const active = getCurrentShopper();
+      saveUserCart(active.id, newCart, active);
+      return newCart;
+    });
+
     showCartToast(`Added ${qty}x ${product.name} to bag!`, true);
   };
 
   const handleUpdateQty = (productId, color, newQty) => {
-    let newCart = [...cart];
-    const idx = newCart.findIndex(item => item.id === productId && item.selectedColor === color);
-    if (idx !== -1) {
+    let removedName = null;
+
+    setCart(prevCart => {
+      const newCart = [...prevCart];
+      const idx = newCart.findIndex(item => item.id === productId && item.selectedColor === color);
+      if (idx === -1) return prevCart;
+
       if (newQty <= 0) {
-        const itemToRemove = newCart[idx];
+        removedName = newCart[idx].name;
         newCart.splice(idx, 1);
-        saveCart(newCart);
-        showCartToast(`Removed ${itemToRemove.name} from bag.`);
       } else {
-        newCart[idx].quantity = newQty;
-        saveCart(newCart);
+        newCart[idx] = { ...newCart[idx], quantity: newQty };
       }
+
+      const active = getCurrentShopper();
+      saveUserCart(active.id, newCart, active);
+      return newCart;
+    });
+
+    if (removedName) {
+      showCartToast(`Removed ${removedName} from bag.`);
     }
   };
 
   const handleRemoveItem = (productId, color) => {
-    const itemToRemove = cart.find(item => item.id === productId && item.selectedColor === color);
-    const newCart = cart.filter(item => !(item.id === productId && item.selectedColor === color));
-    saveCart(newCart);
-    if (itemToRemove) {
-      showCartToast(`Removed ${itemToRemove.name} from bag.`);
+    let removedName = null;
+
+    setCart(prevCart => {
+      const itemToRemove = prevCart.find(item => item.id === productId && item.selectedColor === color);
+      if (itemToRemove) removedName = itemToRemove.name;
+      const newCart = prevCart.filter(item => !(item.id === productId && item.selectedColor === color));
+      const active = getCurrentShopper();
+      saveUserCart(active.id, newCart, active);
+      return newCart;
+    });
+
+    if (removedName) {
+      showCartToast(`Removed ${removedName} from bag.`);
     }
   };
 
   const handleClearCart = () => {
-    clearUserCart(currentShopper.id);
+    const active = getCurrentShopper();
+    clearUserCart(active.id);
     setCart([]);
   };
 
@@ -225,7 +248,7 @@ function App() {
             </button>
             <div className="flex items-center gap-2 text-gray-500 font-serif italic text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b38728]"></span>
-              <span>DAINTY Atelier Kampala · 18K Gold Plated Jewelry</span>
+              <span>DAINTY STUDS & CHAINS Kampala</span>
             </div>
           </div>
         </>
@@ -321,7 +344,7 @@ function App() {
                 </p>
               </div>
 
-              {/* Column 2: Company */}
+               {/* Column 2: Company */}
               <div className="dainty-footer-col">
                 <h4 className="dainty-footer-heading">Company</h4>
                 <ul className="dainty-footer-contact-list">
@@ -331,15 +354,15 @@ function App() {
                   </li>
                   <li>
                     <Mail size={16} className="contact-icon" />
-                    <a href="mailto:info@daintystuds.com">info@daintystuds.com</a>
+                    <a href="mailto:daintystudsandchains@gmail.com">daintystudsandchains@gmail.com</a>
                   </li>
                   <li>
                     <MapPin size={16} className="contact-icon" />
-                    <span>Plot 45, Acacia Ave, Kampala, Uganda</span>
+                    <span>Goodwill zone, Kampala, Uganda</span>
                   </li>
                   <li>
                     <Clock size={16} className="contact-icon" />
-                    <span>9:00 AM – 7:30 PM (Mon – Sat)</span>
+                    <span>Mon - Sun: 24 hrs</span>
                   </li>
                 </ul>
               </div>
@@ -361,21 +384,21 @@ function App() {
                 <h4 className="dainty-footer-heading">Social Media</h4>
                 <ul className="dainty-footer-social-list">
                   <li>
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                      </svg>
-                      <span>Facebook Page</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.instagram.com/dainty_studs_and_chains?exln=MXc3cnI2ZDh1NGpzdw==" target="_blank" rel="noopener noreferrer">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
                         <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                         <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                       </svg>
-                      <span>Official Instagram</span>
+                      <span>@dainty_studs_and_chains</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.tiktok.com/@daintystuds?_r=1&_t=ZS-9BChgZF8WY9" target="_blank" rel="noopener noreferrer">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
+                        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                      </svg>
+                      <span>@daintystuds TikTok</span>
                     </a>
                   </li>
                   <li>
@@ -383,17 +406,15 @@ function App() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                       </svg>
-                      <span>WhatsApp Direct Order</span>
+                      <span>WhatsApp Hotline</span>
                     </a>
                   </li>
                   <li>
-                    <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer">
+                    <a href="tel:+256788227027" target="_blank" rel="noopener noreferrer">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon">
-                        <line x1="12" y1="4" x2="12" y2="20" />
-                        <path d="M18 10a6 6 0 0 0-12 0c0 3 2 5.5 5 6.5" />
-                        <circle cx="12" cy="10" r="3" />
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                       </svg>
-                      <span>Official Pinterest</span>
+                      <span>Direct Phone Call</span>
                     </a>
                   </li>
                 </ul>

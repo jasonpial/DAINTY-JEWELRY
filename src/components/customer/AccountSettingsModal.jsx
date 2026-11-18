@@ -92,13 +92,14 @@ export default function AccountSettingsModal({ isOpen, onClose, cart = [], onLog
       }}
     >
       <div
+        className="account-settings-modal-card"
         style={{
           width: '100%',
           maxWidth: '720px',
           background: '#ffffff',
           borderRadius: '16px',
           boxShadow: '0 25px 60px rgba(0,0,0,0.25)',
-          padding: '2rem',
+          padding: '1.5rem',
           position: 'relative',
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -110,8 +111,8 @@ export default function AccountSettingsModal({ isOpen, onClose, cart = [], onLog
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '1.25rem',
-            right: '1.25rem',
+            top: '1rem',
+            right: '1rem',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
@@ -125,97 +126,105 @@ export default function AccountSettingsModal({ isOpen, onClose, cart = [], onLog
         </button>
 
         {/* Header & User Greeting */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #eae6e1', paddingBottom: '1rem' }}>
-          <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'var(--gradient-gold-metallic, linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%))', color: '#1c1917', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 12px rgba(179,135,40,0.2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.15rem', borderBottom: '1px solid #eae6e1', paddingBottom: '0.9rem', paddingRight: '1.5rem' }}>
+          <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'var(--gradient-gold-metallic, linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%))', color: '#1c1917', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.1rem', boxShadow: '0 4px 12px rgba(179,135,40,0.2)', flexShrink: 0 }}>
             {activeUser?.name ? activeUser.name[0].toUpperCase() : 'U'}
           </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#1c1917', fontFamily: 'serif' }}>
+          <div style={{ minWidth: 0 }}>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#1c1917', fontFamily: 'serif', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Welcome back, {activeUser?.name || 'Valued Patron'}
             </h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#78716c' }}>
+            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: '#78716c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {activeUser?.email || 'DAINTY Member Account'} · Kampala, Uganda
             </p>
           </div>
         </div>
 
-        {/* Dashboard Navigation Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #f0ece4', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+        {/* Dashboard Navigation Tabs (single-row horizontal scroll) */}
+        <div style={{ display: 'flex', gap: '0.45rem', marginBottom: '1.25rem', borderBottom: '1px solid #f0ece4', paddingBottom: '0.6rem', overflowX: 'auto', scrollbarWidth: 'none' }}>
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
             style={{
-              padding: '0.55rem 1rem',
+              padding: '0.45rem 0.85rem',
               borderRadius: '20px',
               border: activeTab === 'profile' ? '1px solid #b38728' : '1px solid #e7e3dc',
               background: activeTab === 'profile' ? '#faf6ec' : '#fff',
               color: activeTab === 'profile' ? '#b38728' : '#44403c',
-              fontSize: '0.8rem',
+              fontSize: '0.76rem',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.35rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <User size={14} /> Profile & Settings
+            <User size={13} /> Profile
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('bag')}
             style={{
-              padding: '0.55rem 1rem',
+              padding: '0.45rem 0.85rem',
               borderRadius: '20px',
               border: activeTab === 'bag' ? '1px solid #b38728' : '1px solid #e7e3dc',
               background: activeTab === 'bag' ? '#faf6ec' : '#fff',
               color: activeTab === 'bag' ? '#b38728' : '#44403c',
-              fontSize: '0.8rem',
+              fontSize: '0.76rem',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.35rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <ShoppingBag size={14} /> My Bag ({bagCount})
+            <ShoppingBag size={13} /> My Bag ({bagCount})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('orders')}
             style={{
-              padding: '0.55rem 1rem',
+              padding: '0.45rem 0.85rem',
               borderRadius: '20px',
               border: activeTab === 'orders' ? '1px solid #b38728' : '1px solid #e7e3dc',
               background: activeTab === 'orders' ? '#faf6ec' : '#fff',
               color: activeTab === 'orders' ? '#b38728' : '#44403c',
-              fontSize: '0.8rem',
+              fontSize: '0.76rem',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.35rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Package size={14} /> Orders ({userOrders.length})
+            <Package size={13} /> Orders ({userOrders.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('favorites')}
             style={{
-              padding: '0.55rem 1rem',
+              padding: '0.45rem 0.85rem',
               borderRadius: '20px',
               border: activeTab === 'favorites' ? '1px solid #b38728' : '1px solid #e7e3dc',
               background: activeTab === 'favorites' ? '#faf6ec' : '#fff',
               color: activeTab === 'favorites' ? '#b38728' : '#44403c',
-              fontSize: '0.8rem',
+              fontSize: '0.76rem',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.35rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Heart size={14} /> Wishlist
+            <Heart size={13} /> Wishlist
           </button>
         </div>
 

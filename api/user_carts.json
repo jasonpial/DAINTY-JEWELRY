@@ -44,5 +44,599 @@
       "createdAt": "2026-11-12T14:02:12.000Z"
     },
     "updatedAt": "2026-11-12T14:05:18.497Z"
+  },
+  "shopper_ph_p256770000000": {
+    "cart": [
+      {
+        "id": "prod_12",
+        "name": "DAINTY 18K Gold Draped Chain Piercing Earring",
+        "description": "An architectural statement hoop featuring a delicate suspended cascade chain connecting the front clasp to a gentle drape. Designed for septum, helix, or conch styling.",
+        "price": 85000,
+        "sale_price": null,
+        "category_id": "earrings",
+        "subcategory_id": "dang_ear",
+        "material": "18K Gold-Plated",
+        "color": "Gold",
+        "gender": "Unisex",
+        "occasion": "Everyday",
+        "stock_quantity": 28,
+        "sku": "DSC-CH-DRP-12",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-08T09:16:54.135Z",
+        "images": [
+          "/images/stud_v_gold_draped_chain_ring.jpeg",
+          "/images/v.jpeg",
+          "/images/stud_iv_gold_chain_ring.jpeg"
+        ],
+        "tags": [
+          "chain",
+          "chains",
+          "drape",
+          "piercing",
+          "earring"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      },
+      {
+        "id": "prod_13",
+        "name": "DAINTY Diamond Pavé Eternity Clicker Hoop",
+        "description": "Seamless hinged clicker ring paved with radiant pavé micro-gemstones. Effortless click-to-close mechanism offering continuous sparkle for tragus, helix, and lobe piercings.",
+        "price": 78000,
+        "sale_price": 69000,
+        "category_id": "earrings",
+        "subcategory_id": "hugg_ear",
+        "material": "Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 42,
+        "sku": "DSC-ER-PVH-13",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-07T09:16:54.135Z",
+        "images": [
+          "/images/stud_iii_gold_pave_clicker.jpeg",
+          "/images/iii.jpeg",
+          "/images/stud_ii_diamond_eternity_ring.jpeg"
+        ],
+        "tags": [
+          "pave",
+          "clicker",
+          "hoop",
+          "dainty studs",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      }
+    ],
+    "shopper": {
+      "id": "shopper_ph_p256770000000",
+      "name": "Google User",
+      "phone": "+256770000000",
+      "email": "patron.google@dainty.com",
+      "isGuest": false,
+      "createdAt": "2026-11-17T15:33:47.252Z"
+    },
+    "updatedAt": "2026-11-17T15:54:14.197Z"
+  },
+  "shopper_ph_p256770000": {
+    "cart": [
+      {
+        "id": "prod_13",
+        "name": "DAINTY Diamond Pavé Eternity Clicker Hoop",
+        "description": "Seamless hinged clicker ring paved with radiant pavé micro-gemstones. Effortless click-to-close mechanism offering continuous sparkle for tragus, helix, and lobe piercings.",
+        "price": 78000,
+        "sale_price": 69000,
+        "category_id": "earrings",
+        "subcategory_id": "hugg_ear",
+        "material": "Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 42,
+        "sku": "DSC-ER-PVH-13",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-07T09:16:54.135Z",
+        "images": [
+          "/images/stud_iii_gold_pave_clicker.jpeg",
+          "/images/iii.jpeg",
+          "/images/stud_ii_diamond_eternity_ring.jpeg"
+        ],
+        "tags": [
+          "pave",
+          "clicker",
+          "hoop",
+          "dainty studs",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      },
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      }
+    ],
+    "shopper": {
+      "id": "shopper_ph_p256770000",
+      "name": "Google User",
+      "phone": "+256770000",
+      "email": "patron.google@dainty.com",
+      "isGuest": false,
+      "createdAt": "2026-11-17T15:54:30.285Z"
+    },
+    "updatedAt": "2026-11-17T15:54:53.174Z"
+  },
+  "shopper_ph_p2567409798": {
+    "cart": [
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      },
+      {
+        "id": "prod_12",
+        "name": "DAINTY 18K Gold Draped Chain Piercing Earring",
+        "description": "An architectural statement hoop featuring a delicate suspended cascade chain connecting the front clasp to a gentle drape. Designed for septum, helix, or conch styling.",
+        "price": 85000,
+        "sale_price": null,
+        "category_id": "earrings",
+        "subcategory_id": "dang_ear",
+        "material": "18K Gold-Plated",
+        "color": "Gold",
+        "gender": "Unisex",
+        "occasion": "Everyday",
+        "stock_quantity": 28,
+        "sku": "DSC-CH-DRP-12",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-08T09:16:54.135Z",
+        "images": [
+          "/images/stud_v_gold_draped_chain_ring.jpeg",
+          "/images/v.jpeg",
+          "/images/stud_iv_gold_chain_ring.jpeg"
+        ],
+        "tags": [
+          "chain",
+          "chains",
+          "drape",
+          "piercing",
+          "earring"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      },
+      {
+        "id": "prod_13",
+        "name": "DAINTY Diamond Pavé Eternity Clicker Hoop",
+        "description": "Seamless hinged clicker ring paved with radiant pavé micro-gemstones. Effortless click-to-close mechanism offering continuous sparkle for tragus, helix, and lobe piercings.",
+        "price": 78000,
+        "sale_price": 69000,
+        "category_id": "earrings",
+        "subcategory_id": "hugg_ear",
+        "material": "Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 42,
+        "sku": "DSC-ER-PVH-13",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-07T09:16:54.135Z",
+        "images": [
+          "/images/stud_iii_gold_pave_clicker.jpeg",
+          "/images/iii.jpeg",
+          "/images/stud_ii_diamond_eternity_ring.jpeg"
+        ],
+        "tags": [
+          "pave",
+          "clicker",
+          "hoop",
+          "dainty studs",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      }
+    ],
+    "shopper": {
+      "id": "shopper_ph_p2567409798",
+      "name": "Google User",
+      "phone": "+2567409798",
+      "email": "patron.google@dainty.com",
+      "isGuest": false,
+      "createdAt": "2026-11-17T15:55:03.286Z"
+    },
+    "updatedAt": "2026-11-17T16:00:23.217Z"
+  },
+  "shopper_ph_p256740979898": {
+    "cart": [
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 1
+      },
+      {
+        "id": "prod_12",
+        "name": "DAINTY 18K Gold Draped Chain Piercing Earring",
+        "description": "An architectural statement hoop featuring a delicate suspended cascade chain connecting the front clasp to a gentle drape. Designed for septum, helix, or conch styling.",
+        "price": 85000,
+        "sale_price": null,
+        "category_id": "earrings",
+        "subcategory_id": "dang_ear",
+        "material": "18K Gold-Plated",
+        "color": "Gold",
+        "gender": "Unisex",
+        "occasion": "Everyday",
+        "stock_quantity": 28,
+        "sku": "DSC-CH-DRP-12",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-08T09:16:54.135Z",
+        "images": [
+          "/images/stud_v_gold_draped_chain_ring.jpeg",
+          "/images/v.jpeg",
+          "/images/stud_iv_gold_chain_ring.jpeg"
+        ],
+        "tags": [
+          "chain",
+          "chains",
+          "drape",
+          "piercing",
+          "earring"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      },
+      {
+        "id": "prod_13",
+        "name": "DAINTY Diamond Pavé Eternity Clicker Hoop",
+        "description": "Seamless hinged clicker ring paved with radiant pavé micro-gemstones. Effortless click-to-close mechanism offering continuous sparkle for tragus, helix, and lobe piercings.",
+        "price": 78000,
+        "sale_price": 69000,
+        "category_id": "earrings",
+        "subcategory_id": "hugg_ear",
+        "material": "Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 42,
+        "sku": "DSC-ER-PVH-13",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-07T09:16:54.135Z",
+        "images": [
+          "/images/stud_iii_gold_pave_clicker.jpeg",
+          "/images/iii.jpeg",
+          "/images/stud_ii_diamond_eternity_ring.jpeg"
+        ],
+        "tags": [
+          "pave",
+          "clicker",
+          "hoop",
+          "dainty studs",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      }
+    ],
+    "shopper": {
+      "id": "shopper_ph_p256740979898",
+      "name": "Juma David Pius",
+      "phone": "+256740979898",
+      "email": "jumadavidpius@gmail.com",
+      "isGuest": false,
+      "createdAt": "2026-11-17T16:01:33.726Z"
+    },
+    "updatedAt": "2026-11-17T16:01:33.726Z"
+  },
+  "shopper_8r6ije9k30": {
+    "cart": [
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      }
+    ],
+    "shopper": {
+      "id": "shopper_8r6ije9k30",
+      "name": "Guest Client",
+      "phone": "",
+      "email": "",
+      "isGuest": true,
+      "createdAt": "2026-11-17T16:16:02.028Z"
+    },
+    "updatedAt": "2026-11-17T16:16:07.695Z"
+  },
+  "shopper_rynjlf9rbj": {
+    "cart": [
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      }
+    ],
+    "shopper": {
+      "id": "shopper_rynjlf9rbj",
+      "name": "Guest Client",
+      "phone": "",
+      "email": "",
+      "isGuest": true,
+      "createdAt": "2026-11-17T16:16:11.407Z"
+    },
+    "updatedAt": "2026-11-17T16:16:17.028Z"
+  },
+  "shopper_gjw5dqhzs4": {
+    "cart": [
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      }
+    ],
+    "shopper": {
+      "id": "shopper_gjw5dqhzs4",
+      "name": "Guest Client",
+      "phone": "",
+      "email": "",
+      "isGuest": true,
+      "createdAt": "2026-11-17T16:22:35.620Z"
+    },
+    "updatedAt": "2026-11-17T16:22:37.230Z"
+  },
+  "shopper_hnwl5wi41j": {
+    "cart": [
+      {
+        "id": "prod_11",
+        "name": "DAINTY 14K Gold Marquise Cluster Stud Earring",
+        "description": "Exquisite multi-stone marquise and round brilliant cut CZ cluster stud crafted in warm 14K gold plate with high security back. A signature delicate piece tailored for lobe or flat cartilage styling.",
+        "price": 95000,
+        "sale_price": 85000,
+        "category_id": "earrings",
+        "subcategory_id": "stud_ear",
+        "material": "14K Gold-Plated",
+        "color": "Gold",
+        "gender": "Women",
+        "occasion": "Everyday",
+        "stock_quantity": 35,
+        "sku": "DSC-ST-MRQ-11",
+        "featured": true,
+        "new_arrival": true,
+        "best_seller": true,
+        "limited_edition": false,
+        "clearance": false,
+        "created_at": "2026-11-09T09:16:54.134Z",
+        "images": [
+          "/images/stud_vii_marquise_cluster_stud.jpeg",
+          "/images/vii.jpeg",
+          "/images/vi.jpeg"
+        ],
+        "tags": [
+          "stud",
+          "marquise",
+          "dainty studs",
+          "piercing",
+          "gold"
+        ],
+        "selectedColor": "Gold",
+        "quantity": 2
+      }
+    ],
+    "shopper": {
+      "id": "shopper_hnwl5wi41j",
+      "name": "Guest Client",
+      "phone": "",
+      "email": "",
+      "isGuest": true,
+      "createdAt": "2026-11-17T16:22:41.143Z"
+    },
+    "updatedAt": "2026-11-17T16:22:42.693Z"
   }
 }

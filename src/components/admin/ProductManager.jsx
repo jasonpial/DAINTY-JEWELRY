@@ -25,7 +25,7 @@ export default function ProductManager() {
     occasion: 'Everyday',
     stock_quantity: 10,
     sku: '',
-    images: ['', '', '', ''],
+    images: ['', '', ''],
     featured: false,
     new_arrival: true,
     best_seller: false,
@@ -66,12 +66,7 @@ export default function ProductManager() {
       occasion: 'Everyday',
       stock_quantity: 15,
       sku: 'DSC-ST-' + Math.floor(Math.random() * 900 + 100),
-      images: [
-        '/images/vi.jpeg',
-        '/images/vii.jpeg',
-        '/images/iv.jpeg',
-        '/images/v.jpeg'
-      ],
+      images: ['', '', ''],
       featured: false,
       new_arrival: true,
       best_seller: false,
@@ -84,16 +79,16 @@ export default function ProductManager() {
   const handleOpenEdit = (product) => {
     setEditingProduct(product);
     
-    // Pad images if not up to 4
-    const imgs = [...product.images];
-    while (imgs.length < 4) imgs.push('');
+    // Pad images if not up to 3
+    const imgs = [...(product.images || [])];
+    while (imgs.length < 3) imgs.push('');
 
     setFormData({
       ...product,
       category_id: 'earrings',
       price: product.price.toString(),
       sale_price: product.sale_price ? product.sale_price.toString() : '',
-      images: imgs
+      images: imgs.slice(0, 3)
     });
     setIsModalOpen(true);
   };
@@ -123,8 +118,8 @@ export default function ProductManager() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     
-    // Clean up empty images
-    const activeImages = formData.images.filter(img => img.trim() !== '');
+    // Clean up empty images (up to 3)
+    const activeImages = formData.images.filter(img => img && img.trim() !== '').slice(0, 3);
     if (activeImages.length === 0) {
       alert('Please provide or upload at least one valid image for the product.');
       return;
@@ -264,7 +259,7 @@ export default function ProductManager() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="pm-grid-2">
                 <div className="form-group">
                   <label className="form-label" style={{ color: '#ffffff' }}>Price (UGX) *</label>
                   <input 
@@ -293,7 +288,7 @@ export default function ProductManager() {
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-gold-light)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
                   ① Select Material First — This determines the product collection
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div className="pm-grid-2 pm-grid-compact" style={{ marginBottom: '0.75rem' }}>
                   {/* Primary Materials — Stainless Steel & Titanium */}
                   {primaryMaterials.map(mat => (
                     <button
@@ -372,7 +367,7 @@ export default function ProductManager() {
                   <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-gold-light)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
                     ② Category — under {formData.material}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="pm-grid-2">
                     <div className="form-group">
                       <label className="form-label" style={{ color: '#ffffff' }}>Category *</label>
                       <select
@@ -412,7 +407,7 @@ export default function ProductManager() {
               )}
 
               {/* SKU, Stock, Gender */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+              <div className="pm-grid-3">
                 <div className="form-group">
                   <label className="form-label" style={{ color: '#ffffff' }}>SKU *</label>
                   <input
@@ -446,7 +441,7 @@ export default function ProductManager() {
               </div>
 
               {/* Color & Occasion */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="pm-grid-2">
                 <div className="form-group">
                   <label className="form-label" style={{ color: '#ffffff' }}>Color *</label>
                   <select name="color" value={formData.color} onChange={handleFormChange} className="form-input">
@@ -491,6 +486,10 @@ export default function ProductManager() {
                 <label className="form-label" style={{ color: '#ffffff', marginBottom: '0.8rem', fontSize: '0.9rem' }}>Product Images (Upload local files or paste image URLs) *</label>
                 
                 {formData.images.map((img, idx) => {
+                  if (idx > 0 && (!formData.images[idx - 1] || formData.images[idx - 1].trim() === '')) {
+                    return null;
+                  }
+
                   const handleFileChange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -569,7 +568,7 @@ export default function ProductManager() {
               </div>
 
               {/* Flag Options */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', padding: '1rem 0' }}>
+              <div className="pm-flags-grid">
                 <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ffffff', cursor: 'pointer' }}>
                   <input type="checkbox" name="featured" checked={formData.featured} onChange={handleFormChange} />
                   Featured

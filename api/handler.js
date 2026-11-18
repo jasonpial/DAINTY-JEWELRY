@@ -498,9 +498,16 @@ export async function handleApiRequest(req, res, customEnv = {}) {
       }
 
       const cartsDb = getUserCartsDb();
-      const userEntry = cartsDb[userId] || { cart: [], shopper: null, updatedAt: null };
+      const exists = Object.prototype.hasOwnProperty.call(cartsDb, userId);
+      const userEntry = exists ? cartsDb[userId] : { cart: [], shopper: null, updatedAt: null };
       const cart = Array.isArray(userEntry) ? userEntry : (userEntry.cart || []);
-      return send(res, 200, { userId, cart, count: cart.length });
+      return send(res, 200, {
+        userId,
+        exists,
+        cart,
+        count: cart.length,
+        updatedAt: userEntry?.updatedAt || null
+      });
     }
 
     // POST /api/cart -> Save/update cart for a specific user
@@ -512,14 +519,15 @@ export async function handleApiRequest(req, res, customEnv = {}) {
       }
 
       const cart = Array.isArray(body.cart) ? body.cart : [];
+      const updatedAt = body.updatedAt || new Date().toISOString();
       const cartsDb = getUserCartsDb();
       cartsDb[userId] = {
         cart,
         shopper: body.shopper || null,
-        updatedAt: new Date().toISOString()
+        updatedAt
       };
       saveUserCartsDb(cartsDb);
-      return send(res, 200, { success: true, userId, count: cart.length });
+      return send(res, 200, { success: true, userId, count: cart.length, updatedAt });
     }
 
     // DELETE /api/cart?userId=... or /api/cart/:userId -> Clear user cart

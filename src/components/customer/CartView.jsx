@@ -228,6 +228,7 @@ export default function CartView({
   const [orderPlaced, setOrderPlaced]     = useState(null);
   const [secureSave, setSecureSave]       = useState(true);
   const [showShopperModal, setShowShopperModal] = useState(false);
+  const [confirmClearBag, setConfirmClearBag]   = useState(false);
   const [newShopperName, setNewShopperName]     = useState('');
   const [newShopperPhone, setNewShopperPhone]   = useState('');
   const savedShoppers = getSavedShoppers();
@@ -268,7 +269,7 @@ export default function CartView({
   const cartSubtotal   = cart.reduce((acc, item) => acc + ((item.sale_price || item.price) * item.quantity), 0);
   const discountAmount = cartSubtotal * (discountPercentage / 100);
   const creditAmount   = cartSubtotal > 0 ? cartSubtotal * 0.01 : 0;
-  const deliveryFee    = cartSubtotal > 0 ? 10000 : 0;
+  const deliveryFee    = 0;
   const cartTotal      = Math.max(0, cartSubtotal - discountAmount - creditAmount + deliveryFee);
   const gstInclusive   = cartTotal > 0 ? cartTotal * 0.10 : 0;
   const cartCount      = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -276,8 +277,12 @@ export default function CartView({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCheckoutData(prev => ({ ...prev, [name]: value }));
-    if (name === 'phone' && value.trim().length >= 10 && onIdentifyShopper) {
-      onIdentifyShopper(value.trim(), checkoutData.name, checkoutData.email);
+  };
+
+  const handlePhoneBlur = () => {
+    const cleanPhone = checkoutData.phone.trim();
+    if (cleanPhone.length >= 10 && onIdentifyShopper) {
+      onIdentifyShopper(cleanPhone, checkoutData.name, checkoutData.email);
     }
   };
 
@@ -309,7 +314,7 @@ export default function CartView({
       const p = item.sale_price || item.price;
       itemDetails += `${i + 1}. *${item.name}* (${item.selectedColor}) - Qty: ${item.quantity} x ${formatUGX(p)}\n`;
     });
-    const text = `Hello DAINTY STUDS AND CHAINS! I'd like to place an order:\n\n*ORDER ITEMS:*\n${itemDetails}\n*Subtotal:* ${formatUGX(cartSubtotal)}\n*Discount:* -${formatUGX(discountAmount)}\n*Credit Rebate:* -${formatUGX(creditAmount)}\n*Delivery:* ${formatUGX(deliveryFee)}\n*TOTAL:* ${formatUGX(cartTotal)} (${formatUSD(cartTotal)})\n\n*CUSTOMER:*\n- Name: ${checkoutData.name}\n- Phone: ${checkoutData.phone}\n- Email: ${checkoutData.email || 'N/A'}\n- Address: ${checkoutData.address}\n- Network: ${selectedNetwork || 'N/A'}\n- Notes: ${checkoutData.notes || 'None'}`;
+    const text = `Hello DAINTY STUDS AND CHAINS! I'd like to place an order:\n\n*ORDER ITEMS:*\n${itemDetails}\n*Subtotal:* ${formatUGX(cartSubtotal)}\n*Discount:* -${formatUGX(discountAmount)}\n*Credit Rebate:* -${formatUGX(creditAmount)}\n*TOTAL:* ${formatUGX(cartTotal)} (${formatUSD(cartTotal)})\n\n*CUSTOMER:*\n- Name: ${checkoutData.name}\n- Phone: ${checkoutData.phone}\n- Email: ${checkoutData.email || 'N/A'}\n- Address: ${checkoutData.address}\n- Network: ${selectedNetwork || 'N/A'}\n- Notes: ${checkoutData.notes || 'None'}`;
     window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -574,12 +579,7 @@ export default function CartView({
   // ── Order Success ────────────────────────────────────────
   if (orderPlaced) {
     return (
-      <div className="animate-fade-in" style={{
-        maxWidth: '560px', margin: '5rem auto', padding: '3rem 2rem',
-        textAlign: 'center', background: '#ffffff',
-        border: '1px solid #eae6e1', borderRadius: '16px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
-      }}>
+      <div className="cart-state-card animate-fade-in">
         <div style={{
           width: '72px', height: '72px', borderRadius: '50%',
           background: 'rgba(22,163,74,0.10)',
@@ -609,12 +609,7 @@ export default function CartView({
   // ── Empty Cart ───────────────────────────────────────────
   if (cart.length === 0) {
     return (
-      <div className="animate-fade-in" style={{
-        maxWidth: '560px', margin: '5rem auto', padding: '3.5rem 2rem',
-        textAlign: 'center', background: '#ffffff',
-        border: '1px solid #eae6e1', borderRadius: '12px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
-      }}>
+      <div className="cart-state-card animate-fade-in">
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
           padding: '0.4rem 0.85rem', background: '#faf8f5',
@@ -787,6 +782,7 @@ export default function CartView({
         />
       )}
 
+      <div className="checkout-page-container">
       <div className="checkout-layout-grid animate-fade-in">
 
         {/* ══════════════════════════════════════════
@@ -833,7 +829,11 @@ export default function CartView({
                 const lineTotal = activePrice * item.quantity;
                 return (
                   <div key={`${item.id}_${item.selectedColor}`} className="checkout-product-item">
-                    <img src={item.images[0]} alt={item.name} className="checkout-prod-img" />
+                    <img
+                      src={(Array.isArray(item.images) && item.images[0]) || item.image || '/images/vi.jpeg'}
+                      alt={item.name}
+                      className="checkout-prod-img"
+                    />
                     
                     <div className="checkout-prod-details">
                       <h4 className="checkout-prod-name">{item.name}</h4>
@@ -894,18 +894,37 @@ export default function CartView({
 
             {/* Clear Entire Bag Option if multiple items */}
             {cart.length > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px dashed #eae6e1' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm('Remove all items from this shopping bag?')) {
-                      if (onClearCart) onClearCart();
-                    }
-                  }}
-                  style={{ background: 'none', border: 'none', color: '#b91c1c', fontSize: '0.74rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.2rem 0.5rem' }}
-                >
-                  <Trash2 size={12} /> Clear all items from this bag
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px dashed #eae6e1' }}>
+                {!confirmClearBag ? (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmClearBag(true)}
+                    style={{ background: 'none', border: 'none', color: '#b91c1c', fontSize: '0.74rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.2rem 0.5rem' }}
+                  >
+                    <Trash2 size={12} /> Clear all items from this bag
+                  </button>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '0.74rem', color: '#78716c', fontWeight: 600 }}>Remove all items?</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfirmClearBag(false);
+                        if (onClearCart) onClearCart();
+                      }}
+                      style={{ background: '#b91c1c', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      Yes, Clear
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmClearBag(false)}
+                      style={{ background: '#f5f5f4', color: '#44403c', border: '1px solid #d6d3d1', borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -958,7 +977,6 @@ export default function CartView({
                 <span>GST (10%) <span style={{ fontSize: '0.72rem', color: '#a8a29e' }}>(Inclusive)</span></span>
                 <span>{formatUGX(gstInclusive)}</span>
               </div>
-              <div className="checkout-invoice-row"><span>Delivery Fee</span><span>{formatUGX(deliveryFee)}</span></div>
               <div className="checkout-invoice-row total">
                 <span>Total</span>
                 <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
@@ -999,7 +1017,7 @@ export default function CartView({
           </div>
 
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+          <div className="payment-card-top-row">
             <h3 className="payment-title" style={{ margin: 0 }}>Mobile Money Payment</h3>
             <span className="relworx-brand-badge">
               <ShieldCheck size={11} /> Powered by Relworx
@@ -1098,7 +1116,7 @@ export default function CartView({
                 <div className="form-group">
                   <label className="form-label" style={{ color: '#1c1917' }}>Billing Phone *</label>
                   <input type="tel" name="phone" required className="form-input"
-                    value={checkoutData.phone} onChange={handleInputChange}
+                    value={checkoutData.phone} onChange={handleInputChange} onBlur={handlePhoneBlur}
                     placeholder="e.g. +256 701 234 567" />
                 </div>
 
@@ -1269,6 +1287,7 @@ export default function CartView({
           )}
 
         </div>
+      </div>
       </div>
 
       {/* Shopper / Multi-User Bag Switcher Modal */}

@@ -328,9 +328,11 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
           box-shadow: 0 4px 12px rgba(179,135,40,0.12);
         }
         @media (max-width: 768px) {
-          .profile-auth-card { flex-direction: column; max-width: 440px; }
-          .profile-auth-gold-side { width: 100%; padding: 2rem 1.5rem; }
-          .profile-auth-form-side { padding: 2rem 1.5rem; }
+          .profile-auth-card { flex-direction: column; max-width: 440px; min-height: auto; max-height: 92vh; overflow-y: auto; }
+          .profile-auth-gold-side { width: 100%; padding: 1.5rem 1.25rem; }
+          .profile-auth-form-side { padding: 1.75rem 1.15rem 1.35rem 1.15rem; }
+          .social-login-row { width: 100%; max-width: 320px; justify-content: center; gap: 0.6rem; }
+          .social-login-btn { flex: 1; padding: 0.55rem 0.65rem; font-size: 0.76rem; }
         }
       `}</style>
 

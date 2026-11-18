@@ -101,7 +101,7 @@ export default function HeroSlideshow({ category, collection }) {
   return (
     <section className="hero-layout-outer">
       {/* Full-width hero slideshow — no sidebar, no category list */}
-      <div className="hero-slider hero-slider-fullwidth" style={{ height: '480px', borderRadius: '8px', overflow: 'hidden', boxShadow: 'var(--shadow-premium)' }}>
+      <div className="hero-slider hero-slider-fullwidth">
         {slides.map((slide, index) => (
           <div
             key={index}

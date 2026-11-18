@@ -34,10 +34,22 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
     };
   }, [routeParams.id]);
 
-  // Capped Images list (up to 4 images with robust fallback)
-  const activeImages = (product && Array.isArray(product.images) && product.images.length > 0)
-    ? product.images.filter(Boolean).slice(0, 4)
-    : (product?.image ? [product.image] : ['/images/vi.jpeg']);
+  // Capped Images list (up to 3 images with robust fallback padding so slideshow works on all product pages)
+  const rawImages = (product && Array.isArray(product.images) && product.images.length > 0)
+    ? product.images.filter(Boolean)
+    : (product?.image ? [product.image] : []);
+
+  const fallbackPool = ['/images/vi.jpeg', '/images/vii.jpeg', '/images/v.jpeg', '/images/i.jpeg', '/images/ii.jpeg', '/images/iii.jpeg'];
+  
+  const activeImages = [];
+  for (let i = 0; i < 3; i++) {
+    if (rawImages[i] && typeof rawImages[i] === 'string' && rawImages[i].trim() !== '') {
+      activeImages.push(rawImages[i]);
+    } else {
+      const fallback = fallbackPool.find(f => !activeImages.includes(f)) || fallbackPool[i % fallbackPool.length];
+      activeImages.push(fallback);
+    }
+  }
 
   // Automatic slideshow effect
   useEffect(() => {
@@ -125,22 +137,73 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
   const subcatName = subcategory_id ? subcategory_id.split('_').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ') : '';
 
   return (
-    <div style={{ background: 'transparent', padding: '2rem 0' }}>
+    <div className="detail-page-wrap">
       <div className="detail-layout">
         
         {/* Gallery Column */}
         <div className="detail-gallery">
-          {/* Main Display */}
-          <div className="detail-main-img-wrapper">
+          {/* Main Display with Slideshow Chevrons & Indicators */}
+          <div className="detail-main-img-wrapper" style={{ position: 'relative' }}>
             <img 
-              src={activeImages[selectedImageIdx] || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80'} 
+              src={activeImages[selectedImageIdx] || '/images/vi.jpeg'} 
               alt={name} 
               className="detail-main-img" 
             />
+            {activeImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIdx(prev => (prev - 1 + activeImages.length) % activeImages.length);
+                  }}
+                  style={{
+                    position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'rgba(255,255,255,0.9)', border: '1px solid #e8e2d7', borderRadius: '50%',
+                    width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', fontSize: '14px', fontWeight: 'bold', color: '#1c1917'
+                  }}
+                  title="Previous Photo"
+                >
+                  ❮
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIdx(prev => (prev + 1) % activeImages.length);
+                  }}
+                  style={{
+                    position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'rgba(255,255,255,0.9)', border: '1px solid #e8e2d7', borderRadius: '50%',
+                    width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', zIndex: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', fontSize: '14px', fontWeight: 'bold', color: '#1c1917'
+                  }}
+                  title="Next Photo"
+                >
+                  ❯
+                </button>
+                <div style={{
+                  position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)',
+                  display: 'flex', gap: '6px', zIndex: 10, background: 'rgba(0,0,0,0.45)', padding: '4px 8px', borderRadius: '12px', backdropFilter: 'blur(4px)'
+                }}>
+                  {activeImages.map((_, i) => (
+                    <span
+                      key={i}
+                      onClick={() => setSelectedImageIdx(i)}
+                      style={{
+                        width: selectedImageIdx === i ? '18px' : '6px', height: '6px', borderRadius: '3px',
+                        background: selectedImageIdx === i ? '#f5e6a5' : 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'all 0.2s'
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Thumbnails (Capped to exactly up to 4 images) */}
-          <div className="detail-thumbnails" style={{ gridTemplateColumns: `repeat(${activeImages.length}, 1fr)` }}>
+          <div className="detail-thumbnails">
             {activeImages.map((img, idx) => (
               <div 
                 key={idx}
@@ -227,54 +290,57 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
           {/* Description */}
           <p className="detail-desc" style={{ color: '#44403c' }}>{description}</p>
 
-          {/* Color Selector */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span className="form-label" style={{ marginBottom: '0.6rem', color: '#1c1917' }}>Available Colors</span>
-            <div style={{ display: 'flex', gap: '0.6rem' }}>
-              {availableColors.map(col => (
-                <button
-                  key={col}
-                  onClick={() => setSelectedColor(col)}
-                  style={{
-                    padding: '0.4rem 1rem',
-                    border: '1px solid',
-                    borderColor: selectedColor === col ? 'var(--color-gold-primary)' : '#eae6e1',
-                    borderRadius: 'var(--border-radius-sm)',
-                    background: selectedColor === col ? '#fcfbfa' : '#ffffff',
-                    color: selectedColor === col ? 'var(--color-gold-dark)' : '#1c1917',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    transition: 'var(--transition-quick)'
-                  }}
-                >
-                  {col}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Quantity Selector */}
-          {!isOutOfStock && (
-            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span className="form-label" style={{ color: '#1c1917' }}>Quantity</span>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #eae6e1', borderRadius: '4px', overflow: 'hidden', background: '#ffffff' }}>
-                <button 
-                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  style={{ padding: '0.4rem 0.8rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#1c1917' }}
-                >
-                  -
-                </button>
-                <span style={{ padding: '0 0.8rem', fontSize: '0.9rem', fontWeight: 600, color: '#1c1917' }}>{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(q => Math.min(stock_quantity, q + 1))}
-                  style={{ padding: '0.4rem 0.8rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#1c1917' }}
-                >
-                  +
-                </button>
+          {/* Color & Quantity Selectors Row */}
+          <div className="detail-selectors-row">
+            {/* Color Selector */}
+            <div className="detail-selector-block">
+              <span className="form-label" style={{ marginBottom: '0.45rem', color: '#1c1917', display: 'block' }}>Available Colors</span>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {availableColors.map(col => (
+                  <button
+                    key={col}
+                    onClick={() => setSelectedColor(col)}
+                    style={{
+                      padding: '0.4rem 0.9rem',
+                      border: '1px solid',
+                      borderColor: selectedColor === col ? 'var(--color-gold-primary)' : '#eae6e1',
+                      borderRadius: 'var(--border-radius-sm)',
+                      background: selectedColor === col ? '#fcfbfa' : '#ffffff',
+                      color: selectedColor === col ? 'var(--color-gold-dark)' : '#1c1917',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      transition: 'var(--transition-quick)'
+                    }}
+                  >
+                    {col}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
+
+            {/* Quantity Selector */}
+            {!isOutOfStock && (
+              <div className="detail-selector-block" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <span className="form-label" style={{ color: '#1c1917', margin: 0 }}>Quantity</span>
+                <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #eae6e1', borderRadius: '4px', overflow: 'hidden', background: '#ffffff' }}>
+                  <button 
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    style={{ padding: '0.4rem 0.75rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#1c1917' }}
+                  >
+                    -
+                  </button>
+                  <span style={{ padding: '0 0.7rem', fontSize: '0.9rem', fontWeight: 600, color: '#1c1917' }}>{quantity}</span>
+                  <button 
+                    onClick={() => setQuantity(q => Math.min(stock_quantity, q + 1))}
+                    style={{ padding: '0.4rem 0.75rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#1c1917' }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Actions Column */}
           <div className="detail-actions">
@@ -299,14 +365,14 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
             )}
           </div>
 
-          {/* Trust points list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid #eae6e1', paddingTop: '1.5rem', marginTop: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: '#44403c' }}>
-              <Truck size={16} style={{ color: 'var(--color-gold-dark)' }} />
+          {/* Trust points row */}
+          <div className="detail-trust-row">
+            <div className="detail-trust-item">
+              <Truck size={16} style={{ color: 'var(--color-gold-dark)', flexShrink: 0 }} />
               <span>Delivery across Kampala.</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: '#44403c' }}>
-              <Award size={16} style={{ color: 'var(--color-gold-dark)' }} />
+            <div className="detail-trust-item">
+              <Award size={16} style={{ color: 'var(--color-gold-dark)', flexShrink: 0 }} />
               <span>Best Quality</span>
             </div>
           </div>

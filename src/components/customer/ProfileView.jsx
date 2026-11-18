@@ -81,15 +81,15 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
 
   if (!activeUser) {
     return (
-      <div style={{ maxWidth: '600px', margin: '5rem auto', padding: '3.5rem 2rem', textAlign: 'center', background: '#fff', borderRadius: '16px', border: '1px solid #eae6e1', boxShadow: '0 20px 60px rgba(0,0,0,0.06)' }}>
-        <Shield size={48} style={{ color: '#b38728', margin: '0 auto 1rem auto' }} />
-        <h2 style={{ fontSize: '1.6rem', fontFamily: 'serif', fontWeight: 800, color: '#1c1917', marginBottom: '0.5rem' }}>
+      <div className="profile-signin-card">
+        <Shield size={44} style={{ color: '#b38728', margin: '0 auto 1rem auto' }} />
+        <h2 className="profile-signin-title">
           Account Sign In Required
         </h2>
-        <p style={{ fontSize: '0.88rem', color: '#78716c', marginBottom: '1.75rem', lineHeight: '1.6' }}>
+        <p className="profile-signin-desc">
           Please choose an account or sign in to view your DAINTY profile, saved bag, and order history.
         </p>
-        <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {onOpenAuth && (
             <button type="button" className="btn-primary" onClick={onOpenAuth}>
               Sign In / Choose Account
@@ -98,7 +98,7 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
           <button
             type="button"
             onClick={() => navigateTo('home')}
-            style={{ padding: '0.75rem 1.5rem', borderRadius: '30px', border: '1px solid #d6d3d1', background: '#fff', color: '#1c1917', fontWeight: 700, cursor: 'pointer' }}
+            style={{ padding: '0.7rem 1.35rem', borderRadius: '30px', border: '1px solid #d6d3d1', background: '#fff', color: '#1c1917', fontWeight: 700, cursor: 'pointer', fontSize: '0.84rem' }}
           >
             Return to Home
           </button>
@@ -108,29 +108,29 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '3rem auto', padding: '0 1.5rem' }}>
+    <div className="profile-page-wrap">
       <button
         type="button"
         onClick={() => navigateTo('home')}
-        style={{ background: 'none', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#78716c', fontWeight: 600, fontSize: '0.84rem', cursor: 'pointer', marginBottom: '1.5rem' }}
+        className="profile-back-btn"
       >
         <ArrowLeft size={16} /> Back to Store
       </button>
 
       {/* Profile Header Banner */}
-      <div style={{ background: 'linear-gradient(135deg, #1c1917 0%, #2c2724 100%)', color: '#fff', borderRadius: '16px', padding: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.15)', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--gradient-gold-metallic, linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%))', color: '#1c1917', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.8rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+      <div className="profile-hero-banner">
+        <div className="profile-hero-user">
+          <div className="profile-hero-avatar">
             {activeUser.name ? activeUser.name[0].toUpperCase() : 'U'}
           </div>
-          <div>
-            <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#d4af37', fontWeight: 700, marginBottom: '0.2rem' }}>
+          <div style={{ minWidth: 0 }}>
+            <div className="profile-hero-kicker">
               DAINTY Verified Patron
             </div>
-            <h1 style={{ margin: 0, fontSize: '1.8rem', fontFamily: 'serif', fontWeight: 800 }}>
+            <h1 className="profile-hero-title">
               {activeUser.name}
             </h1>
-            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#d6d3d1' }}>
+            <p className="profile-hero-meta">
               {activeUser.email} {activeUser.phone ? `• ${activeUser.phone}` : ''}
             </p>
           </div>
@@ -139,227 +139,167 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
         <button
           type="button"
           onClick={handleSignOut}
-          style={{ padding: '0.7rem 1.4rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', fontWeight: 700, fontSize: '0.84rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s ease' }}
+          className="profile-signout-btn"
         >
-          <LogOut size={16} /> Sign Out
+          <LogOut size={15} /> Sign Out
         </button>
       </div>
 
       {/* Dashboard Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '2rem' }}>
-        {/* Sidebar Nav */}
-        <div style={{ background: '#ffffff', border: '1px solid #e7e3dc', borderRadius: '12px', padding: '1rem', height: 'fit-content', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+      <div className="profile-dashboard-grid">
+        {/* Sidebar Nav (Horizontal pill row on mobile, sidebar stack on desktop) */}
+        <div className="profile-sidebar-card">
+          <div className="profile-tabs-list">
             <button
               type="button"
               onClick={() => setActiveTab('profile')}
-              style={{
-                width: '100%',
-                padding: '0.8rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: activeTab === 'profile' ? '#1c1917' : 'transparent',
-                color: activeTab === 'profile' ? '#fff' : '#1c1917',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                transition: 'all 0.2s ease'
-              }}
+              className={`profile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
             >
-              <User size={17} /> Account Details
+              <User size={16} /> <span>Account Details</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('bag')}
-              style={{
-                width: '100%',
-                padding: '0.8rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: activeTab === 'bag' ? '#1c1917' : 'transparent',
-                color: activeTab === 'bag' ? '#fff' : '#1c1917',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                transition: 'all 0.2s ease'
-              }}
+              className={`profile-tab-btn ${activeTab === 'bag' ? 'active' : ''}`}
             >
-              <ShoppingBag size={17} /> Shopping Bag ({bagCount})
+              <ShoppingBag size={16} /> <span>Shopping Bag ({bagCount})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('orders')}
-              style={{
-                width: '100%',
-                padding: '0.8rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: activeTab === 'orders' ? '#1c1917' : 'transparent',
-                color: activeTab === 'orders' ? '#fff' : '#1c1917',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                transition: 'all 0.2s ease'
-              }}
+              className={`profile-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
             >
-              <Package size={17} /> Order History ({userOrders.length})
+              <Package size={16} /> <span>Order History ({userOrders.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('wishlist')}
-              style={{
-                width: '100%',
-                padding: '0.8rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: activeTab === 'wishlist' ? '#1c1917' : 'transparent',
-                color: activeTab === 'wishlist' ? '#fff' : '#1c1917',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                transition: 'all 0.2s ease'
-              }}
+              className={`profile-tab-btn ${activeTab === 'wishlist' ? 'active' : ''}`}
             >
-              <Heart size={17} /> Saved Wishlist
+              <Heart size={16} /> <span>Saved Wishlist</span>
             </button>
           </div>
         </div>
 
         {/* Main Content Panel */}
-        <div style={{ background: '#ffffff', border: '1px solid #e7e3dc', borderRadius: '12px', padding: '2.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+        <div className="profile-content-panel">
           {activeTab === 'profile' && (
             <div>
-              <h2 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.4rem' }}>
+              <h2 className="profile-panel-heading">
                 Profile &amp; Account Settings
               </h2>
-              <p style={{ fontSize: '0.85rem', color: '#78716c', marginBottom: '1.75rem' }}>
+              <p className="profile-panel-sub">
                 Update your personal credentials, secure password, and delivery address.
               </p>
 
               {success && (
-                <div style={{ padding: '0.85rem 1rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                <div style={{ padding: '0.85rem 1rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem', fontSize: '0.85rem', fontWeight: 600 }}>
                   <CheckCircle2 size={18} />
                   <span>Account profile and credentials successfully updated!</span>
                 </div>
               )}
 
               {error && (
-                <div style={{ padding: '0.85rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', marginBottom: '1.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                <div style={{ padding: '0.85rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', marginBottom: '1.25rem', fontSize: '0.85rem', fontWeight: 600 }}>
                   {error}
                 </div>
               )}
 
-              <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
+              <form onSubmit={handleSave} className="profile-form-grid">
+                <div className="profile-form-full">
+                  <label className="profile-field-label">
                     Full Name
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <User size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                    <User size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
+                      className="profile-field-input"
                       required
                     />
                   </div>
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
+                <div className="profile-form-full">
+                  <label className="profile-field-label">
                     Email Address
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Mail size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                    <Mail size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
+                      className="profile-field-input"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
-                    Mobile Money Phone Number
+                  <label className="profile-field-label">
+                    Mobile Money Phone
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Phone size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                    <Phone size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="e.g. 0740979898"
-                      style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
+                      className="profile-field-input"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
+                  <label className="profile-field-label">
                     Delivery Address
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <MapPin size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                    <MapPin size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
                     <input
                       type="text"
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
                       placeholder="Kampala, Uganda"
-                      style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
+                      className="profile-field-input"
                     />
                   </div>
                 </div>
 
                 {activeUser.provider !== 'google' && (
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#44403c', marginBottom: '0.35rem' }}>
+                  <div className="profile-form-full">
+                    <label className="profile-field-label">
                       Secure Password
                     </label>
                     <div style={{ position: 'relative' }}>
-                      <Lock size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                      <Lock size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
                       <input
                         type="password"
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
                         placeholder="Leave blank to keep current password"
-                        style={{ width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem', border: '1px solid #d6d3d1', borderRadius: '8px', fontSize: '0.88rem', outline: 'none' }}
+                        className="profile-field-input"
                       />
                     </div>
                   </div>
                 )}
 
-                <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                <div className="profile-form-full" style={{ marginTop: '0.5rem' }}>
                   <button
                     type="submit"
-                    style={{ padding: '0.85rem 2rem', background: '#1c1917', color: '#fff', border: 'none', borderRadius: '30px', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}
+                    className="profile-save-btn"
                   >
                     <Save size={16} /> Save Profile Changes
                   </button>
@@ -370,36 +310,36 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
 
           {activeTab === 'bag' && (
             <div>
-              <h2 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.4rem' }}>
+              <h2 className="profile-panel-heading">
                 Your Active Shopping Bag ({bagCount} items)
               </h2>
-              <p style={{ fontSize: '0.85rem', color: '#78716c', marginBottom: '1.75rem' }}>
+              <p className="profile-panel-sub">
                 Items currently curated in your personal shopping bag.
               </p>
 
               {cart.length === 0 ? (
-                <div style={{ padding: '3rem', textAlign: 'center', background: '#faf8f5', borderRadius: '12px', border: '1px solid #e8e2d7' }}>
-                  <ShoppingBag size={42} style={{ color: '#b38728', margin: '0 auto 0.75rem auto' }} />
+                <div style={{ padding: '2.25rem 1.25rem', textAlign: 'center', background: '#faf8f5', borderRadius: '12px', border: '1px solid #e8e2d7' }}>
+                  <ShoppingBag size={40} style={{ color: '#b38728', margin: '0 auto 0.75rem auto' }} />
                   <p style={{ fontSize: '0.9rem', color: '#78716c', marginBottom: '1.25rem' }}>Your shopping bag is empty.</p>
                   <button className="btn-primary" onClick={() => navigateTo('shop')}>
                     Explore Shop Catalog
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   {cart.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
-                      <img src={item.images?.[0] || '/images/logo-image.png'} alt={item.name} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px' }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1c1917' }}>{item.name}</div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Color: {item.selectedColor} · Quantity: {item.quantity}</div>
+                    <div key={idx} className="profile-bag-item">
+                      <img src={item.images?.[0] || '/images/logo-image.png'} alt={item.name} className="profile-bag-thumb" />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1c1917', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b' }}>Color: {item.selectedColor} · Qty: {item.quantity}</div>
                       </div>
-                      <div style={{ fontSize: '1rem', fontWeight: 800, color: '#b38728' }}>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#b38728', flexShrink: 0 }}>
                         {formatUGX((item.sale_price || item.price) * item.quantity)}
                       </div>
                     </div>
                   ))}
-                  <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+                  <div style={{ marginTop: '0.75rem', textAlign: 'right' }}>
                     <button className="btn-primary" onClick={() => navigateTo('cart')}>
                       Proceed to Checkout ({bagCount} items)
                     </button>
@@ -411,33 +351,33 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
 
           {activeTab === 'orders' && (
             <div>
-              <h2 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.4rem' }}>
+              <h2 className="profile-panel-heading">
                 Order History ({userOrders.length})
               </h2>
-              <p style={{ fontSize: '0.85rem', color: '#78716c', marginBottom: '1.75rem' }}>
+              <p className="profile-panel-sub">
                 Track your past purchases and Mobile Money payments.
               </p>
 
               {userOrders.length === 0 ? (
-                <div style={{ padding: '3rem', textAlign: 'center', background: '#faf8f5', borderRadius: '12px', border: '1px solid #e8e2d7' }}>
-                  <Package size={42} style={{ color: '#b38728', margin: '0 auto 0.75rem auto' }} />
+                <div style={{ padding: '2.25rem 1.25rem', textAlign: 'center', background: '#faf8f5', borderRadius: '12px', border: '1px solid #e8e2d7' }}>
+                  <Package size={40} style={{ color: '#b38728', margin: '0 auto 0.75rem auto' }} />
                   <p style={{ fontSize: '0.9rem', color: '#78716c', margin: 0 }}>No past orders found for this account.</p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   {userOrders.map(order => (
-                    <div key={order.id} style={{ padding: '1.25rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1c1917' }}>Order #{order.id}</span>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 700, padding: '0.2rem 0.6rem', background: '#dcfce7', color: '#15803d', borderRadius: '12px' }}>
+                    <div key={order.id} style={{ padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.45rem' }}>
+                        <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c1917' }}>Order #{order.id}</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', background: '#dcfce7', color: '#15803d', borderRadius: '12px' }}>
                           {order.status || 'Confirmed'}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem' }}>
-                        Date: {new Date(order.created_at || Date.now()).toLocaleDateString()} · Total Amount: <strong style={{ color: '#1c1917' }}>{formatUGX(order.total_amount)}</strong>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '0.45rem' }}>
+                        Date: {new Date(order.created_at || Date.now()).toLocaleDateString()} · Total: <strong style={{ color: '#1c1917' }}>{formatUGX(order.total_amount)}</strong>
                       </div>
-                      <div style={{ fontSize: '0.8rem', color: '#475569' }}>
-                        Payment Method: {order.payment_method}
+                      <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+                        Payment: {order.payment_method}
                       </div>
                     </div>
                   ))}
@@ -448,15 +388,15 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
 
           {activeTab === 'wishlist' && (
             <div>
-              <h2 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 800, color: '#1c1917', marginBottom: '0.4rem' }}>
+              <h2 className="profile-panel-heading">
                 Saved Wishlist &amp; Favorites
               </h2>
-              <p style={{ fontSize: '0.85rem', color: '#78716c', marginBottom: '1.75rem' }}>
+              <p className="profile-panel-sub">
                 Jewelry pieces you have saved for later.
               </p>
 
-              <div style={{ padding: '3rem', textAlign: 'center', background: '#faf8f5', borderRadius: '12px', border: '1px solid #e8e2d7' }}>
-                <Heart size={42} style={{ color: '#b38728', margin: '0 auto 0.75rem auto' }} />
+              <div style={{ padding: '2.25rem 1.25rem', textAlign: 'center', background: '#faf8f5', borderRadius: '12px', border: '1px solid #e8e2d7' }}>
+                <Heart size={40} style={{ color: '#b38728', margin: '0 auto 0.75rem auto' }} />
                 <p style={{ fontSize: '0.9rem', color: '#78716c', marginBottom: '1.25rem' }}>Explore our catalog and bookmark your favorite gold-plated items.</p>
                 <button className="btn-primary" onClick={() => navigateTo('shop', { collection: 'best_sellers' })}>
                   View Best Sellers

@@ -166,7 +166,9 @@ export default function AdminPortal({ onLogout } = {}) {
   // Navigation State
   // Valid activeTab nodes: 'dashboard' | 'catalog' | 'orders' | 'messages' | 'settings'
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 1024 : true
+  );
 
   // Formatted date string for header
   const [todayFormattedDate] = useState(() => {
@@ -534,14 +536,14 @@ export default function AdminPortal({ onLogout } = {}) {
     <div className="min-h-screen bg-[#faf8f5] text-[#1c1917] font-sans antialiased selection:bg-[#b38728]/25 flex flex-col">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-white text-[#1c1917] px-5 py-3.5 rounded-xl shadow-2xl border border-[#b38728]/30 animate-slide-up text-xs font-semibold">
+        <div className="fixed bottom-3 left-3 right-3 sm:left-auto sm:bottom-6 sm:right-6 sm:max-w-sm z-50 flex items-center gap-3 bg-white text-[#1c1917] px-4 py-3 sm:px-5 sm:py-3.5 rounded-xl shadow-2xl border border-[#b38728]/30 animate-slide-up text-xs font-semibold">
           <div 
-            className="w-6 h-6 rounded-full flex items-center justify-center text-black shadow-xs font-bold"
+            className="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-black shadow-xs font-bold"
             style={{ background: 'var(--gradient-gold-metallic)' }}
           >
             <Sparkles className="w-3.5 h-3.5 stroke-[2.5]" />
           </div>
-          <span>{toast}</span>
+          <span className="truncate">{toast}</span>
         </div>
       )}
 
@@ -608,13 +610,13 @@ export default function AdminPortal({ onLogout } = {}) {
         </div>
 
         {/* Right: Sync Status, Date, Notifications, Profile, and Power Logout (Clean non-overlapping flex layout) */}
-        <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3.5 shrink-0">
           {/* Hostinger Online Sync Status Button */}
           <button
             type="button"
             onClick={handleManualSync}
             disabled={isSyncingServer}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 text-emerald-800 text-[11px] font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 text-emerald-800 text-[11px] font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
             title="Online Hostinger Database Sync Active. Click to re-sync immediately."
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -669,7 +671,7 @@ export default function AdminPortal({ onLogout } = {}) {
             </div>
             <div className="hidden sm:flex flex-col text-left">
               <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-gray-900 leading-tight whitespace-nowrap">DAINTY Curator</span>
+                <span className="text-xs font-bold text-gray-900 leading-tight whitespace-nowrap">DAINTY STUDS & CHAINS</span>
                 <ChevronDown className="w-3 h-3 text-gray-400 shrink-0" />
               </div>
               <span className="text-[10px] text-gray-400 font-normal leading-tight whitespace-nowrap">Company Manager</span>
@@ -722,7 +724,7 @@ export default function AdminPortal({ onLogout } = {}) {
                   <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                 </div>
                 <div className="overflow-hidden font-sans">
-                  <h4 className="font-bold text-[14px] text-gray-900 leading-snug truncate">DAINTY Curator</h4>
+                  <h4 className="font-bold text-[14px] text-gray-900 leading-snug truncate">DAINTY STUDS & CHAINS</h4>
                   <p className="text-[11px] text-[#b38728] font-semibold leading-snug truncate">Store Management HQ</p>
                 </div>
               </div>
@@ -903,82 +905,112 @@ export default function AdminPortal({ onLogout } = {}) {
         {/* =====================================================================
             MAIN DASHBOARD CONTENT (Consistent Metallic Gold Gradient Theme)
            ===================================================================== */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full overflow-y-auto">
+        <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-7xl mx-auto w-full overflow-y-auto overflow-x-hidden">
+          {/* Mobile Horizontal Admin Navigation Row */}
+          <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+            {[
+              { id: 'dashboard', label: 'Overview', icon: LayoutGrid },
+              { id: 'catalog', label: `Catalog (${products.length || 0})`, icon: FolderKanban },
+              { id: 'orders', label: `Orders (${orders.length || 0})`, icon: ClipboardList },
+              { id: 'messages', label: `Messages (${chats.length || 0})`, icon: MessageSquare },
+              { id: 'settings', label: 'Settings', icon: Settings },
+            ].map((tab) => {
+              const TabIcon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleNavClick(tab.id)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer border ${
+                    isActive
+                      ? 'font-bold shadow-xs border-[#b38728]/40'
+                      : 'font-semibold bg-white text-gray-700 border-gray-200/80'
+                  }`}
+                  style={isActive ? { background: 'var(--gradient-gold-metallic)', color: '#000000' } : {}}
+                >
+                  <TabIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* ===================================================================
               VIEW 1: DASHBOARD OVERVIEW
              =================================================================== */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6 animate-fade-in font-sans">
-              {/* ROW 1: 4 STAT CARDS (Matches five.webp Top Stat Cards) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="space-y-5 sm:space-y-6 animate-fade-in font-sans">
+              {/* ROW 1: 4 STAT CARDS (2x2 Grid on mobile phones, 4-up on desktop) */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
                 {/* Card 1: Total Sales */}
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">Total Sales</span>
-                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                      <Coins className="w-4 h-4" />
+                <div className="bg-white rounded-2xl p-3 sm:p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-500 truncate">Total Sales</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                      <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                   </div>
-                  <div className="my-2.5">
-                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                  <div className="my-1.5 sm:my-2.5">
+                    <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
                       {totalSalesUGX > 0 ? formatUGX(totalSalesUGX) : 'UGX 15,200,000'}
                     </h3>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs">
+                  <div className="flex items-center gap-1 text-[10px] sm:text-xs flex-wrap">
                     <span className="inline-flex items-center font-bold text-emerald-600">
-                      <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
                       75.55%
                     </span>
-                    <span className="text-gray-400 font-medium">+ UGX 1.2M Target</span>
+                    <span className="text-gray-400 font-medium truncate">+ UGX 1.2M Target</span>
                   </div>
                 </div>
 
                 {/* Card 2: Total Orders */}
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">Total Orders</span>
-                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-                      <Package className="w-4 h-4" />
+                <div className="bg-white rounded-2xl p-3 sm:p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-500 truncate">Total Orders</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                      <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                   </div>
-                  <div className="my-2.5">
-                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                  <div className="my-1.5 sm:my-2.5">
+                    <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
                       {orders.length > 0 ? (16920 + orders.length).toLocaleString() : '16,920'}
                     </h3>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs flex-wrap">
                     <div className="flex items-center gap-1">
                       <span className="inline-flex items-center font-bold text-rose-500">
-                        <ArrowDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <ArrowDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
                         3%
                       </span>
-                      <span className="text-gray-400 font-medium">Vs last month</span>
+                      <span className="text-gray-400 font-medium hidden sm:inline">Vs last month</span>
                     </div>
                     <button 
                       onClick={() => handleNavClick('orders')}
                       className="font-bold text-[#b38728] hover:underline cursor-pointer"
                     >
-                      View orders
+                      View
                     </button>
                   </div>
                 </div>
 
                 {/* Card 3: Order Complete */}
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">Order Complete</span>
-                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4" />
+                <div className="bg-white rounded-2xl p-3 sm:p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-500 truncate">Order Complete</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                   </div>
-                  <div className="my-2.5">
-                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                  <div className="my-1.5 sm:my-2.5">
+                    <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
                       16,581
                     </h3>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs">
+                  <div className="flex items-center gap-1 text-[10px] sm:text-xs flex-wrap">
                     <span className="inline-flex items-center font-bold text-emerald-600">
-                      <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
                       98%
                     </span>
                     <span className="text-gray-400 font-medium">Vs last month</span>
@@ -986,24 +1018,24 @@ export default function AdminPortal({ onLogout } = {}) {
                 </div>
 
                 {/* Card 4: Cancel Order */}
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">Cancel Order</span>
-                    <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                      <AlertCircle className="w-4 h-4" />
+                <div className="bg-white rounded-2xl p-3 sm:p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] sm:text-xs font-medium text-gray-500 truncate">Cancel Order</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                      <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                   </div>
-                  <div className="my-2.5">
-                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                  <div className="my-1.5 sm:my-2.5">
+                    <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
                       338
                     </h3>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs">
+                  <div className="flex items-center gap-1 text-[10px] sm:text-xs flex-wrap">
                     <span className="inline-flex items-center font-bold text-rose-500">
-                      <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
                       2%
                     </span>
-                    <span className="text-gray-400 font-medium">227 Design changing *</span>
+                    <span className="text-gray-400 font-medium truncate">227 Design changing *</span>
                   </div>
                 </div>
               </div>
@@ -1174,7 +1206,7 @@ export default function AdminPortal({ onLogout } = {}) {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Latest Order Table (~65% / 8 cols) */}
                 <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-5">
                     <div className="flex items-center gap-2.5">
                       <h4 className="text-base font-bold text-gray-900">Latest Order</h4>
                       <span 
@@ -1185,10 +1217,10 @@ export default function AdminPortal({ onLogout } = {}) {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <button
                         onClick={() => showToast('Date range filter applied.')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
                       >
                         <Calendar className="w-3.5 h-3.5 text-gray-400" />
                         <span>Select Date</span>
@@ -1196,7 +1228,7 @@ export default function AdminPortal({ onLogout } = {}) {
 
                       <button
                         onClick={() => showToast('Filter panel opened.')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
                       >
                         <SlidersHorizontal className="w-3.5 h-3.5 text-gray-400" />
                         <span>Filters</span>
@@ -1775,7 +1807,7 @@ export default function AdminPortal({ onLogout } = {}) {
              =================================================================== */}
           {activeTab === 'orders' && (
             <div className="space-y-6 animate-fade-in">
-              <div className="bg-white p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#3e2723]">Customer Orders</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
@@ -1783,24 +1815,24 @@ export default function AdminPortal({ onLogout } = {}) {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 min-w-0">
+                  <div className="relative w-full sm:w-auto">
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       placeholder="Search orders, phone, client..."
                       value={orderSearch}
                       onChange={(e) => setOrderSearch(e.target.value)}
-                      className="pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#b38728]"
+                      className="w-full sm:w-56 pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#b38728]"
                     />
                   </div>
 
-                  <div className="flex items-center bg-gray-100 p-1 rounded-xl text-xs overflow-x-auto">
+                  <div className="flex items-center bg-gray-100 p-1 rounded-xl text-xs overflow-x-auto gap-1" style={{ scrollbarWidth: 'none' }}>
                     {['all', 'pending', 'processing', 'completed', 'cancelled'].map((st) => (
                       <button
                         key={st}
                         onClick={() => setOrderStatusFilter(st)}
-                        className={`px-3 py-1 rounded-lg font-medium capitalize transition-all ${
+                        className={`shrink-0 px-3 py-1 rounded-lg font-medium capitalize transition-all ${
                           orderStatusFilter === st
                             ? 'text-black font-bold shadow-xs'
                             : 'text-gray-500 hover:text-gray-900'
@@ -1919,32 +1951,32 @@ export default function AdminPortal({ onLogout } = {}) {
               VIEW 4: CUSTOMER MESSAGES (Live Concierge Chat connected to db.js)
              =================================================================== */}
           {activeTab === 'messages' && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in">
-              <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-[#dfc9b2]/40 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#f3ece6]">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 animate-fade-in">
+              <div className="md:col-span-5 bg-white p-4 sm:p-5 rounded-2xl border border-[#dfc9b2]/40 shadow-xs space-y-3 sm:space-y-4 min-w-0">
+                <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-[#f3ece6]">
                   <h4 className="text-sm font-bold text-[#3e2723]">Customer Conversations</h4>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                     Live
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-2 md:gap-0 md:space-y-2 pb-1 md:pb-0" style={{ scrollbarWidth: 'none' }}>
                   {chats.length > 0 ? (
                     chats.map((c) => (
                       <div
                         key={c.chatId}
                         onClick={() => setActiveChatId(c.chatId)}
-                        className={`p-3 rounded-xl cursor-pointer transition-all border ${
+                        className={`shrink-0 w-56 md:w-auto p-3 rounded-xl cursor-pointer transition-all border ${
                           activeChatId === c.chatId
                             ? 'bg-amber-50/70 border-[#b38728]/40 shadow-xs'
-                            : 'border-transparent hover:bg-gray-50'
+                            : 'border-gray-100 md:border-transparent hover:bg-gray-50'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-xs text-gray-800">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="font-bold text-xs text-gray-800 truncate">
                             {c.chatId === 'admin_demo_chat' ? 'Demo Customer (Kampala)' : `Customer ${c.chatId.substring(0, 8)}`}
                           </span>
-                          <span className="text-[10px] text-gray-400">
+                          <span className="text-[10px] text-gray-400 shrink-0">
                             {formatDate(c.lastMessage?.timestamp)}
                           </span>
                         </div>
@@ -1954,12 +1986,12 @@ export default function AdminPortal({ onLogout } = {}) {
                       </div>
                     ))
                   ) : (
-                    <p className="text-xs text-gray-400 text-center py-6">No chat messages yet.</p>
+                    <p className="text-xs text-gray-400 text-center py-6 w-full">No chat messages yet.</p>
                   )}
                 </div>
               </div>
 
-              <div className="md:col-span-7 bg-white p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs flex flex-col justify-between min-h-[460px]">
+              <div className="md:col-span-7 bg-white p-4 sm:p-6 rounded-2xl border border-[#dfc9b2]/40 shadow-xs flex flex-col justify-between min-h-[380px] sm:min-h-[460px] min-w-0">
                 {activeChat ? (
                   <>
                     <div className="border-b border-[#f3ece6] pb-3">
@@ -2034,10 +2066,10 @@ export default function AdminPortal({ onLogout } = {}) {
           {activeTab === 'settings' && (
             <div className="space-y-6 animate-fade-in max-w-4xl">
               {/* Header */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-black shadow-xs font-bold"
+                    className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center text-black shadow-xs font-bold"
                     style={{ background: 'var(--gradient-gold-metallic)' }}
                   >
                     <Settings className="w-5 h-5 stroke-[2.4]" />
@@ -2048,7 +2080,7 @@ export default function AdminPortal({ onLogout } = {}) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#dfc9b2]/60 text-xs text-[#8a640f] font-semibold shadow-xs">
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#dfc9b2]/60 text-xs text-[#8a640f] font-semibold shadow-xs shrink-0">
                   <Shield className="w-3.5 h-3.5" />
                   <span>Security &amp; Console</span>
                 </div>
@@ -2332,7 +2364,7 @@ export default function AdminPortal({ onLogout } = {}) {
                       <Smartphone className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-serif font-bold text-base text-gray-900">Relworx Mobile Money Gateway</h3>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           relworxGatewayStatus.configured
@@ -2777,44 +2809,50 @@ function ProductFormModal({ product, onClose, onSave }) {
     featured: product?.featured || false,
     new_arrival: product?.new_arrival ?? true,
     best_seller: product?.best_seller || false,
-    images: product?.images || (product?.image ? [product.image] : [''])
+    images: product?.images || (product?.image ? [product.image, '', ''] : ['', '', ''])
   });
 
   const [imagePreview, setImagePreview] = useState(
     formData.images?.[0] || product?.image || '/images/vi.jpeg'
   );
 
-  // File Upload Handler with client-side image optimization
-  const handleFileUpload = async (e) => {
+  // Progressive Slot File Upload Handler
+  const handleSlotFileUpload = async (index, e) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
         const compressedUrl = await compressImage(file, 1000, 1000, 0.82);
-        setImagePreview(compressedUrl);
-        setFormData((prev) => ({
-          ...prev,
-          images: [compressedUrl, ...(prev.images?.slice(1) || [])]
-        }));
+        if (index === 0) setImagePreview(compressedUrl);
+        setFormData((prev) => {
+          const newImgs = [...(prev.images || ['', '', ''])];
+          newImgs[index] = compressedUrl;
+          return { ...prev, images: newImgs };
+        });
       } catch (err) {
         console.error('Image upload compression error:', err);
       }
     }
   };
 
-  // URL Input Handler
-  const handleImageUrlChange = (url) => {
-    setImagePreview(url);
-    setFormData((prev) => ({
-      ...prev,
-      images: [url, ...(prev.images?.slice(1) || [])]
-    }));
+  // Progressive Slot URL Input Handler
+  const handleSlotUrlChange = (index, url) => {
+    if (index === 0) setImagePreview(url);
+    setFormData((prev) => {
+      const newImgs = [...(prev.images || ['', '', ''])];
+      newImgs[index] = url;
+      return { ...prev, images: newImgs };
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    const activeImg = imagePreview && imagePreview.trim() ? imagePreview : '/images/vi.jpeg';
+    const activeImages = (formData.images || []).filter(img => img && img.trim() !== '').slice(0, 3);
+    if (activeImages.length === 0 && imagePreview) {
+      activeImages.push(imagePreview);
+    }
+
     const payload = {
       ...formData,
       name: formData.name.trim(),
@@ -2830,7 +2868,7 @@ function ProductFormModal({ product, onClose, onSave }) {
       category_id: 'earrings',
       subcategory_id: formData.subcategory_id || 'stud_ear',
       piercing_location: formData.piercing_location || 'Ear Lobe',
-      images: [activeImg, ...(formData.images?.slice(1) || [])].filter(Boolean)
+      images: activeImages.length > 0 ? activeImages : ['/images/vi.jpeg']
     };
     if (!payload.images || payload.images.length === 0) {
       payload.images = ['/images/vi.jpeg'];
@@ -2940,41 +2978,67 @@ function ProductFormModal({ product, onClose, onSave }) {
                   </div>
                 </div>
 
-                {/* Upload & URL Input Controls */}
+                {/* Progressive 3 Image Slots (Upload & URL Input Controls) */}
                 <div className="space-y-3 pt-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <label 
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-black font-bold text-xs cursor-pointer shadow-xs hover:brightness-105 transition-all text-center"
-                      style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
-                    >
-                      <Upload className="w-4 h-4 stroke-[2.5]" />
-                      <span>Upload Photo from Device</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                    </label>
-                    <span className="text-[11px] text-gray-400 text-center sm:text-left">
-                      Supports JPG, PNG, WEBP (stored locally)
-                    </span>
-                  </div>
+                  <label className="block text-xs font-bold text-gray-900 mb-1">
+                    Product Photos (Up to 3 Photos for Slideshow)
+                  </label>
+                  {[0, 1, 2].map((slotIdx) => {
+                    if (slotIdx > 0 && (!formData.images?.[slotIdx - 1] || formData.images[slotIdx - 1].trim() === '')) {
+                      return null;
+                    }
+                    const slotVal = formData.images?.[slotIdx] || '';
+                    const slotTitles = ['Main Photo (Required 1st)', 'Alternative Photo 2 (Optional)', 'Alternative Photo 3 (Optional)'];
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                      Or Image Web Link / URL
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="url"
-                        placeholder="https://images.unsplash.com/photo-..."
-                        value={imagePreview.startsWith('data:') ? '' : imagePreview}
-                        onChange={(e) => handleImageUrlChange(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#b38728] focus:bg-white font-mono text-gray-700"
-                      />
-                    </div>
-                  </div>
+                    return (
+                      <div key={slotIdx} className="p-3 bg-gray-50/80 rounded-xl border border-gray-200/80 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-gray-800">
+                            {slotTitles[slotIdx]}
+                          </span>
+                          {slotIdx > 0 && slotVal && (
+                            <button
+                              type="button"
+                              onClick={() => handleSlotUrlChange(slotIdx, '')}
+                              className="text-[10px] text-rose-600 font-bold hover:underline cursor-pointer"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <label 
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-black font-bold text-xs cursor-pointer shadow-2xs hover:brightness-105 transition-all text-center shrink-0"
+                            style={{ background: 'var(--gradient-gold-metallic)', border: '1px solid var(--color-gold-light)' }}
+                          >
+                            <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>Upload Photo</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleSlotFileUpload(slotIdx, e)}
+                              className="hidden"
+                            />
+                          </label>
+                          <input
+                            type="url"
+                            placeholder="Or paste image web link..."
+                            value={slotVal.startsWith('data:') ? '[Uploaded Local File]' : slotVal}
+                            onChange={(e) => handleSlotUrlChange(slotIdx, e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-[#b38728] font-mono text-gray-700"
+                            disabled={slotVal.startsWith('data:')}
+                          />
+                        </div>
+                        {slotVal && (
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="text-[10px] text-gray-400">Preview:</span>
+                            <img src={slotVal} alt={`Slot ${slotIdx + 1}`} className="w-8 h-8 rounded object-cover border border-gray-200" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

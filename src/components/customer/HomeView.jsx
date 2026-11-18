@@ -333,7 +333,7 @@ export default function HomeView({ onAddToBag }) {
           </div>
           <button
             className="dainty-btn-ig"
-            onClick={() => window.open('https://instagram.com', '_blank')}
+            onClick={() => window.open('https://www.instagram.com/dainty_studs_and_chains?exln=MXc3cnI2ZDh1NGpzdw==', '_blank')}
           >
             EXPLORE ON INSTAGRAM
           </button>
