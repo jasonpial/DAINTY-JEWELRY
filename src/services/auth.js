@@ -211,6 +211,9 @@ function mapFirebaseAuthError(error) {
   if (code === 'auth/unauthorized-domain') {
     return new Error('This domain is not authorized for Firebase OAuth. Please add it in Firebase Console → Authentication → Settings.');
   }
+  if (code === 'auth/operation-not-allowed') {
+    return new Error('Email/Password sign-in is not enabled in Firebase. Please enable Email/Password in Firebase Console → Authentication → Sign-in method, or sign in with Google.');
+  }
   if (code === 'auth/user-not-found') {
     return new Error('No account exists with this email address. Please create an account or sign up below.');
   }
@@ -247,9 +250,6 @@ export async function signInWithEmail(email, password) {
     setActiveUser(userData);
     return userData;
   } catch (error) {
-    if (error?.code === 'auth/operation-not-allowed' || error?.message?.includes('operation-not-allowed')) {
-      return loginUser({ emailOrPhone: email, password });
-    }
     throw mapFirebaseAuthError(error);
   }
 }
@@ -283,9 +283,6 @@ export async function signUpWithEmail(name, email, password, phone = '', address
     setActiveUser(userData);
     return userData;
   } catch (error) {
-    if (error?.code === 'auth/operation-not-allowed' || error?.message?.includes('operation-not-allowed')) {
-      return registerUser({ name, email, phone, password, address, provider: 'password' });
-    }
     throw mapFirebaseAuthError(error);
   }
 }
