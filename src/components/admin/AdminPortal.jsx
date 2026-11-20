@@ -2996,13 +2996,13 @@ function ProductFormModal({ product, onClose, onSave }) {
                           <span className="text-[11px] font-bold text-gray-800">
                             {slotTitles[slotIdx]}
                           </span>
-                          {slotIdx > 0 && slotVal && (
+                          {slotVal && (
                             <button
                               type="button"
                               onClick={() => handleSlotUrlChange(slotIdx, '')}
                               className="text-[10px] text-rose-600 font-bold hover:underline cursor-pointer"
                             >
-                              Clear
+                              Remove / Clear Image
                             </button>
                           )}
                         </div>

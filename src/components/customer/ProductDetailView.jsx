@@ -34,21 +34,14 @@ export default function ProductDetailView({ routeParams, onAddToBag }) {
     };
   }, [routeParams.id]);
 
-  // Capped Images list (up to 3 images with robust fallback padding so slideshow works on all product pages)
+  // Active images list: strictly images added by admin (no default fallback padding)
   const rawImages = (product && Array.isArray(product.images) && product.images.length > 0)
-    ? product.images.filter(Boolean)
+    ? product.images
     : (product?.image ? [product.image] : []);
 
-  const fallbackPool = ['/images/vi.jpeg', '/images/vii.jpeg', '/images/v.jpeg', '/images/i.jpeg', '/images/ii.jpeg', '/images/iii.jpeg'];
-  
-  const activeImages = [];
-  for (let i = 0; i < 3; i++) {
-    if (rawImages[i] && typeof rawImages[i] === 'string' && rawImages[i].trim() !== '') {
-      activeImages.push(rawImages[i]);
-    } else {
-      const fallback = fallbackPool.find(f => !activeImages.includes(f)) || fallbackPool[i % fallbackPool.length];
-      activeImages.push(fallback);
-    }
+  const activeImages = rawImages.filter(img => img && typeof img === 'string' && img.trim() !== '');
+  if (activeImages.length === 0) {
+    activeImages.push('/images/logo-image.png');
   }
 
   // Automatic slideshow effect

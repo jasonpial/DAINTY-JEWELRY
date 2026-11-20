@@ -27,21 +27,14 @@ export default function ProductCard({ product, onAddToBag }) {
     material
   } = product;
 
-  // Capped Images list (up to 3 images with robust fallback padding so slideshow works on home page & all listing pages)
+  // Active images list: strictly images added by admin (no default fallback padding)
   const rawImages = (Array.isArray(images) && images.length > 0)
-    ? images.filter(Boolean)
+    ? images
     : (image ? [image] : []);
 
-  const fallbackPool = ['/images/vi.jpeg', '/images/vii.jpeg', '/images/v.jpeg', '/images/i.jpeg', '/images/ii.jpeg', '/images/iii.jpeg'];
-  
-  const activeImages = [];
-  for (let i = 0; i < 3; i++) {
-    if (rawImages[i] && typeof rawImages[i] === 'string' && rawImages[i].trim() !== '') {
-      activeImages.push(rawImages[i]);
-    } else {
-      const fallback = fallbackPool.find(f => !activeImages.includes(f)) || fallbackPool[i % fallbackPool.length];
-      activeImages.push(fallback);
-    }
+  const activeImages = rawImages.filter(img => img && typeof img === 'string' && img.trim() !== '');
+  if (activeImages.length === 0) {
+    activeImages.push('/images/logo-image.png');
   }
 
   const [cardImageIdx, setCardImageIdx] = useState(0);
