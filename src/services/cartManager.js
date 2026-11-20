@@ -193,6 +193,41 @@ export function createNewShopper(name = '', phone = '', email = '') {
 }
 
 /**
+ * Switch or create isolated shopper session tied specifically to a user ID.
+ */
+export function switchShopperByUserId(userId, name = '', email = '', phone = '') {
+  if (!userId) return getCurrentShopper();
+  const cleanId = 'shopper_uid_' + String(userId).trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+  const cleanEmail = email ? email.trim().toLowerCase() : '';
+  const current = getCurrentShopper();
+
+  if (current.id === cleanId) {
+    const updated = {
+      ...current,
+      name: name.trim() || current.name || 'Dainty Patron',
+      email: cleanEmail || current.email,
+      phone: phone || current.phone,
+      isGuest: false
+    };
+    localStorage.setItem(STORAGE_ACTIVE_SHOPPER_KEY, JSON.stringify(updated));
+    addOrUpdateSavedShopper(updated);
+    return updated;
+  }
+
+  const shopperProfile = {
+    id: cleanId,
+    name: name.trim() || (cleanEmail ? cleanEmail.split('@')[0] : 'Dainty Patron'),
+    email: cleanEmail,
+    phone: phone || '',
+    isGuest: false,
+    createdAt: new Date().toISOString()
+  };
+
+  switchShopper(shopperProfile);
+  return shopperProfile;
+}
+
+/**
  * Identify / Bind the current cart to a customer's phone number or name.
  * Always preserves and merges any items currently in the active bag so checkout never loses items.
  */

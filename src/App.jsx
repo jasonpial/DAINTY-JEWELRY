@@ -20,6 +20,7 @@ import {
   saveUserCart,
   clearUserCart,
   switchShopper,
+  switchShopperByUserId,
   identifyShopperByPhone,
   syncUserCartFromServer
 } from './services/cartManager';
@@ -61,7 +62,7 @@ function App() {
     if (currentShopper?.id) {
       syncUserCartFromServer(currentShopper.id).then(serverCart => {
         if (Array.isArray(serverCart)) {
-          setCart(prev => (prev.length > 0 && serverCart.length === 0 ? prev : serverCart));
+          setCart(serverCart);
         }
       });
     }
@@ -81,7 +82,17 @@ function App() {
     };
 
     const handleUserChange = (e) => {
-      setCurrentUser(e.detail?.user || getActiveUser());
+      const user = e.detail?.user || getActiveUser();
+      setCurrentUser(user);
+      if (user) {
+        const shopper = switchShopperByUserId(user.id || user.uid, user.name, user.email, user.phone);
+        setCurrentShopper(shopper);
+        setCart(getUserCart(shopper.id));
+      } else {
+        const guest = getCurrentShopper();
+        setCurrentShopper(guest);
+        setCart(getUserCart(guest.id));
+      }
     };
 
     window.addEventListener('dainty_shopper_changed', handleShopperChange);
@@ -92,7 +103,7 @@ function App() {
       window.removeEventListener('dainty_cart_changed', handleCartChange);
       window.removeEventListener('dainty_user_changed', handleUserChange);
     };
-  }, [currentShopper?.id]);
+  }, [currentShopper?.id, currentUser?.id]);
 
   const showCartToast = (message, isAdd = false) => {
     const toast = document.createElement('div');

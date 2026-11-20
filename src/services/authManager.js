@@ -4,7 +4,7 @@
  * so users are never automatically logged back into a previous account across new sessions or after signing out.
  */
 
-import { identifyShopperByPhone } from './cartManager';
+import { switchShopperByUserId } from './cartManager';
 
 const USERS_DB_KEY = 'dainty_users_database';
 const ACTIVE_USER_SESSION_KEY = 'dainty_active_user_session';
@@ -88,8 +88,8 @@ export function setActiveUser(user) {
       sessionStorage.setItem(ACTIVE_USER_SESSION_KEY, JSON.stringify(user));
       localStorage.removeItem(ACTIVE_USER_SESSION_KEY);
       rememberAccountInDirectory(user);
-      // Also bind shopper profile for isolated bag
-      identifyShopperByPhone(user.phone || '', user.name || '', user.email || '');
+      // Bind isolated shopper profile specifically by unique user ID
+      switchShopperByUserId(user.id || user.uid, user.name, user.email, user.phone);
     } else {
       sessionStorage.removeItem(ACTIVE_USER_SESSION_KEY);
       localStorage.removeItem(ACTIVE_USER_SESSION_KEY);
@@ -139,7 +139,7 @@ export function loginUser({ emailOrPhone, password }) {
   );
 
   if (!found) {
-    throw new Error('No account found with this email. Please create an account or sign in with Google.');
+    throw new Error('No account exists with this email address. Please create an account or sign up below.');
   }
 
   if (found.provider === 'google' && !found.password) {

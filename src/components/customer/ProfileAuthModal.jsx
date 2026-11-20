@@ -643,6 +643,20 @@ export default function ProfileAuthModal({ isOpen, onClose, initialMode = 'signi
                   {error && (
                     <div style={{ color: '#dc2626', fontSize: '0.78rem', fontWeight: 600, margin: '0.4rem 0', maxWidth: '320px', textAlign: 'center' }}>
                       {error}
+                      {(error.includes('No account exists') || error.includes('user-not-found')) && (
+                        <div style={{ marginTop: '0.4rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsSignUp(true);
+                              setError('');
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#b38728', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', fontSize: '0.78rem' }}
+                          >
+                            Click here to create an account
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
