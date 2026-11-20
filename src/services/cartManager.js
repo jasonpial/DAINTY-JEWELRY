@@ -422,25 +422,19 @@ export async function syncUserCartFromServer(shopperId) {
       return getUserCart(shopperId);
     }
 
-    const localCartNow = getUserCart(shopperId);
     const serverCart = data && Array.isArray(data.cart) ? data.cart : [];
+    const localCartNow = getUserCart(shopperId);
 
-    // Never wipe a non-empty local bag when the server has no record or an empty cart
-    if (serverCart.length === 0) {
-      if (localCartNow.length > 0) {
-        saveUserCart(shopperId, localCartNow);
+    // If server has items, synchronize across devices
+    if (serverCart.length > 0) {
+      if (JSON.stringify(serverCart) !== JSON.stringify(localCartNow)) {
+        const key = `dainty_cart_${shopperId}`;
+        localStorage.setItem(key, JSON.stringify(serverCart));
+        localStorage.setItem(LEGACY_CART_KEY, JSON.stringify(serverCart));
+        window.dispatchEvent(new CustomEvent('dainty_cart_changed', {
+          detail: { shopperId, cart: serverCart, count: serverCart.reduce((sum, i) => sum + (i.quantity || 1), 0) }
+        }));
       }
-      return localCartNow;
-    }
-
-    // Hydrate from server only if local bag is empty (e.g. fresh device/cleared localStorage)
-    if (localCartNow.length === 0) {
-      const key = `dainty_cart_${shopperId}`;
-      localStorage.setItem(key, JSON.stringify(serverCart));
-      localStorage.setItem(LEGACY_CART_KEY, JSON.stringify(serverCart));
-      window.dispatchEvent(new CustomEvent('dainty_cart_changed', {
-        detail: { shopperId, cart: serverCart, count: serverCart.reduce((sum, i) => sum + (i.quantity || 1), 0) }
-      }));
       return serverCart;
     }
 

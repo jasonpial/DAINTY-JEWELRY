@@ -57,7 +57,7 @@ function App() {
     }
   });
 
-  // Sync isolated cart across sessions and listen to events
+  // Sync isolated cart across sessions and listen to events & real-time cross-device polling
   useEffect(() => {
     if (currentShopper?.id) {
       syncUserCartFromServer(currentShopper.id).then(serverCart => {
@@ -98,10 +98,31 @@ function App() {
     window.addEventListener('dainty_shopper_changed', handleShopperChange);
     window.addEventListener('dainty_cart_changed', handleCartChange);
     window.addEventListener('dainty_user_changed', handleUserChange);
+
+    // Poll server cart every 3 seconds for real-time cross-device bag synchronization
+    const pollInterval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        const active = getCurrentShopper();
+        if (active?.id) {
+          syncUserCartFromServer(active.id).then(serverCart => {
+            if (Array.isArray(serverCart)) {
+              setCart(prev => {
+                if (JSON.stringify(serverCart) !== JSON.stringify(prev)) {
+                  return serverCart;
+                }
+                return prev;
+              });
+            }
+          });
+        }
+      }
+    }, 3000);
+
     return () => {
       window.removeEventListener('dainty_shopper_changed', handleShopperChange);
       window.removeEventListener('dainty_cart_changed', handleCartChange);
       window.removeEventListener('dainty_user_changed', handleUserChange);
+      clearInterval(pollInterval);
     };
   }, [currentShopper?.id, currentUser?.id]);
 
