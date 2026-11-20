@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Lock, Save, LogOut, CheckCircle2, ShoppingBag, Package, Heart, Shield, ArrowLeft } from 'lucide-react';
 import { getActiveUser, updateActiveUser, logoutUser } from '../../services/authManager';
-import { signOutUser, syncProfileUpdateToFirestore } from '../../services/auth';
+import { signOutUser, syncProfileUpdateToFirestore, deleteFirebaseAccount } from '../../services/auth';
 import { formatUGX } from './ProductCard';
 import { getOrders } from '../../db';
 import { navigateTo } from '../../Router';
@@ -75,6 +75,18 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
     logoutUser();
     if (onLogout) onLogout();
     navigateTo('home');
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm('Are you sure you want to permanently delete your DAINTY account? All saved data, orders, and bag items will be removed.');
+    if (!confirmed) return;
+    try {
+      await deleteFirebaseAccount();
+      if (onLogout) onLogout();
+      navigateTo('home');
+    } catch (err) {
+      setError(err.message || 'Failed to delete account.');
+    }
   };
 
   const bagCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -296,12 +308,19 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
                   </div>
                 )}
 
-                <div className="profile-form-full" style={{ marginTop: '0.5rem' }}>
+                <div className="profile-form-full" style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <button
                     type="submit"
                     className="profile-save-btn"
                   >
                     <Save size={16} /> Save Profile Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    style={{ padding: '0.75rem 1.25rem', borderRadius: '30px', border: '1px solid #fecdd3', background: '#fff1f2', color: '#e11d48', fontWeight: 700, cursor: 'pointer', fontSize: '0.84rem' }}
+                  >
+                    Delete Account
                   </button>
                 </div>
               </form>

@@ -18,8 +18,10 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  deleteUser
 } from 'firebase/auth';
+import { deleteActiveAccount } from './authManager';
 import {
   getFirestore,
   doc,
@@ -363,4 +365,16 @@ export function subscribeToAuthChanges(callback) {
     callback(activeSession);
     return () => {};
   }
+}
+
+export async function deleteFirebaseAccount() {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      await deleteUser(user);
+    }
+  } catch (err) {
+    console.warn('Firebase user deletion note:', err);
+  }
+  deleteActiveAccount();
 }

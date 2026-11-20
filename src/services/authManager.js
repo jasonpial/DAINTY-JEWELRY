@@ -4,7 +4,7 @@
  * so users are never automatically logged back into a previous account across new sessions or after signing out.
  */
 
-import { switchShopperByUserId } from './cartManager';
+import { switchShopperByUserId, createNewShopper, clearUserCart } from './cartManager';
 
 const USERS_DB_KEY = 'dainty_users_database';
 const ACTIVE_USER_SESSION_KEY = 'dainty_active_user_session';
@@ -184,4 +184,15 @@ export function updateActiveUser(updatedData) {
 
 export function logoutUser() {
   setActiveUser(null);
+  const freshGuest = createNewShopper();
+  clearUserCart(freshGuest.id);
+}
+
+export function deleteActiveAccount() {
+  const active = getActiveUser();
+  if (!active) return;
+  const users = getAllUsers();
+  const filtered = users.filter(u => u.id !== active.id && (u.email || '').toLowerCase() !== (active.email || '').toLowerCase());
+  saveAllUsers(filtered);
+  logoutUser();
 }
