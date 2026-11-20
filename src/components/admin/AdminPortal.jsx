@@ -524,6 +524,13 @@ export default function AdminPortal({ onLogout } = {}) {
     return orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
   }, [orders]);
 
+  const statisticSplineData = useMemo(() => {
+    if (!orders || orders.length === 0) {
+      return STATISTIC_SPLINE_DATA.map(d => ({ ...d, revenue: 0, sales: 0, cancel: 0 }));
+    }
+    return STATISTIC_SPLINE_DATA;
+  }, [orders]);
+
   // Navigation item click helper
   const handleNavClick = (tabId) => {
     setActiveTab(tabId);
@@ -953,13 +960,13 @@ export default function AdminPortal({ onLogout } = {}) {
                   </div>
                   <div className="my-1.5 sm:my-2.5">
                     <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
-                      {totalSalesUGX > 0 ? formatUGX(totalSalesUGX) : 'UGX 15,200,000'}
+                      {totalSalesUGX > 0 ? formatUGX(totalSalesUGX) : 'UGX 0'}
                     </h3>
                   </div>
                   <div className="flex items-center gap-1 text-[10px] sm:text-xs flex-wrap">
                     <span className="inline-flex items-center font-bold text-emerald-600">
                       <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
-                      75.55%
+                      {orders.length > 0 ? '75.55%' : '0.00%'}
                     </span>
                     <span className="text-gray-400 font-medium truncate">+ UGX 1.2M Target</span>
                   </div>
@@ -975,14 +982,14 @@ export default function AdminPortal({ onLogout } = {}) {
                   </div>
                   <div className="my-1.5 sm:my-2.5">
                     <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
-                      {orders.length > 0 ? (16920 + orders.length).toLocaleString() : '16,920'}
+                      {orders.length > 0 ? orders.length.toLocaleString() : '0'}
                     </h3>
                   </div>
                   <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs flex-wrap">
                     <div className="flex items-center gap-1">
                       <span className="inline-flex items-center font-bold text-rose-500">
                         <ArrowDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
-                        3%
+                        {orders.length > 0 ? '3%' : '0%'}
                       </span>
                       <span className="text-gray-400 font-medium hidden sm:inline">Vs last month</span>
                     </div>
@@ -1005,13 +1012,13 @@ export default function AdminPortal({ onLogout } = {}) {
                   </div>
                   <div className="my-1.5 sm:my-2.5">
                     <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
-                      16,581
+                      {orders.length > 0 ? orders.filter(o => (o.status || '').toLowerCase() === 'completed').length.toLocaleString() : '0'}
                     </h3>
                   </div>
                   <div className="flex items-center gap-1 text-[10px] sm:text-xs flex-wrap">
                     <span className="inline-flex items-center font-bold text-emerald-600">
                       <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
-                      98%
+                      {orders.length > 0 ? '98%' : '0%'}
                     </span>
                     <span className="text-gray-400 font-medium">Vs last month</span>
                   </div>
@@ -1027,15 +1034,15 @@ export default function AdminPortal({ onLogout } = {}) {
                   </div>
                   <div className="my-1.5 sm:my-2.5">
                     <h3 className="text-base sm:text-2xl font-extrabold text-gray-900 tracking-tight break-words leading-tight">
-                      338
+                      {orders.length > 0 ? orders.filter(o => (o.status || '').toLowerCase() === 'cancelled').length.toLocaleString() : '0'}
                     </h3>
                   </div>
                   <div className="flex items-center gap-1 text-[10px] sm:text-xs flex-wrap">
                     <span className="inline-flex items-center font-bold text-rose-500">
                       <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
-                      2%
+                      {orders.length > 0 ? '2%' : '0%'}
                     </span>
-                    <span className="text-gray-400 font-medium truncate">227 Design changing *</span>
+                    <span className="text-gray-400 font-medium truncate">{orders.length > 0 ? '227 Design changing *' : 'No cancellations'}</span>
                   </div>
                 </div>
               </div>
@@ -1076,7 +1083,7 @@ export default function AdminPortal({ onLogout } = {}) {
                         strokeWidth="16"
                         strokeLinecap="round"
                       />
-                      {/* Filled Arc (62.28% of 235.6 arc length = 146.7, strokeDashoffset = 88.9) */}
+                      {/* Filled Arc */}
                       <path
                         d="M 25 105 A 75 75 0 0 1 175 105"
                         fill="none"
@@ -1084,21 +1091,27 @@ export default function AdminPortal({ onLogout } = {}) {
                         strokeWidth="16"
                         strokeLinecap="round"
                         strokeDasharray="235.6"
-                        strokeDashoffset="88.9"
+                        strokeDashoffset={orders.length > 0 ? "88.9" : "235.6"}
                       />
                     </svg>
                     {/* Percentage Center Overlay */}
                     <div className="absolute top-14 flex flex-col items-center text-center">
-                      <span className="text-3xl font-extrabold text-gray-900 tracking-tight">62.28%</span>
-                      <span className="text-[11px] font-bold text-rose-500 bg-rose-50 px-2.5 py-0.5 rounded-full mt-0.5">
-                        -37.72%
+                      <span className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                        {orders.length > 0 ? '62.28%' : '0.00%'}
+                      </span>
+                      <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full mt-0.5">
+                        {orders.length > 0 ? '-37.72%' : '0.00%'}
                       </span>
                     </div>
                   </div>
 
                   {/* Gauge Subtitle Message */}
                   <p className="text-center text-xs text-gray-500 font-medium px-4">
-                    You succeed earn <span className="font-bold text-gray-800">UGX 740,000</span> today, Current Sells Revenue is <span className="font-bold text-[#b38728]">40%</span> !
+                    {orders.length > 0 ? (
+                      <>You succeed earn <span className="font-bold text-gray-800">UGX 740,000</span> today, Current Sells Revenue is <span className="font-bold text-[#b38728]">40%</span> !</>
+                    ) : (
+                      <>No sales recorded yet. Your boutique catalog is raw and virgin, ready for your first customer order.</>
+                    )}
                   </p>
 
                   {/* Bottom 3 Columns Metrics with Vertical Dividers */}
@@ -1113,14 +1126,14 @@ export default function AdminPortal({ onLogout } = {}) {
                     <div className="px-2">
                       <p className="text-[11px] text-gray-400 font-medium">Revenue</p>
                       <p className="text-xs font-bold text-gray-800 mt-1 flex items-center justify-center gap-0.5">
-                        <span>UGX 298k</span>
+                        <span>{orders.length > 0 ? 'UGX 298k' : 'UGX 0'}</span>
                         <span className="text-emerald-500 text-sm">↑</span>
                       </p>
                     </div>
                     <div className="px-2">
                       <p className="text-[11px] text-gray-400 font-medium">Sells</p>
                       <p className="text-xs font-bold text-gray-800 mt-1 flex items-center justify-center gap-0.5">
-                        <span>UGX 747k</span>
+                        <span>{orders.length > 0 ? 'UGX 747k' : 'UGX 0'}</span>
                         <span className="text-emerald-500 text-sm">↑</span>
                       </p>
                     </div>
@@ -1161,7 +1174,7 @@ export default function AdminPortal({ onLogout } = {}) {
                   {/* Spline Chart */}
                   <div className="h-64 sm:h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={STATISTIC_SPLINE_DATA} margin={{ top: 15, right: 10, left: -20, bottom: 0 }}>
+                      <LineChart data={statisticSplineData} margin={{ top: 15, right: 10, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                         <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                         <YAxis 
@@ -1256,138 +1269,8 @@ export default function AdminPortal({ onLogout } = {}) {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
-                        {/* Row 1: Ibnul Shams Al Asad */}
-                        <tr className="hover:bg-amber-50/30 transition-colors">
-                          <td className="py-3.5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
-                                S
-                              </div>
-                              <div className="flex items-center gap-1 text-gray-700 font-medium">
-                                <span>On Shop</span>
-                                <Phone className="w-3 h-3 text-gray-400" />
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3.5">
-                            <p className="font-bold text-gray-800">Ibnul Shams Al Asad</p>
-                            <p className="text-[11px] text-gray-400">shams@hotmail.com</p>
-                          </td>
-                          <td className="py-3.5 font-bold text-gray-800">UGX 812,100</td>
-                          <td className="py-3.5">
-                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100/70 text-amber-800 shadow-[0_0_8px_rgba(251,191,36,0.25)]">
-                              Processing
-                            </span>
-                          </td>
-                          <td className="py-3.5 text-right">
-                            <div className="inline-flex items-center gap-1 text-gray-400">
-                              <button 
-                                onClick={() => showToast('Order details opened for Ibnul Shams.')}
-                                className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
-                                title="View Details"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-                              <button 
-                                onClick={() => showToast('Archived order row.')}
-                                className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
-                                title="Remove"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-
-                        {/* Row 2: Ilham Budi Agung */}
-                        <tr className="hover:bg-amber-50/30 transition-colors">
-                          <td className="py-3.5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">
-                                a
-                              </div>
-                              <div className="flex items-center gap-1 text-gray-700 font-medium">
-                                <span>Amazon</span>
-                                <Mail className="w-3 h-3 text-gray-400" />
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3.5">
-                            <p className="font-bold text-gray-800">Ilham Budi Agung</p>
-                            <p className="text-[11px] text-gray-400">ilahmbudi@google.com</p>
-                          </td>
-                          <td className="py-3.5 font-bold text-gray-800">UGX 1,349,000</td>
-                          <td className="py-3.5">
-                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100/70 text-amber-800 shadow-[0_0_8px_rgba(251,191,36,0.25)]">
-                              Processing
-                            </span>
-                          </td>
-                          <td className="py-3.5 text-right">
-                            <div className="inline-flex items-center gap-1 text-gray-400">
-                              <button 
-                                onClick={() => showToast('Order details opened for Ilham Budi.')}
-                                className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
-                                title="View Details"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-                              <button 
-                                onClick={() => showToast('Archived order row.')}
-                                className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
-                                title="Remove"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-
-                        {/* Row 3: Mohammad Karim */}
-                        <tr className="hover:bg-amber-50/30 transition-colors">
-                          <td className="py-3.5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
-                                S
-                              </div>
-                              <div className="flex items-center gap-1 text-gray-700 font-medium">
-                                <span>On Shop</span>
-                                <Phone className="w-3 h-3 text-gray-400" />
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3.5">
-                            <p className="font-bold text-gray-800">Mohammad Karim</p>
-                            <p className="text-[11px] text-gray-400">m_karim@yahoo.com</p>
-                          </td>
-                          <td className="py-3.5 font-bold text-gray-800">UGX 272,500</td>
-                          <td className="py-3.5">
-                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600">
-                              Cancel
-                            </span>
-                          </td>
-                          <td className="py-3.5 text-right">
-                            <div className="inline-flex items-center gap-1 text-gray-400">
-                              <button 
-                                onClick={() => showToast('Order details opened for Mohammad Karim.')}
-                                className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
-                                title="View Details"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-                              <button 
-                                onClick={() => showToast('Archived order row.')}
-                                className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
-                                title="Remove"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-
-                        {/* Row 4: Layla Al-Mansoori / Live Orders */}
                         {orders.length > 0 ? (
-                          orders.slice(0, 1).map((ord) => (
+                          orders.map((ord) => (
                             <tr key={ord.id} className="hover:bg-amber-50/30 transition-colors">
                               <td className="py-3.5">
                                 <div className="flex items-center gap-2">
@@ -1407,9 +1290,9 @@ export default function AdminPortal({ onLogout } = {}) {
                               <td className="py-3.5 font-bold text-gray-800">{formatUGX(ord.total_amount)}</td>
                               <td className="py-3.5">
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                                  ord.status === 'Completed' 
+                                  (ord.status || '').toLowerCase() === 'completed' || (ord.status || '').toLowerCase() === 'delivered'
                                     ? 'bg-emerald-50 text-emerald-600' 
-                                    : ord.status === 'Cancelled' 
+                                    : (ord.status || '').toLowerCase() === 'cancelled' || (ord.status || '').toLowerCase() === 'cancel'
                                     ? 'bg-rose-50 text-rose-600' 
                                     : 'bg-amber-100/70 text-amber-800'
                                 }`}>
@@ -1437,45 +1320,9 @@ export default function AdminPortal({ onLogout } = {}) {
                             </tr>
                           ))
                         ) : (
-                          <tr className="hover:bg-amber-50/30 transition-colors">
-                            <td className="py-3.5">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
-                                  S
-                                </div>
-                                <div className="flex items-center gap-1 text-gray-700 font-medium">
-                                  <span>On Shop</span>
-                                  <Phone className="w-3 h-3 text-gray-400" />
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-3.5">
-                              <p className="font-bold text-gray-800">Layla Al-Mansoori</p>
-                              <p className="text-[11px] text-gray-400">layla@dainty.ug</p>
-                            </td>
-                            <td className="py-3.5 font-bold text-gray-800">UGX 540,000</td>
-                            <td className="py-3.5">
-                              <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600">
-                                Completed
-                              </span>
-                            </td>
-                            <td className="py-3.5 text-right">
-                              <div className="inline-flex items-center gap-1 text-gray-400">
-                                <button 
-                                  onClick={() => showToast('Order details opened for Layla Al-Mansoori.')}
-                                  className="p-1 hover:text-[#b38728] transition-colors cursor-pointer"
-                                  title="View Details"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                </button>
-                                <button 
-                                  onClick={() => showToast('Archived order row.')}
-                                  className="p-1 hover:text-rose-500 transition-colors cursor-pointer"
-                                  title="Remove"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                          <tr>
+                            <td colSpan="5" className="py-12 text-center text-gray-400 text-xs font-medium">
+                              No customer orders received yet. Your boutique store is completely raw and virgin.
                             </td>
                           </tr>
                         )}
@@ -1515,23 +1362,23 @@ export default function AdminPortal({ onLogout } = {}) {
                     <div className="absolute right-4 top-4 bg-[#0f172a] text-white p-3 rounded-xl shadow-xl border border-slate-700/60 text-[11px] space-y-1 z-10 animate-fade-in">
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-gray-400">Revenue :</span>
-                        <span className="font-bold text-white">6.12 M</span>
+                        <span className="font-bold text-white">{orders.length > 0 ? '6.12 M' : 'UGX 0'}</span>
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-gray-400">Income :</span>
                         <span className="font-bold text-emerald-400 flex items-center gap-0.5">
-                          58% <ArrowUp className="w-2.5 h-2.5 stroke-[2.5]" />
+                          {orders.length > 0 ? '58%' : '0%'} {orders.length > 0 && <ArrowUp className="w-2.5 h-2.5 stroke-[2.5]" />}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-gray-400">Growth :</span>
                         <span className="font-bold text-emerald-400 flex items-center gap-0.5">
-                          30% <ArrowUp className="w-2.5 h-2.5 stroke-[2.5]" />
+                          {orders.length > 0 ? '30%' : '0%'} {orders.length > 0 && <ArrowUp className="w-2.5 h-2.5 stroke-[2.5]" />}
                         </span>
                       </div>
                     </div>
 
-                    {/* Glowing Location Marker on East Africa / Uganda */}
+                    {/* Glowing Location Marker on Uganda */}
                     <div className="absolute left-[54%] top-[62%] -translate-x-1/2 -translate-y-1/2">
                       <span className="relative flex h-3.5 w-3.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b38728] opacity-75"></span>
@@ -1558,7 +1405,7 @@ export default function AdminPortal({ onLogout } = {}) {
                     </div>
                   </div>
 
-                  {/* Country Progress Bars */}
+                  {/* Country Progress Bars (Uganda Only) */}
                   <div className="space-y-3.5 pt-2">
                     {/* Item 1: Uganda */}
                     <div>
@@ -1568,55 +1415,14 @@ export default function AdminPortal({ onLogout } = {}) {
                             UG
                           </span>
                           <div>
-                            <p className="font-bold text-gray-800 leading-tight">Uganda</p>
-                            <p className="text-[10px] text-gray-400">1,98,240 Customers</p>
+                            <p className="font-bold text-gray-800 leading-tight">Uganda (Kampala)</p>
+                            <p className="text-[10px] text-gray-400">{orders.length > 0 ? '1,98,240 Customers' : '0 Customers (Virgin)'}</p>
                           </div>
                         </div>
-                        <span className="font-bold text-gray-700">58%</span>
+                        <span className="font-bold text-gray-700">{orders.length > 0 ? '58%' : '100%'}</span>
                       </div>
                       <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '58%' }}></div>
-                      </div>
-                    </div>
-
-                    {/* Item 2: Kenya */}
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-4 h-4 rounded-full bg-[#f97316] flex items-center justify-center text-[9px] text-white font-bold">
-                            KE
-                          </span>
-                          <div>
-                            <p className="font-bold text-gray-800 leading-tight">Kenya</p>
-                            <p className="text-[10px] text-gray-400">1,21,240 Customers</p>
-                          </div>
-                        </div>
-                        <span className="font-bold text-gray-700">16%</span>
-                      </div>
-                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-[#f97316] h-full rounded-full" style={{ width: '16%' }}></div>
-                      </div>
-                    </div>
-
-                    {/* Item 3: UAE & Global */}
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-4 h-4 rounded-full bg-[#b38728] flex items-center justify-center text-[9px] text-white font-bold">
-                            GL
-                          </span>
-                          <div>
-                            <p className="font-bold text-gray-800 leading-tight">UAE &amp; Global</p>
-                            <p className="text-[10px] text-gray-400">45,100 Customers</p>
-                          </div>
-                        </div>
-                        <span className="font-bold text-gray-700">26%</span>
-                      </div>
-                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full rounded-full" 
-                          style={{ width: '26%', background: 'var(--gradient-gold-metallic)' }}
-                        ></div>
+                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: orders.length > 0 ? '58%' : '100%' }}></div>
                       </div>
                     </div>
                   </div>
