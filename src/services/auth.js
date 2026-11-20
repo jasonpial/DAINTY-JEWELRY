@@ -247,6 +247,9 @@ export async function signInWithEmail(email, password) {
     setActiveUser(userData);
     return userData;
   } catch (error) {
+    if (error?.code === 'auth/operation-not-allowed' || error?.message?.includes('operation-not-allowed')) {
+      return loginUser({ emailOrPhone: email, password });
+    }
     throw mapFirebaseAuthError(error);
   }
 }
@@ -280,6 +283,9 @@ export async function signUpWithEmail(name, email, password, phone = '', address
     setActiveUser(userData);
     return userData;
   } catch (error) {
+    if (error?.code === 'auth/operation-not-allowed' || error?.message?.includes('operation-not-allowed')) {
+      return registerUser({ name, email, phone, password, address, provider: 'password' });
+    }
     throw mapFirebaseAuthError(error);
   }
 }
