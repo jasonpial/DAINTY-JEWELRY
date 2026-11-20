@@ -12,8 +12,8 @@ import AdminPortal from './components/admin/AdminPortal';
 import ProfileAuthModal from './components/customer/ProfileAuthModal';
 import AccountSettingsModal from './components/customer/AccountSettingsModal';
 import ProfileView from './components/customer/ProfileView';
-import { getActiveUser } from './services/authManager';
-import { testConnection, subscribeToAuthChanges } from './services/auth';
+import { getActiveUser, logoutUser } from './services/authManager';
+import { testConnection, subscribeToAuthChanges, checkUserAccountExistsOnServer } from './services/auth';
 import {
   getCurrentShopper,
   getUserCart,
@@ -98,9 +98,14 @@ function App() {
     window.addEventListener('dainty_shopper_changed', handleShopperChange);
     window.addEventListener('dainty_cart_changed', handleCartChange);
     window.addEventListener('dainty_user_changed', handleUserChange);
+    const handleAccountDeleted = () => {
+      logoutUser();
+      window.location.reload();
+    };
+    window.addEventListener('dainty_account_deleted', handleAccountDeleted);
 
-    // Poll server cart every 3 seconds for real-time cross-device bag synchronization
-    const pollInterval = setInterval(() => {
+    // Poll server cart and check account validity every 3 seconds for cross-device deletion sync
+    const pollInterval = setInterval(async () => {
       if (typeof document !== 'undefined' && !document.hidden) {
         const active = getCurrentShopper();
         if (active?.id) {
@@ -115,6 +120,15 @@ function App() {
             }
           });
         }
+
+        const activeUser = getActiveUser();
+        if (activeUser?.id) {
+          const exists = await checkUserAccountExistsOnServer(activeUser.id);
+          if (!exists) {
+            logoutUser();
+            window.location.reload();
+          }
+        }
       }
     }, 3000);
 
@@ -122,6 +136,7 @@ function App() {
       window.removeEventListener('dainty_shopper_changed', handleShopperChange);
       window.removeEventListener('dainty_cart_changed', handleCartChange);
       window.removeEventListener('dainty_user_changed', handleUserChange);
+      window.removeEventListener('dainty_account_deleted', handleAccountDeleted);
       clearInterval(pollInterval);
     };
   }, [currentShopper?.id, currentUser?.id]);

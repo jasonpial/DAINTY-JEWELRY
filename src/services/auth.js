@@ -30,6 +30,7 @@ import {
   getDocFromServer,
   setDoc,
   updateDoc,
+  deleteDoc,
   serverTimestamp
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -371,16 +372,42 @@ export function subscribeToAuthChanges(callback) {
   }
 }
 
+export async function checkUserAccountExistsOnServer(userId) {
+  if (!db || !userId) return true;
+  try {
+    const userRef = doc(db, 'users', userId);
+    const snap = await getDoc(userRef);
+    if (snap.exists() === false) {
+      return false;
+    }
+  } catch {
+    // Network or offline error -> assume true
+  }
+  return true;
+}
+
 export async function deleteFirebaseAccount() {
   try {
     const user = auth.currentUser;
-    if (user) {
+    if (user && db) {
+      try {
+        await deleteDoc(doc(db, 'users', user.uid));
+      } catch (e) {
+        console.warn('Could not delete user doc from firestore:', e);
+      }
       clearUserCart('shopper_uid_' + user.uid);
       await deleteUser(user);
     }
   } catch (err) {
     console.warn('Firebase user deletion note:', err);
   }
+  const active = getActiveUser();
+  if (active?.id && db) {
+    try {
+      await deleteDoc(doc(db, 'users', active.id));
+    } catch {}
+  }
   deleteActiveAccount();
   window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new CustomEvent('dainty_account_deleted'));
 }
