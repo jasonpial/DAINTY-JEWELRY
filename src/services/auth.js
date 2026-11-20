@@ -209,11 +209,14 @@ function mapFirebaseAuthError(error) {
   if (code === 'auth/unauthorized-domain') {
     return new Error('This domain is not authorized for Firebase OAuth. Please add it in Firebase Console → Authentication → Settings.');
   }
-  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
-    return new Error('Invalid email or password. Please check your credentials and try again.');
+  if (code === 'auth/user-not-found') {
+    return new Error('No account exists with this email address. Please create an account or sign up below.');
+  }
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+    return new Error('Incorrect email or password. Please check your credentials and try again.');
   }
   if (code === 'auth/email-already-in-use') {
-    return new Error('An account with this email already exists. Please sign in instead.');
+    return new Error('An account with this email already exists on another device or session. Please sign in instead.');
   }
   if (code === 'auth/weak-password') {
     return new Error('Password must be at least 6 characters long.');
@@ -231,7 +234,6 @@ function mapFirebaseAuthError(error) {
 export async function signInWithEmail(email, password) {
   await persistenceReady;
 
-  // Ensure any lingering previous Firebase Auth session is cleared so user switches explicitly
   if (auth.currentUser) {
     await signOut(auth);
   }
@@ -243,10 +245,6 @@ export async function signInWithEmail(email, password) {
     setActiveUser(userData);
     return userData;
   } catch (error) {
-    if (error?.code === 'auth/operation-not-allowed') {
-      // Only fall back to strict password-checked local auth if Email/Password provider is disabled in Firebase Console
-      return loginUser({ emailOrPhone: email, password });
-    }
     throw mapFirebaseAuthError(error);
   }
 }
@@ -269,7 +267,6 @@ export async function signUpWithEmail(name, email, password, phone = '', address
       await updateProfile(firebaseUser, { displayName: name.trim() });
     }
 
-    // Send real Firebase email verification (non-blocking)
     sendEmailVerification(firebaseUser).catch(() => {});
 
     const userData = await syncFirebaseUserProfile(firebaseUser, {
@@ -281,9 +278,6 @@ export async function signUpWithEmail(name, email, password, phone = '', address
     setActiveUser(userData);
     return userData;
   } catch (error) {
-    if (error?.code === 'auth/operation-not-allowed') {
-      return registerUser({ name, email, phone, password, address, provider: 'password' });
-    }
     throw mapFirebaseAuthError(error);
   }
 }
