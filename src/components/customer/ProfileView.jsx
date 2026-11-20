@@ -308,17 +308,18 @@ export default function ProfileView({ cart = [], onLogout, onOpenAuth }) {
                   </div>
                 )}
 
-                <div className="profile-form-full" style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div className="profile-form-full" style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <button
                     type="submit"
                     className="profile-save-btn"
+                    style={{ width: '100%', justifyContent: 'center' }}
                   >
                     <Save size={16} /> Save Profile Changes
                   </button>
                   <button
                     type="button"
                     onClick={handleDeleteAccount}
-                    style={{ padding: '0.75rem 1.25rem', borderRadius: '30px', border: '1px solid #fecdd3', background: '#fff1f2', color: '#e11d48', fontWeight: 700, cursor: 'pointer', fontSize: '0.84rem' }}
+                    style={{ width: '100%', padding: '0.75rem 1.25rem', borderRadius: '8px', border: '1px solid #fecdd3', background: '#fff1f2', color: '#e11d48', fontWeight: 700, cursor: 'pointer', fontSize: '0.84rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}
                   >
                     Delete Account
                   </button>

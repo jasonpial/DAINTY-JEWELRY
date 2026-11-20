@@ -7588,32 +7588,35 @@ body,
     padding: 1.75rem 1.1rem;
   }
   .profile-page-wrap {
-    margin: 1rem auto 2.5rem auto;
-    padding: 0 0.75rem;
+    margin: 0.5rem auto 1.5rem auto;
+    padding: 0 0.5rem;
   }
   .profile-hero-banner {
-    padding: 1rem;
-    gap: 0.75rem;
+    padding: 0.75rem;
+    gap: 0.5rem;
   }
   .main-content .profile-hero-banner .profile-hero-avatar {
-    width: 46px;
-    height: 46px;
-    font-size: 1.1rem;
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
   }
   .profile-hero-title {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
+  }
+  .profile-hero-meta {
+    font-size: 0.72rem;
   }
   .profile-dashboard-grid {
     grid-template-columns: 1fr;
-    gap: 0.85rem;
+    gap: 0.6rem;
   }
   .profile-sidebar-card {
-    padding: 0.5rem;
+    padding: 0.35rem;
   }
   .profile-tabs-list {
     flex-direction: row;
     overflow-x: auto;
-    gap: 0.4rem;
+    gap: 0.3rem;
     scrollbar-width: none;
   }
   .profile-tabs-list::-webkit-scrollbar {
@@ -7623,18 +7626,30 @@ body,
     width: auto;
     white-space: nowrap;
     flex-shrink: 0;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.76rem;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.73rem;
   }
   .profile-content-panel {
-    padding: 1rem;
+    padding: 0.85rem;
+  }
+  .profile-panel-heading {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+  .profile-panel-sub {
+    font-size: 0.78rem;
+    margin-bottom: 1rem;
   }
   .profile-form-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.65rem;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .profile-field-label {
+    font-size: 0.72rem;
+    margin-bottom: 0.2rem;
   }
   .profile-field-input {
-    padding: 0.55rem 0.6rem 0.55rem 2.1rem;
+    padding: 0.5rem 0.5rem 0.5rem 2.1rem;
     font-size: 0.8rem;
   }
 }
