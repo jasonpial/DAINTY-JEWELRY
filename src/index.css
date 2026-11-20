@@ -3509,12 +3509,14 @@ div[style*="background: rgba"] span,
     background: var(--color-gold-primary) !important;
     padding: 0.4rem 0.5rem !important;
     min-height: auto !important;
+    overflow: visible !important;
   }
   .nav-row-inner {
     width: 100% !important;
     justify-content: center !important;
     height: auto !important;
     padding: 0.3rem 0 !important;
+    overflow: visible !important;
   }
   .nav-links-left {
     display: flex !important;
@@ -3522,6 +3524,7 @@ div[style*="background: rgba"] span,
     justify-content: center !important;
     gap: 0.4rem 0.6rem !important;
     width: 100% !important;
+    overflow: visible !important;
   }
   .gold-nav-item {
     font-size: 0.72rem !important;
@@ -3532,6 +3535,8 @@ div[style*="background: rgba"] span,
   }
   .gold-nav-dropdown {
     height: auto !important;
+    position: relative !important;
+    overflow: visible !important;
   }
   .nav-links-right-gold {
     display: none !important; /* Hide desktop right items */
@@ -7153,6 +7158,9 @@ body,
     min-width: 0 !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
+    z-index: 999999 !important;
+    max-height: 75vh !important;
+    overflow-y: auto !important;
   }
 
   /* Announcement / Back Nav / Chat / Toast */
