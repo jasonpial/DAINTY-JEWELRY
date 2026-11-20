@@ -22,6 +22,7 @@ import {
   deleteUser
 } from 'firebase/auth';
 import { deleteActiveAccount } from './authManager';
+import { clearUserCart } from './cartManager';
 import {
   getFirestore,
   doc,
@@ -374,10 +375,12 @@ export async function deleteFirebaseAccount() {
   try {
     const user = auth.currentUser;
     if (user) {
+      clearUserCart('shopper_uid_' + user.uid);
       await deleteUser(user);
     }
   } catch (err) {
     console.warn('Firebase user deletion note:', err);
   }
   deleteActiveAccount();
+  window.dispatchEvent(new Event('storage'));
 }
