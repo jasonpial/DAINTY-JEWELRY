@@ -186,7 +186,7 @@ export default function HomeView({ onAddToBag }) {
       <section className="dainty-feature-strip-section">
         <div className="dainty-feature-strip-inner">
           <div className="dainty-feature-strip-content">
-            <span className="strip-tag">LIMITED EXCLUSIVE OFFER</span>
+            <span className="strip-tag">LIMITED EXCLUSIVE OFFERS</span>
             <h3 className="strip-title">Pair Any Stud with a Draped Piercing Chain &amp; Save 10%</h3>
             <p className="strip-desc">
               Every piece is crafted with hypoallergenic titanium &amp; stainless steel cores, finished with 18K gold plating designed for effortless everyday wear and sensitive ears.
