@@ -42,6 +42,15 @@ const MIME_TYPES = {
 };
 
 const server = createServer(async (req, res) => {
+  const hostHeader = req.headers.host || 'localhost';
+  const host = hostHeader.split(':')[0];
+
+  if (host === 'www.daintystudsandchains.com') {
+    res.writeHead(301, { 'Location': `https://daintystudsandchains.com${req.url}` });
+    res.end();
+    return;
+  }
+
   // Global CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -53,8 +62,7 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const host = req.headers.host || 'localhost';
-  const url = new URL(req.url, `http://${host}`);
+  const url = new URL(req.url, `http://${hostHeader}`);
   const pathname = url.pathname;
 
   // 1. Direct all /api/* requests to the API handler
@@ -79,9 +87,12 @@ const server = createServer(async (req, res) => {
     if (existsSync(filePath) && statSync(filePath).isFile()) {
       const ext = extname(filePath).toLowerCase();
       const mime = MIME_TYPES[ext] || 'application/octet-stream';
+      const isHtml = ext === '.html';
       res.writeHead(200, {
         'Content-Type': mime,
-        'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable'
+        'Cache-Control': isHtml 
+          ? 'no-store, no-cache, must-revalidate, proxy-revalidate' 
+          : 'public, max-age=31536000, immutable'
       });
       createReadStream(filePath).pipe(res);
       return;
@@ -95,7 +106,9 @@ const server = createServer(async (req, res) => {
   if (existsSync(indexPath)) {
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=UTF-8',
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     });
     createReadStream(indexPath).pipe(res);
     return;
