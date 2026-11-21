@@ -268,10 +268,8 @@ export default function CartView({
   // ── Pricing ──────────────────────────────────────────────
   const cartSubtotal   = cart.reduce((acc, item) => acc + ((item.sale_price || item.price) * item.quantity), 0);
   const discountAmount = cartSubtotal * (discountPercentage / 100);
-  const creditAmount   = cartSubtotal > 0 ? cartSubtotal * 0.01 : 0;
   const deliveryFee    = 0;
-  const cartTotal      = Math.max(0, cartSubtotal - discountAmount - creditAmount + deliveryFee);
-  const gstInclusive   = cartTotal > 0 ? cartTotal * 0.10 : 0;
+  const cartTotal      = Math.max(0, cartSubtotal - discountAmount + deliveryFee);
   const cartCount      = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleInputChange = (e) => {
@@ -314,7 +312,7 @@ export default function CartView({
       const p = item.sale_price || item.price;
       itemDetails += `${i + 1}. *${item.name}* (${item.selectedColor}) - Qty: ${item.quantity} x ${formatUGX(p)}\n`;
     });
-    const text = `Hello DAINTY STUDS AND CHAINS! I'd like to place an order:\n\n*ORDER ITEMS:*\n${itemDetails}\n*Subtotal:* ${formatUGX(cartSubtotal)}\n*Discount:* -${formatUGX(discountAmount)}\n*Credit Rebate:* -${formatUGX(creditAmount)}\n*TOTAL:* ${formatUGX(cartTotal)} (${formatUSD(cartTotal)})\n\n*CUSTOMER:*\n- Name: ${checkoutData.name}\n- Phone: ${checkoutData.phone}\n- Email: ${checkoutData.email || 'N/A'}\n- Address: ${checkoutData.address}\n- Network: ${selectedNetwork || 'N/A'}\n- Notes: ${checkoutData.notes || 'None'}`;
+    const text = `Hello DAINTY STUDS AND CHAINS! I'd like to place an order:\n\n*ORDER ITEMS:*\n${itemDetails}\n*Subtotal:* ${formatUGX(cartSubtotal)}\n*Discount:* -${formatUGX(discountAmount)}\n*TOTAL:* ${formatUGX(cartTotal)} (${formatUSD(cartTotal)})\n\n*CUSTOMER:*\n- Name: ${checkoutData.name}\n- Phone: ${checkoutData.phone}\n- Email: ${checkoutData.email || 'N/A'}\n- Address: ${checkoutData.address}\n- Network: ${selectedNetwork || 'N/A'}\n- Notes: ${checkoutData.notes || 'None'}`;
     window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -965,18 +963,6 @@ export default function CartView({
                   <span>Discount ({discountPercentage}%)</span><span>-{formatUGX(discountAmount)}</span>
                 </div>
               )}
-              {creditAmount > 0 && (
-                <div className="checkout-invoice-row">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                    Credit (1%) <HelpCircle size={12} title="1% loyalty credit rebate" />
-                  </span>
-                  <span>-{formatUGX(creditAmount)}</span>
-                </div>
-              )}
-              <div className="checkout-invoice-row">
-                <span>GST (10%) <span style={{ fontSize: '0.72rem', color: '#a8a29e' }}>(Inclusive)</span></span>
-                <span>{formatUGX(gstInclusive)}</span>
-              </div>
               <div className="checkout-invoice-row total">
                 <span>Total</span>
                 <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
