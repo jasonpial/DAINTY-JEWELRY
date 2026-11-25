@@ -87,29 +87,56 @@ const server = createServer(async (req, res) => {
     if (existsSync(filePath) && statSync(filePath).isFile()) {
       const ext = extname(filePath).toLowerCase();
       const mime = MIME_TYPES[ext] || 'application/octet-stream';
+
+      const filename = filePath.split(/[\\/]/).pop() || '';
+
       const isHtml = ext === '.html';
+
+      const isServiceWorker =
+        /(^|\/)(sw|service-worker|serviceworker)\.js$/i.test(decodedPath);
+
+      const isManifest =
+        filename === 'manifest.json' ||
+        filename === 'manifest.webmanifest';
+
+      // Detect Vite-generated content-hashed files
+      const isHashedAsset =
+        /[-.][A-Za-z0-9_-]{8,}\./.test(filename);
+
+      let cacheControl;
+
+      if (isHtml || isServiceWorker || isManifest) {
+        cacheControl = 'no-store, no-cache, must-revalidate';
+      } else if (isHashedAsset) {
+        cacheControl = 'public, max-age=31536000, immutable';
+      } else {
+        cacheControl = 'no-cache, must-revalidate';
+      }
+
       res.writeHead(200, {
         'Content-Type': mime,
-        'Cache-Control': isHtml 
-          ? 'no-store, no-cache, must-revalidate, proxy-revalidate' 
-          : 'public, max-age=31536000, immutable'
+        'Cache-Control': cacheControl,
+        'X-Content-Type-Options': 'nosniff'
       });
+
       createReadStream(filePath).pipe(res);
       return;
     }
-  } catch {
-    // Continue to SPA fallback
+  } catch (err) {
+    console.error('[Static File Error]:', err.message);
   }
 
-  // 3. SPA Route Fallback -> dist/index.html (e.g. /admin, /shop, /checkout)
+  // 3. SPA Route Fallback
   const indexPath = join(DIST_DIR, 'index.html');
+
   if (existsSync(indexPath)) {
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=UTF-8',
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0'
     });
+
     createReadStream(indexPath).pipe(res);
     return;
   }
