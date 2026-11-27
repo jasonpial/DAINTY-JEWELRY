@@ -10,9 +10,13 @@ const POSSIBLE_PERSISTENT_DIRS = [
   '/home/u111258626/domains/daintystudsandchains.com/dainty_data',
   resolve(__dirname, '../data'),
   resolve(__dirname, '../../dainty_data'),
-  resolve(__dirname, 'data'),
-  __dirname
+  resolve(__dirname, 'data')
 ].filter(Boolean);
+
+const POSSIBLE_READ_DIRS = [
+  ...POSSIBLE_PERSISTENT_DIRS,
+  __dirname
+];
 
 function ensureDir(dir) {
   try {
@@ -196,7 +200,7 @@ const _DELETED_IDS_PATH = getFilePath('deleted_ids.json');
 
 // Helper to read and write database with persistent mirroring
 function getDeletedIds() {
-  for (const dir of POSSIBLE_PERSISTENT_DIRS) {
+  for (const dir of POSSIBLE_READ_DIRS) {
     try {
       if (existsSync(dir)) {
         const target = resolve(dir, 'deleted_ids.json');
@@ -214,7 +218,7 @@ function saveDeletedIds(ids) {
   let saved = false;
   for (const dir of POSSIBLE_PERSISTENT_DIRS) {
     try {
-      if (existsSync(dir)) {
+      if (ensureDir(dir)) {
         const target = resolve(dir, 'deleted_ids.json');
         writeFileSync(target, JSON.stringify(ids, null, 2), 'utf-8');
         saved = true;
@@ -226,7 +230,7 @@ function saveDeletedIds(ids) {
 
 function getDbProducts() {
   const deletedSet = new Set(getDeletedIds());
-  for (const dir of POSSIBLE_PERSISTENT_DIRS) {
+  for (const dir of POSSIBLE_READ_DIRS) {
     try {
       if (existsSync(dir)) {
         const target = resolve(dir, 'products_db.json');
