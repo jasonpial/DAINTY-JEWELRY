@@ -30,8 +30,105 @@ export const piercingLocations = [
   'Body Jewelry'
 ];
 
-// Seed Products (Empty by default for hosting)
-const defaultProducts = [];
+// Seed Products
+const defaultProducts = [
+  {
+    id: "prod_dainty_1",
+    name: "18K Gold Draped Chain Studs",
+    category_id: "earrings",
+    subcategory_id: "dang_ear",
+    price: 145000,
+    sale_price: null,
+    description: "Handcrafted 18K gold-plated sterling silver stud connected to a delicate draped chain for effortless cascading elegance.",
+    images: ["/images/iv.jpeg", "/images/v.jpeg", "/images/vi.jpeg"],
+    stock_quantity: 45,
+    best_seller: true,
+    new_arrival: true,
+    gender: "Women",
+    occasion: "Everyday",
+    created_at: "2026-11-01T00:00:00.000Z"
+  },
+  {
+    id: "prod_dainty_2",
+    name: "Diamond-Pavé Huggie Clickers",
+    category_id: "earrings",
+    subcategory_id: "hugg_ear",
+    price: 180000,
+    sale_price: 159000,
+    description: "Seamless hinged huggie hoops encrusted with micro-pavé cubic zirconia stones for brilliant sparkle from every angle.",
+    images: ["/images/iii.jpeg", "/images/ii.jpeg", "/images/i.jpeg"],
+    stock_quantity: 30,
+    best_seller: true,
+    new_arrival: false,
+    gender: "Women",
+    occasion: "Wedding",
+    created_at: "2026-11-02T00:00:00.000Z"
+  },
+  {
+    id: "prod_dainty_3",
+    name: "Titanium Flat-Back Sleep-In Stud",
+    category_id: "earrings",
+    subcategory_id: "stud_ear",
+    price: 95000,
+    sale_price: null,
+    description: "Implant-grade titanium flat-back labret designed for 24/7 comfortable wear, fresh piercings, and sensitive skin.",
+    images: ["/images/vi.jpeg", "/images/0.jpeg"],
+    stock_quantity: 60,
+    best_seller: true,
+    new_arrival: true,
+    gender: "Unisex",
+    occasion: "Everyday",
+    created_at: "2026-11-03T00:00:00.000Z"
+  },
+  {
+    id: "prod_dainty_4",
+    name: "Marquise Cluster Cartilage Earring",
+    category_id: "earrings",
+    subcategory_id: "stat_ear",
+    price: 165000,
+    sale_price: null,
+    description: "Stunning marquise and round stone cluster designed specifically for helix, conch, and flat cartilage piercings.",
+    images: ["/images/vii.jpeg", "/images/viii.jpeg"],
+    stock_quantity: 25,
+    best_seller: false,
+    new_arrival: true,
+    gender: "Women",
+    occasion: "Party",
+    created_at: "2026-11-04T00:00:00.000Z"
+  },
+  {
+    id: "prod_dainty_5",
+    name: "Minimalist Gold Hoop Earrings",
+    category_id: "earrings",
+    subcategory_id: "hoop_ear",
+    price: 120000,
+    sale_price: null,
+    description: "Classic lightweight polished gold hoops offering timeless elegance for daily stacking and professional wear.",
+    images: ["/images/i.jpeg", "/images/ii.jpeg"],
+    stock_quantity: 50,
+    best_seller: true,
+    new_arrival: false,
+    gender: "Women",
+    occasion: "Everyday",
+    created_at: "2026-11-05T00:00:00.000Z"
+  },
+  {
+    id: "prod_dainty_6",
+    name: "Double Chain Drop Piercing Ring",
+    category_id: "earrings",
+    subcategory_id: "dang_ear",
+    price: 155000,
+    sale_price: null,
+    description: "Bold dual-chain drop connecting two piercing locations with fluid motion and high-polished shine.",
+    images: ["/images/iv.jpeg", "/images/v.jpeg"],
+    stock_quantity: 20,
+    best_seller: false,
+    new_arrival: true,
+    gender: "Women",
+    occasion: "Anniversary",
+    created_at: "2026-11-06T00:00:00.000Z"
+  }
+];
 
 // Helper functions
 const STORAGE_PREFIX = 'dainty_ecommerce_';
