@@ -8,6 +8,12 @@ function patch(path, replacements) {
   }
   writeFileSync(path, text, 'utf8');
 }
+function regexPatch(path, replacements) {
+  if (!existsSync(path)) return;
+  let text = readFileSync(path, 'utf8');
+  for (const [pattern, replacement] of replacements) text = text.replace(pattern, replacement);
+  writeFileSync(path, text, 'utf8');
+}
 
 const handler = 'api/handler.js';
 patch(handler, [
@@ -25,9 +31,10 @@ patch(db, [
 ]);
 
 const auth = 'src/services/auth.js';
-patch(auth, [
-  ["  getDoc,\n  getDocFromServer,\n  setDoc,\n  updateDoc,\n  deleteDoc,\n  serverTimestamp\n", "  getDocFromServer\n"],
-  ["const path = `users/${firebaseUser.uid}`;\n  const userRef = doc(db, 'users', firebaseUser.uid);", "const userId = encodeURIComponent(firebaseUser.uid);"],
-  ["export async function syncProfileUpdateToFirestore", "export async function syncProfileUpdateToFirestore"],
-  ["export async function checkUserAccountExistsOnServer(userId) {", "export async function checkUserAccountExistsOnServer(userId) {" ]
+patch(auth, [["  getDoc,\n  getDocFromServer,\n  setDoc,\n  updateDoc,\n  deleteDoc,\n  serverTimestamp\n", "  getDocFromServer\n"]]);
+regexPatch(auth, [
+  [/async function syncFirebaseUserProfile[\s\S]*?\n}\n\n\/\*\*/, `async function syncFirebaseUserProfile(firebaseUser, { name, phone = '', address = '', provider = 'password' } = {}) {\n  const userId = encodeURIComponent(firebaseUser.uid);\n  const safeEmail = clampStr(firebaseUser.email || '', 160);\n  const safeName = clampStr(name || firebaseUser.displayName || safeEmail.split('@')[0] || 'Dainty Patron', 100);\n  const safePhone = clampStr(phone || firebaseUser.phoneNumber || '', 32);\n  const safeAddress = clampStr(address || '', 300);\n  const safeProvider = provider === 'google' ? 'google' : 'password';\n  let existing = null;\n  try { const response = await fetch('/api/profiles/' + userId); if (response.ok) existing = await response.json(); } catch {}\n  const profile = { ...(existing || {}), id: firebaseUser.uid, uid: firebaseUser.uid, name: clampStr(existing?.name || safeName, 100), email: safeEmail || existing?.email || '', phone: existing?.phone || safePhone, address: existing?.address || safeAddress, provider: safeProvider, createdAt: existing?.createdAt || new Date().toISOString(), updated_at: new Date().toISOString() };\n  const response = await fetch('/api/profiles/' + userId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });\n  if (!response.ok) throw new Error('Could not save the account profile to Hostinger.');\n  return await response.json();\n}\n\n/**`],
+  [/export async function syncProfileUpdateToFirestore[\s\S]*?\n}\n\n\/\*\*/, `export async function syncProfileUpdateToFirestore({ name, email, phone = '', address = '' }) {\n  const currentUser = auth.currentUser;\n  if (!currentUser) return false;\n  try {\n    const response = await fetch('/api/profiles/' + encodeURIComponent(currentUser.uid), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: clampStr(name || currentUser.displayName || 'Dainty Patron', 100), email: clampStr(email || currentUser.email || '', 160), phone: clampStr(phone, 32), address: clampStr(address, 300) }) });\n    return response.ok;\n  } catch { return false; }\n}\n\n/**`],
+  [/export async function checkUserAccountExistsOnServer[\s\S]*?\n}\n\nexport async function deleteFirebaseAccount/, `export async function checkUserAccountExistsOnServer(userId) {\n  if (!userId) return true;\n  try { const response = await fetch('/api/profiles/' + encodeURIComponent(userId)); if (!response.ok) return true; return Boolean(await response.json()); } catch { return true; }\n}\n\nexport async function deleteFirebaseAccount`],
+  [/export async function deleteFirebaseAccount[\s\S]*?\n}\n$/, `export async function deleteFirebaseAccount() {\n  try {\n    const user = auth.currentUser; const active = getActiveUser(); const userId = user?.uid || active?.id;\n    if (userId) { await fetch('/api/profiles/' + encodeURIComponent(userId), { method: 'DELETE' }); clearUserCart('shopper_uid_' + userId); }\n    if (user) await deleteUser(user);\n  } catch (err) { console.warn('Account deletion note:', err); }\n  deleteActiveAccount(); window.dispatchEvent(new Event('storage')); window.dispatchEvent(new CustomEvent('dainty_account_deleted'));\n}\n`]
 ]);
