@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "prebuild": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs && node scripts/hostinger-products-only-build.mjs && node scripts/restore-product-render-cache-build.mjs",
+    "prebuild": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs && node scripts/hostinger-products-only-build.mjs && node scripts/restore-product-render-cache-build.mjs && node scripts/ensure-php-file-api.mjs",
     "start": "node --env-file-if-exists=.env server.js",
-    "prestart": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs && node scripts/hostinger-products-only-build.mjs && node scripts/restore-product-render-cache-build.mjs",
+    "prestart": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs && node scripts/hostinger-products-only-build.mjs && node scripts/restore-product-render-cache-build.mjs && node scripts/ensure-php-file-api.mjs",
     "api": "node --env-file-if-exists=.env api/server.mjs",
     "build": "vite build",
     "lint": "oxlint",
@@ -22,13 +22,12 @@
     "react-dom": "^19.2.8",
     "recharts": "^3.10.1",
     "tailwindcss": "^4.3.4",
-    "vite": "^8.2.0"
+    "vite": "^8.2.0",
+    "oxlint": "^1.75.0"
   },
   "devDependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "eslint": "^10.15.0",
-    "oxlint": "^1.75.0"
+    "@types/react-dom": "^19.2.3"
   }
 }
