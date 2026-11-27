@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "prebuild": "node scripts/ensure-hostinger-data.mjs",
+    "prebuild": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs",
     "start": "node --env-file-if-exists=.env server.js",
-    "prestart": "node scripts/ensure-hostinger-data.mjs",
+    "prestart": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs",
     "api": "node --env-file-if-exists=.env api/server.mjs",
     "build": "vite build",
     "lint": "oxlint",
