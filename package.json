@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "prebuild": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs",
+    "prebuild": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs && node scripts/hostinger-products-only-build.mjs",
     "start": "node --env-file-if-exists=.env server.js",
-    "prestart": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs",
+    "prestart": "node scripts/ensure-hostinger-data.mjs && node scripts/migrate-local-orders-build.mjs && node scripts/migrate-local-cart-build.mjs && node scripts/restore-auth-error-map.mjs && node scripts/cache-bust-product-sync-build.mjs && node scripts/hostinger-products-only-build.mjs",
     "api": "node --env-file-if-exists=.env api/server.mjs",
     "build": "vite build",
     "lint": "oxlint",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.4",
-    "@vitejs/plugin-react": "^6.0.4",
+    "@vitejs/plugin-react": "^6.0.0",
     "firebase": "^13.4.0",
     "lucide-react": "^1.31.0",
     "react": "^19.2.8",
