@@ -64,6 +64,9 @@ function searchAndFilterProducts(products, query, routeParams, filters, activeSu
       if (pTarget.includes('lobe')) {
         return pField.includes('lobe') || pName.includes('lobe') || pDesc.includes('lobe') || pTags.includes('lobe') || p.category_id === 'earrings';
       }
+      if (pTarget.includes('tragus') || pTarget.includes('trigger')) {
+        return pField.includes('tragus') || pField.includes('trigger') || pName.includes('tragus') || pName.includes('trigger') || pDesc.includes('tragus') || pDesc.includes('trigger');
+      }
       return pField.includes(pTarget) || pName.includes(pTarget) || pDesc.includes(pTarget) || pTags.includes(pTarget);
     });
   }

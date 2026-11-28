@@ -23,6 +23,7 @@ export const piercingLocations = [
   'Flat',
   'Conch',
   'Tragus',
+  'Trigger',
   'Rook',
   'Daith',
   'Industrials',
