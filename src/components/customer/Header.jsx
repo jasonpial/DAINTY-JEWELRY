@@ -276,6 +276,7 @@ export default function Header({ cartCount, currentRoute, currentShopper, _onSwi
                 <div className="dropdown-section-label" style={{ marginTop: '0.4rem' }}>Shop by Piercing</div>
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Ear Lobe'); }}>Ear Lobe</a>
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Helix/Cartilage'); }}>Helix/Cartilage</a>
+                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Flat'); }}>Flat</a>
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Conch'); }}>Conch</a>
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Tragus'); }}>Tragus</a>
                 <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleShopByClick('piercing', 'Rook'); }}>Rook</a>

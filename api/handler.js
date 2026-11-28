@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { handleHostingerDataRequest } from './hostinger-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -366,6 +367,9 @@ export async function handleApiRequest(req, res, customEnv = {}) {
   }
 
   try {
+    const hostingerDataHandled = await handleHostingerDataRequest(req, res, url, readJson, send);
+    if (hostingerDataHandled !== false) return;
+
     // =========================================================================
     // DATABASE STATUS & HEALTH ENDPOINTS (Fixes Hostinger /api/database/status)
     // =========================================================================

@@ -26,12 +26,7 @@ import { clearUserCart } from './cartManager';
 import {
   getFirestore,
   doc,
-  getDoc,
-  getDocFromServer,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp
+  getDocFromServer
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import {
@@ -111,70 +106,18 @@ function clampStr(val, max) {
  * Adheres strictly to firebase-blueprint.json schema & security rules.
  */
 async function syncFirebaseUserProfile(firebaseUser, { name, phone = '', address = '', provider = 'password' } = {}) {
-  const path = `users/${firebaseUser.uid}`;
-  const userRef = doc(db, 'users', firebaseUser.uid);
-
-  let existingSnap = null;
-  try {
-    existingSnap = await getDoc(userRef);
-  } catch (err) {
-    handleFirestoreError(err, OperationType.GET, path);
-  }
-
+  const userId = encodeURIComponent(firebaseUser.uid);
   const safeEmail = clampStr(firebaseUser.email || '', 160);
   const safeName = clampStr(name || firebaseUser.displayName || safeEmail.split('@')[0] || 'Dainty Patron', 100);
   const safePhone = clampStr(phone || firebaseUser.phoneNumber || '', 32);
-  const safeAddress = clampStr(address || 'Kampala, Uganda', 300);
+  const safeAddress = clampStr(address || '', 300);
   const safeProvider = provider === 'google' ? 'google' : 'password';
-
-  if (existingSnap && existingSnap.exists()) {
-    const existingData = existingSnap.data();
-    try {
-      await updateDoc(userRef, {
-        name: clampStr(existingData.name || safeName, 100),
-        email: safeEmail || existingData.email,
-        provider: safeProvider,
-        updatedAt: serverTimestamp()
-      });
-    } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, path);
-    }
-
-    return {
-      id: firebaseUser.uid,
-      name: existingData.name || safeName,
-      email: safeEmail || existingData.email,
-      phone: existingData.phone || safePhone,
-      address: existingData.address || safeAddress,
-      provider: safeProvider,
-      createdAt: existingData.createdAt?.toDate ? existingData.createdAt.toDate().toISOString() : new Date().toISOString()
-    };
-  } else {
-    try {
-      await setDoc(userRef, {
-        uid: firebaseUser.uid,
-        name: safeName,
-        email: safeEmail,
-        phone: safePhone,
-        address: safeAddress,
-        provider: safeProvider,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-    } catch (err) {
-      handleFirestoreError(err, OperationType.CREATE, path);
-    }
-
-    return {
-      id: firebaseUser.uid,
-      name: safeName,
-      email: safeEmail,
-      phone: safePhone,
-      address: safeAddress,
-      provider: safeProvider,
-      createdAt: new Date().toISOString()
-    };
-  }
+  let existing = null;
+  try { const response = await fetch('/api/profiles/' + userId); if (response.ok) existing = await response.json(); } catch {}
+  const profile = { ...(existing || {}), id: firebaseUser.uid, uid: firebaseUser.uid, name: clampStr(existing?.name || safeName, 100), email: safeEmail || existing?.email || '', phone: existing?.phone || safePhone, address: existing?.address || safeAddress, provider: safeProvider, createdAt: existing?.createdAt || new Date().toISOString(), updated_at: new Date().toISOString() };
+  const response = await fetch('/api/profiles/' + userId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
+  if (!response.ok) throw new Error('Could not save the account profile to Hostinger.');
+  return await response.json();
 }
 
 /**
@@ -183,54 +126,23 @@ async function syncFirebaseUserProfile(firebaseUser, { name, phone = '', address
 export async function syncProfileUpdateToFirestore({ name, email, phone = '', address = '' }) {
   const currentUser = auth.currentUser;
   if (!currentUser) return false;
-
-  const path = `users/${currentUser.uid}`;
-  const userRef = doc(db, 'users', currentUser.uid);
-
   try {
-    await updateDoc(userRef, {
-      name: clampStr(name || currentUser.displayName || 'Dainty Patron', 100),
-      email: clampStr(email || currentUser.email || '', 160),
-      phone: clampStr(phone, 32),
-      address: clampStr(address, 300),
-      updatedAt: serverTimestamp()
-    });
-    return true;
-  } catch (err) {
-    handleFirestoreError(err, OperationType.UPDATE, path);
-    return false;
-  }
+    const response = await fetch('/api/profiles/' + encodeURIComponent(currentUser.uid), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: clampStr(name || currentUser.displayName || 'Dainty Patron', 100), email: clampStr(email || currentUser.email || '', 160), phone: clampStr(phone, 32), address: clampStr(address, 300) }) });
+    return response.ok;
+  } catch { return false; }
 }
 
 function mapFirebaseAuthError(error) {
   const code = error?.code || '';
-  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-    return new Error('Sign-in was cancelled. Please select an account to continue.');
-  }
-  if (code === 'auth/popup-blocked') {
-    return new Error('Sign-in popup was blocked by your browser. Please allow popups and try again.');
-  }
-  if (code === 'auth/unauthorized-domain') {
-    return new Error('This domain is not authorized for Firebase OAuth. Please add it in Firebase Console → Authentication → Settings.');
-  }
-  if (code === 'auth/operation-not-allowed') {
-    return new Error('Email/Password sign-in is not enabled in Firebase. Please enable Email/Password in Firebase Console → Authentication → Sign-in method, or sign in with Google.');
-  }
-  if (code === 'auth/user-not-found') {
-    return new Error('No account exists with this email address. Please create an account or sign up below.');
-  }
-  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
-    return new Error('Incorrect email or password. Please check your credentials and try again.');
-  }
-  if (code === 'auth/email-already-in-use') {
-    return new Error('An account with this email already exists on another device or session. Please sign in instead.');
-  }
-  if (code === 'auth/weak-password') {
-    return new Error('Password must be at least 6 characters long.');
-  }
-  if (code === 'auth/too-many-requests') {
-    return new Error('Too many sign-in attempts. Please wait a moment before trying again.');
-  }
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return new Error('Sign-in was cancelled. Please select an account to continue.');
+  if (code === 'auth/popup-blocked') return new Error('Sign-in popup was blocked by your browser. Please allow popups and try again.');
+  if (code === 'auth/unauthorized-domain') return new Error('This domain is not authorized for Firebase OAuth.');
+  if (code === 'auth/operation-not-allowed') return new Error('This sign-in method is not enabled in Firebase.');
+  if (code === 'auth/user-not-found') return new Error('No account exists with this email address.');
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') return new Error('Incorrect email or password.');
+  if (code === 'auth/email-already-in-use') return new Error('An account with this email already exists. Please sign in instead.');
+  if (code === 'auth/weak-password') return new Error('Password must be at least 6 characters long.');
+  if (code === 'auth/too-many-requests') return new Error('Too many sign-in attempts. Please try again later.');
   return new Error(error?.message || 'Authentication failed. Please try again.');
 }
 
@@ -373,41 +285,15 @@ export function subscribeToAuthChanges(callback) {
 }
 
 export async function checkUserAccountExistsOnServer(userId) {
-  if (!db || !userId) return true;
-  try {
-    const userRef = doc(db, 'users', userId);
-    const snap = await getDoc(userRef);
-    if (snap.exists() === false) {
-      return false;
-    }
-  } catch {
-    // Network or offline error -> assume true
-  }
-  return true;
+  if (!userId) return true;
+  try { const response = await fetch('/api/profiles/' + encodeURIComponent(userId)); if (!response.ok) return true; return Boolean(await response.json()); } catch { return true; }
 }
 
 export async function deleteFirebaseAccount() {
   try {
-    const user = auth.currentUser;
-    if (user && db) {
-      try {
-        await deleteDoc(doc(db, 'users', user.uid));
-      } catch (e) {
-        console.warn('Could not delete user doc from firestore:', e);
-      }
-      clearUserCart('shopper_uid_' + user.uid);
-      await deleteUser(user);
-    }
-  } catch (err) {
-    console.warn('Firebase user deletion note:', err);
-  }
-  const active = getActiveUser();
-  if (active?.id && db) {
-    try {
-      await deleteDoc(doc(db, 'users', active.id));
-    } catch {}
-  }
-  deleteActiveAccount();
-  window.dispatchEvent(new Event('storage'));
-  window.dispatchEvent(new CustomEvent('dainty_account_deleted'));
+    const user = auth.currentUser; const active = getActiveUser(); const userId = user?.uid || active?.id;
+    if (userId) { await fetch('/api/profiles/' + encodeURIComponent(userId), { method: 'DELETE' }); clearUserCart('shopper_uid_' + userId); }
+    if (user) await deleteUser(user);
+  } catch (err) { console.warn('Account deletion note:', err); }
+  deleteActiveAccount(); window.dispatchEvent(new Event('storage')); window.dispatchEvent(new CustomEvent('dainty_account_deleted'));
 }

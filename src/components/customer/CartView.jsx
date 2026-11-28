@@ -267,9 +267,9 @@ export default function CartView({
 
   // ── Pricing ──────────────────────────────────────────────
   const cartSubtotal   = cart.reduce((acc, item) => acc + ((item.sale_price || item.price) * item.quantity), 0);
-  const discountAmount = cartSubtotal * (discountPercentage / 100);
+  const transactionFee = cartSubtotal * 0.025;
   const deliveryFee    = 0;
-  const cartTotal      = Math.max(0, cartSubtotal - discountAmount + deliveryFee);
+  const cartTotal      = Math.max(0, cartSubtotal + transactionFee);
   const cartCount      = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleInputChange = (e) => {
@@ -926,43 +926,10 @@ export default function CartView({
               </div>
             )}
 
-            {/* Coupon */}
-            <div style={{ marginTop: '1.8rem', borderTop: '1px solid #eae6e1', paddingTop: '1.5rem' }}>
-              <span className="method-label">Promo / Coupon Code</span>
-              <div className="coupon-input-group">
-                <input type="text" className="coupon-input" placeholder="Enter coupon code"
-                  value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} />
-                <button type="button" className="coupon-btn"
-                  style={{ backgroundColor: '#1c1917', color: '#fff', border: '1px solid #1c1917' }}
-                  onClick={() => {
-                    const c = couponCode.trim().toUpperCase();
-                    if (c === 'DAINTY5')  handleApplyCoupon('DAINTY5', 5);
-                    else if (c === 'DAINTY10') handleApplyCoupon('DAINTY10', 10);
-                    else if (c === 'DAINTY15') handleApplyCoupon('DAINTY15', 15);
-                    else if (c === '') handleApplyCoupon('', 0);
-                    else alert('Invalid coupon! Try DAINTY5, DAINTY10, or DAINTY15.');
-                  }}>Apply
-                </button>
-              </div>
-              <div className="coupon-chips-wrapper">
-                {[['DAINTY5', 5, '5% OFF'], ['DAINTY10', 10, '10% OFF'], ['DAINTY15', 15, '15% OFF']].map(([code, pct, label]) => (
-                  <button key={code} type="button"
-                    className={`coupon-chip ${couponCode === code ? 'active' : ''}`}
-                    style={couponCode === code ? { backgroundColor: '#1c1917', color: '#fff', borderColor: '#1c1917' } : {}}
-                    onClick={() => handleApplyCoupon(code, pct)}>{label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Invoice */}
-            <div className="checkout-invoice-box">
+            <div className="checkout-invoice-box" style={{ marginTop: '1.8rem' }}>
               <div className="checkout-invoice-row"><span>Subtotal</span><span>{formatUGX(cartSubtotal)}</span></div>
-              {discountAmount > 0 && (
-                <div className="checkout-invoice-row discount">
-                  <span>Discount ({discountPercentage}%)</span><span>-{formatUGX(discountAmount)}</span>
-                </div>
-              )}
+              <div className="checkout-invoice-row"><span>Transaction Fee (2.5%)</span><span>{formatUGX(transactionFee)}</span></div>
               <div className="checkout-invoice-row total">
                 <span>Total</span>
                 <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}>

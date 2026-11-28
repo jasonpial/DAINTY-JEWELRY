@@ -438,6 +438,14 @@ export async function syncUserCartFromServer(shopperId) {
       return serverCart;
     }
 
+    if (localCartNow.length > 0) {
+      fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: shopperId, cart: localCartNow, shopper: getCurrentShopper(), updatedAt: new Date().toISOString() })
+      }).catch(() => {});
+    }
+
     return localCartNow;
   } catch {}
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { getProducts, categories } from '../../db';
+import { getProducts, categories, piercingLocations } from '../../db';
 import { navigateTo } from '../../Router';
 import { priceRanges } from './FilterSidebar';
 import { Sparkles, SlidersHorizontal, RotateCcw } from 'lucide-react';
@@ -268,18 +268,27 @@ export default function ShopView({ routeParams, onAddToBag }) {
         <div className="dainty-category-tabs-scroll">
           <div className="dainty-category-tabs-inner">
             <button
-              className={`dainty-cat-tab-btn ${currentCategory === 'all' && !routeParams.collection ? 'active' : ''}`}
-              onClick={() => handleCategoryTab('all')}
+              className={`dainty-cat-tab-btn ${!routeParams.category && !routeParams.piercing && !routeParams.collection ? 'active' : ''}`}
+              onClick={() => navigateTo('shop')}
             >
               All Series
             </button>
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                className={`dainty-cat-tab-btn ${currentCategory === cat.id ? 'active' : ''}`}
-                onClick={() => handleCategoryTab(cat.id)}
+                className={`dainty-cat-tab-btn ${routeParams.category === cat.id && !routeParams.piercing ? 'active' : ''}`}
+                onClick={() => navigateTo('shop', { category: cat.id })}
               >
                 <span>{cat.name}</span>
+              </button>
+            ))}
+            {piercingLocations.map((loc) => (
+              <button
+                key={loc}
+                className={`dainty-cat-tab-btn ${routeParams.piercing === loc ? 'active' : ''}`}
+                onClick={() => navigateTo('shop', { piercing: loc })}
+              >
+                <span>{loc}</span>
               </button>
             ))}
           </div>

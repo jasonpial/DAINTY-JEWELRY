@@ -12,7 +12,7 @@ ini_set('display_errors', '0');
 // CORS Headers
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS, PUT');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
@@ -24,6 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $dbConfigFile = __DIR__ . '/db_config.json';
 $productsDbFile = __DIR__ . '/products_db.json';
 $deletedIdsFile = __DIR__ . '/deleted_ids.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
+$profilesFile = __DIR__ . '/profiles.json';
 
 // Helper to get MySQL PDO connection if configured
 function getPdoConnection($configFile) {
@@ -121,9 +130,25 @@ $endpoint = trim($endpoint, '/');
 $rawInput = file_get_contents('php://input');
 $body = json_decode($rawInput, true);
 
-$pdo = getPdoConnection($dbConfigFile);
+// File Manager JSON files are the single source of truth for this website.
+$pdo = null;
 
 // -----------------------------------------------------------------------------
+// ROUTE: Account Profiles stored in Hostinger File Manager
+if (preg_match('#^profiles/([^/]+)$#', $endpoint, $matches)) {
+    $profileId = urldecode($matches[1]);
+    $profiles = [];
+    if (file_exists($profilesFile)) { $stored = json_decode(file_get_contents($profilesFile), true); if (is_array($stored)) $profiles = $stored; }
+    if ($method === 'GET') { echo json_encode($profiles[$profileId] ?? null); exit; }
+    if ($method === 'PUT' || $method === 'PATCH') {
+        if (!is_array($body)) { http_response_code(400); echo json_encode(['error' => 'Profile data is required.']); exit; }
+        $profiles[$profileId] = array_merge($profiles[$profileId] ?? [], $body, ['id' => $profileId, 'updated_at' => gmdate('c')]);
+        if (file_put_contents($profilesFile, json_encode($profiles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX) === false) { http_response_code(500); echo json_encode(['error' => 'Could not write the profile file.']); exit; }
+        echo json_encode($profiles[$profileId]); exit;
+    }
+    if ($method === 'DELETE') { unset($profiles[$profileId]); file_put_contents($profilesFile, json_encode($profiles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX); echo json_encode(['success' => true, 'id' => $profileId]); exit; }
+}
+
 // ROUTE: Database Status / Connection Test
 // -----------------------------------------------------------------------------
 if ($endpoint === 'db_status' || $endpoint === 'database/status') {
