@@ -5468,9 +5468,10 @@ div[style*="background: rgba"] span,
   color: #1c1917;
 }
 
-.dainty-cat-tab-btn.active {
+.dainty-cat-tab-btn.active,
+.dainty-cat-tab-btn.active span {
   background: #1c1917;
-  color: #ffffff;
+  color: #ffffff !important;
   border-color: #1c1917;
 }
 
