@@ -20,6 +20,7 @@ export const subcategories = [
 export const piercingLocations = [
   'Ear Lobe',
   'Helix/Cartilage',
+  'Flat',
   'Conch',
   'Tragus',
   'Rook',
@@ -263,7 +264,7 @@ function filterEarringsOnly(list, deletedSet = new Set()) {
 
 export async function syncProductsWithServer() {
   try {
-    const res = await fetch('/api/products');
+    const res = await fetch('/api/products?sync=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) {
       console.warn('Server database sync responded with status:', res.status);
       return;
@@ -277,18 +278,7 @@ export async function syncProductsWithServer() {
       const cleanServer = filterEarringsOnly(serverProducts, deletedSet);
       
       // Keep only newly drafted local items that are waiting for initial sync
-      const localProds = getStorageItem('products', []);
-      const pendingLocal = filterEarringsOnly(
-        Array.isArray(localProds) ? localProds.filter(p => p && p._pendingSync === true) : [],
-        deletedSet
-      );
-
-      // Merge pending local items on top of authoritative server items
-      const serverIdSet = new Set(cleanServer.map(p => p.id));
-      const combined = [
-        ...pendingLocal.filter(p => !serverIdSet.has(p.id)),
-        ...cleanServer
-      ];
+      const combined = cleanServer;
 
       // Compare with previous state to avoid redundant renders
       const currentJson = JSON.stringify(combined);
@@ -305,6 +295,34 @@ export async function syncProductsWithServer() {
     console.warn('Server database sync idle:', err.message);
   }
 }
+
+export async function syncOrdersWithServer() {
+  try { const res = await fetch('/api/orders'); if (!res.ok) return; const orders = await res.json(); if (Array.isArray(orders)) { setStorageItem('orders', orders, true); window.dispatchEvent(new CustomEvent('dainty_orders_changed', { detail: { count: orders.length } })); } } catch {}
+}
+
+export async function syncMessagesWithServer() {
+  try { const res = await fetch('/api/messages'); if (!res.ok) return; const messages = await res.json(); if (Array.isArray(messages)) { setStorageItem('messages', messages, true); window.dispatchEvent(new CustomEvent('dainty_messages_changed', { detail: { count: messages.length } })); } } catch {}
+}
+
+export async function migrateLocalOrdersToHostinger() {
+  if (typeof window === 'undefined') return { migrated: 0, skipped: true };
+  try {
+    const markerKey = STORAGE_PREFIX + 'orders_migrated_to_hostinger';
+    if (localStorage.getItem(markerKey) === '1') return { migrated: 0, alreadyDone: true };
+    const localOrders = getStorageItem('orders', []);
+    if (!Array.isArray(localOrders) || localOrders.length === 0) { localStorage.setItem(markerKey, '1'); return { migrated: 0, empty: true }; }
+    let migrated = 0;
+    for (const order of localOrders) {
+      const response = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
+      if (!response.ok) throw new Error('Order migration stopped');
+      migrated += 1;
+    }
+    localStorage.setItem(markerKey, '1');
+    return { migrated };
+  } catch (error) { console.warn('Order migration pending:', error.message); return { migrated: 0, failed: true }; }
+}
+
+
 
 // Initialization
 export function initDB() {
@@ -331,7 +349,10 @@ export function initDB() {
   // Trigger background server sync once on load and on tab focus
   if (!isServerSyncStarted && typeof window !== 'undefined') {
     isServerSyncStarted = true;
+    migrateLocalOrdersToHostinger();
     syncProductsWithServer();
+    syncOrdersWithServer();
+    syncMessagesWithServer();
 
     // Re-sync when switching back to this tab/window
     window.addEventListener('focus', () => syncProductsWithServer());
@@ -440,8 +461,9 @@ export async function deleteProduct(productId) {
 
   // 4. Persist deletion to server database and trigger re-sync
   try {
-    const res = await fetch(`/api/products/${productId}`, {
-      method: 'DELETE'
+    const res = await fetch(`/api/products/${productId}?sync=${Date.now()}`, {
+      method: 'DELETE',
+      cache: 'no-store'
     });
     if (res.ok) {
       await syncProductsWithServer();
@@ -500,6 +522,7 @@ export function saveOrder(orderData) {
     }
   });
   setStorageItem('products', products);
+  fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newOrder) }).catch(() => {});
 
   return newOrder;
 }
@@ -510,6 +533,7 @@ export function updateOrderStatus(orderId, status) {
   if (idx !== -1) {
     orders[idx].status = status;
     setStorageItem('orders', orders);
+    fetch(`/api/orders/${encodeURIComponent(orderId)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }).catch(() => {});
     return orders[idx];
   }
   return null;
@@ -532,6 +556,7 @@ export function saveMessage(chatId, sender, content) {
   };
   messages.push(newMessage);
   setStorageItem('messages', messages);
+  fetch('/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newMessage) }).catch(() => {});
   return newMessage;
 }
 
